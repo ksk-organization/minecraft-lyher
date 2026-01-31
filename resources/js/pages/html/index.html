@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NOMROTI - Network</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Google Fonts: Inter (Clean & Modern) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        :root {
+            /* --- YOUR COLORS --- */
+            --primary-orange: #ff6600; 
+            --orange-hover: #ff8533;
+            
+            /* --- BACKGROUNDS --- */
+            --bg-body: #1a1a1a; 
+            --bg-card: #252525;
+            --text-main: #ffffff;
+            --text-muted: #cccccc;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* --- Navbar (Floating & Clean) --- */
+        .navbar {
+            padding: 20px 0;
+            position: absolute;
+            width: 100%;
+            z-index: 100;
+        }
+        
+        .nav-container {
+            background: rgba(40, 40, 40, 0.9); /* Gray Glass */
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 8px 30px;
+            border-radius: 50px;
+            display: inline-flex;
+            align-items: center;
+            gap: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+        }
+
+        .navbar-brand {
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: white !important;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            padding: 0;
+            margin: 0;
+        }
+
+        .nav-link {
+            color: #ddd !important;
+            font-size: 0.9rem;
+            font-weight: 600;
+            padding: 0 !important;
+            transition: 0.3s;
+        }
+        .nav-link:hover { color: var(--primary-orange) !important; }
+
+        .btn-play {
+            background-color: var(--primary-orange);
+            color: white;
+            font-weight: 700;
+            font-size: 0.85rem;
+            padding: 8px 20px;
+            border-radius: 50px;
+            border: none;
+            transition: transform 0.2s, background 0.2s;
+            white-space: nowrap;
+        }
+        .btn-play:hover {
+            transform: scale(1.05);
+            background-color: var(--orange-hover);
+        }
+
+        /* --- Hero Section (Section 1) --- */
+        .hero-section {
+            height: 85vh;
+            min-height: 650px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            background: 
+                linear-gradient(to bottom, rgba(40, 40, 40, 0.85), rgba(26, 26, 26, 1)), 
+                url('https://m.gettywallpapers.com/wp-content/uploads/2023/10/Minecraft-Laptop-Wallpaper-scaled.jpg');
+            background-size: cover;
+            background-position: center;
+            padding-top: 80px; /* Space for navbar */
+        }
+
+        .hero-title {
+            font-size: 4.5rem;
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: 20px;
+            text-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        
+        .hero-desc {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            font-weight: 400;
+            margin-bottom: 30px;
+        }
+
+        /* --- NEW: Server Status Bar (Cool Feature) --- */
+        .server-status-bar {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 12px 25px;
+            margin-bottom: 30px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            user-select: none;
+            max-width: 100%; /* Prevent overflow on super small screens */
+        }
+
+        .server-status-bar:hover {
+            background: rgba(0, 0, 0, 0.7);
+            border-color: var(--primary-orange);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(255, 102, 0, 0.2);
+        }
+        
+        .server-status-bar:active {
+            transform: scale(0.98);
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            background-color: #2ecc71; /* Green */
+            border-radius: 50%;
+            margin-right: 15px;
+            box-shadow: 0 0 15px #2ecc71;
+            animation: pulse-green 2s infinite;
+            flex-shrink: 0;
+        }
+
+        @keyframes pulse-green {
+            0% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7); }
+            70% { box-shadow: 0 0 0 8px rgba(46, 204, 113, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); }
+        }
+
+        .server-ip-text {
+            font-family: 'JetBrains Mono', monospace; /* Cool coding font */
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: white;
+            margin-right: 25px;
+            letter-spacing: 0.5px;
+        }
+
+        .player-count-box {
+            font-size: 0.9rem;
+            color: #ccc;
+            border-left: 2px solid rgba(255,255,255,0.1);
+            padding-left: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .count-number {
+            color: var(--primary-orange);
+            font-weight: 800;
+            font-size: 1.1rem;
+        }
+
+        .copy-hint {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--primary-orange);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            opacity: 0;
+            transition: 0.3s;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+
+        .server-status-bar:hover .copy-hint {
+            opacity: 1;
+            top: -40px;
+        }
+
+        /* Social Buttons */
+        .btn-social {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: white;
+            font-weight: 600;
+            padding: 10px 25px;
+            border-radius: 50px;
+            transition: 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .btn-social:hover {
+            background: white;
+            color: black;
+            transform: translateY(-3px);
+        }
+        .btn-discord:hover { color: #5865F2; }
+        .btn-telegram:hover { color: #0088cc; }
+
+        /* Animation for Floating Logo */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .hero-logo {
+            max-width: 80%;
+            height: auto;
+            animation: float 4s ease-in-out infinite;
+            filter: drop-shadow(0 20px 40px rgba(0,0,0,0.4));
+        }
+
+        /* --- Gamemode Cards --- */
+        .mode-card {
+            background: var(--bg-card);
+            border-radius: 15px;
+            overflow: hidden; 
+            transition: all 0.3s ease;
+            height: 100%;
+            border: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .mode-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            border-color: var(--primary-orange);
+        }
+
+        .mode-img-wrapper {
+            height: 180px;
+            width: 100%;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .mode-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .mode-card:hover .mode-img { transform: scale(1.1); }
+
+        .mode-img-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 50%;
+            background: linear-gradient(to top, var(--bg-card), transparent);
+        }
+
+        .mode-content {
+            padding: 25px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .mode-title {
+            font-weight: 800;
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .mode-desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .mode-btn {
+            margin-top: auto; 
+            color: var(--primary-orange);
+            font-weight: 700;
+            text-transform: uppercase;
+            text-decoration: none;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+        }
+        .mode-btn:hover i { transform: translateX(5px); }
+
+        /* --- Footer --- */
+        footer {
+            margin-top: 100px;
+            padding: 40px 0;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            color: #666;
+            text-align: center;
+            font-size: 0.85rem;
+        }
+
+        /* --- MOBILE OPTIMIZATION --- */
+        .gamemode-section {
+            margin-top: -80px; 
+            position: relative; 
+            z-index: 2;
+        }
+
+        @media (max-width: 991px) {
+            .hero-title {
+                font-size: 3rem; /* Smaller title on tablet/mobile */
+            }
+            .hero-logo {
+                max-width: 60%; /* Smaller logo */
+                margin-top: 2rem;
+            }
+            .nav-container {
+                gap: 15px; /* Tighter nav spacing */
+                padding: 8px 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 10px 0;
+            }
+            .nav-container {
+                width: 95%; /* Wider nav for mobile */
+                justify-content: space-between;
+                padding: 10px 20px;
+            }
+            .hero-section {
+                height: auto; /* Allow auto height for stacking */
+                padding: 120px 0 60px 0;
+            }
+            .hero-title {
+                font-size: 2.8rem; 
+            }
+            .gamemode-section {
+                margin-top: 0; /* Remove overlap on mobile */
+            }
+            .server-status-bar {
+                flex-direction: column; /* Stack IP and Count on very small screens if needed, or just adjust padding */
+                gap: 10px;
+                padding: 15px 20px;
+            }
+            .server-ip-text {
+                margin-right: 0;
+                margin-bottom: 5px;
+            }
+            .player-count-box {
+                border-left: none;
+                padding-left: 0;
+                border-top: 1px solid rgba(255,255,255,0.1);
+                padding-top: 5px;
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar d-flex justify-content-center">
+        <div class="nav-container">
+            <a class="navbar-brand" href="#">NOMROTI</a>
+            
+            <!-- Hidden on mobile to keep it clean -->
+            <a class="nav-link d-none d-md-block" href="#">Home</a>
+            <a class="nav-link d-none d-md-block" href="#">Store</a>
+            
+            <!-- Socials (Icon Only) -->
+            <a class="nav-link" href="#" title="Discord"><i class="fab fa-discord"></i></a>
+            <a class="nav-link" href="#" title="Telegram"><i class="fab fa-telegram"></i></a>
+            
+            <button class="btn-play" onclick="copyIp()">PLAY NOW</button>
+        </div>
+    </nav>
+
+    <!-- Hero Header (Section 1) -->
+    <header class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <!-- Left: Text -->
+                <div class="col-lg-6 text-center text-lg-start">
+                    <h1 class="hero-title">NOMROTI <br><span style="color: var(--primary-orange);">NETWORK</span></h1>
+                    
+                    <p class="hero-desc">
+                        The next generation of Minecraft. Experience our custom gamemodes designed for competitive players.
+                    </p>
+
+                    <!-- Server Status Bar -->
+                    <div class="position-relative d-inline-block">
+                        <div class="server-status-bar" onclick="copyIp()">
+                            <div class="status-dot"></div>
+                            <span class="server-ip-text">nomroti.net</span>
+                            <div class="player-count-box">
+                                <i class="fas fa-users"></i>
+                                <span class="count-number" id="player-count">0</span>
+                                <span>Online</span>
+                            </div>
+                            <!-- Hover Tooltip -->
+                            <div class="copy-hint">Click to Copy</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Right: Floating Logo -->
+                <div class="col-lg-6 text-center mt-4 mt-lg-0">
+                    <img src="https://assets.stickpng.com/images/580b57fcd9996e24bc43c2f6.png" alt="Server Logo" class="hero-logo">
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Gamemodes Section -->
+    <section class="container gamemode-section">
+        <div class="row g-4">
+            
+            <!-- ECO Mode -->
+            <div class="col-md-4">
+                <div class="mode-card">
+                    <div class="mode-img-wrapper">
+                        <img src="https://images.unsplash.com/photo-1599583724135-236357e937d3?q=80&w=600&auto=format&fit=crop" alt="Eco" class="mode-img">
+                        <div class="mode-img-overlay"></div>
+                    </div>
+                    <div class="mode-content">
+                        <h3 class="mode-title">NOMROTI ECO</h3>
+                        <p class="mode-desc">
+                            Establish your economy. Build massive towns, create player shops, and dominate the market.
+                        </p>
+                        <a href="gamemode.html" class="mode-btn">Learn More <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SKYBLOCK Mode -->
+            <div class="col-md-4">
+                <div class="mode-card">
+                    <div class="mode-img-wrapper">
+                        <img src="https://images.unsplash.com/photo-1502481851512-e9e2529bfbf9?q=80&w=600&auto=format&fit=crop" alt="Skyblock" class="mode-img">
+                        <div class="mode-img-overlay"></div>
+                    </div>
+                    <div class="mode-content">
+                        <h3 class="mode-title">SKYBLOCK</h3>
+                        <p class="mode-desc">
+                            Start with nothing. Expand your floating island, automate resources, and level up.
+                        </p>
+                        <a href="gamemode.html" class="mode-btn">View Wiki <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PRACTICE Mode -->
+            <div class="col-md-4">
+                <div class="mode-card">
+                    <div class="mode-img-wrapper">
+                        <img src="https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=600&auto=format&fit=crop" alt="Practice" class="mode-img">
+                        <div class="mode-img-overlay"></div>
+                    </div>
+                    <div class="mode-content">
+                        <h3 class="mode-title">PRACTICE</h3>
+                        <p class="mode-desc">
+                            Train your PvP. Jump into 1v1 duels, bridge practice, or ranked bot matches.
+                        </p>
+                        <a href="gamemode.html" class="mode-btn">View Stats <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p class="m-0">&copy; 2026 NOMROTI Network. All Rights Reserved.</p>
+        </div>
+    </footer>
+    
+    <script>
+        function copyIp() {
+            navigator.clipboard.writeText("nomroti.net");
+            // Simple visual feedback
+            const hint = document.querySelector('.copy-hint');
+            const originalText = hint.innerText;
+            hint.innerText = "COPIED!";
+            setTimeout(() => {
+                hint.innerText = originalText;
+            }, 1500);
+        }
+
+        // Cool Number Animation
+        function animateValue(id, start, end, duration) {
+            if (start === end) return;
+            var range = end - start;
+            var current = start;
+            var increment = end > start ? 1 : -1;
+            var stepTime = Math.abs(Math.floor(duration / range));
+            var obj = document.getElementById(id);
+            var timer = setInterval(function() {
+                current += increment;
+                // Jump larger steps if range is big to finish in time
+                if (range > 100) current += Math.floor(Math.random() * 50); 
+                if (current >= end) {
+                    current = end;
+                    clearInterval(timer);
+                }
+                obj.innerHTML = current.toLocaleString();
+            }, 10);
+        }
+
+        // Start animation when page loads
+        document.addEventListener("DOMContentLoaded", () => {
+            animateValue("player-count", 0, 1420, 2000); // Animates to 1,420
+        });
+    </script>
+</body>
+</html>

@@ -10,8 +10,17 @@ Route::get('/', function () {
     ]);
 })->name('home');
 
+
+Route::get('/game-mode', function () {
+    return Inertia::render('game-mode');
+});
+Route::get('/detail', function () {
+    return Inertia::render('product-detail');
+});
+
+
 Route::get('dashboard', function () {
     return Inertia::render('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-require __DIR__.'/settings.php';
+require __DIR__ . '/settings.php';

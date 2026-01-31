@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - NOMROTI</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-orange: #ff6600; 
+            --orange-hover: #ff8533;
+            --bg-body: #1a1a1a; 
+            --bg-card: #252525;
+            --bg-darker: #121212;
+            --text-main: #ffffff;
+            --text-muted: #cccccc;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* Navbar */
+        .navbar { background: var(--bg-darker); border-bottom: 1px solid rgba(255,255,255,0.05); padding: 15px 0; }
+        .navbar-brand { font-weight: 800; font-size: 1.2rem; color: white !important; }
+        
+        /* Stats Cards */
+        .stat-card {
+            background: var(--bg-card); border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 12px; padding: 20px; display: flex; align-items: center;
+            transition: 0.3s;
+        }
+        .stat-card:hover { border-color: var(--primary-orange); transform: translateY(-2px); }
+        .stat-icon {
+            width: 50px; height: 50px; border-radius: 10px; background: rgba(255, 102, 0, 0.1);
+            color: var(--primary-orange); display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; margin-right: 15px;
+        }
+        .stat-value { font-size: 1.5rem; font-weight: 800; margin: 0; }
+        .stat-label { color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        /* Tables */
+        .dashboard-card {
+            background: var(--bg-card); border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 12px; padding: 25px; margin-bottom: 30px;
+        }
+        .card-header-custom {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px;
+        }
+        .table-custom { color: white; vertical-align: middle; }
+        .table-custom thead th {
+            background: rgba(0,0,0,0.2); border: none; color: var(--text-muted);
+            font-weight: 600; font-size: 0.85rem; text-transform: uppercase; padding: 12px;
+        }
+        .table-custom td { border-bottom: 1px solid rgba(255,255,255,0.05); padding: 15px 12px; font-size: 0.95rem; }
+        
+        .user-cell { display: flex; align-items: center; gap: 10px; font-weight: 600; }
+        .user-avatar { width: 30px; height: 30px; border-radius: 5px; }
+        
+        /* Buttons & Badges */
+        .btn-icon {
+            width: 35px; height: 35px; border-radius: 8px; border: none;
+            display: inline-flex; align-items: center; justify-content: center;
+            transition: 0.2s; color: white; margin-right: 5px;
+        }
+        .btn-approve { background: rgba(46, 204, 113, 0.2); color: #2ecc71; }
+        .btn-approve:hover { background: #2ecc71; color: white; }
+        
+        .btn-reject { background: rgba(231, 76, 60, 0.2); color: #e74c3c; }
+        .btn-reject:hover { background: #e74c3c; color: white; }
+
+        .btn-view { background: rgba(255,255,255,0.1); color: white; font-size: 0.8rem; padding: 5px 10px; border-radius: 4px; text-decoration: none; transition: 0.2s; }
+        .btn-view:hover { background: white; color: black; }
+
+        .status-badge { padding: 5px 10px; border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
+        .badge-pending { background: rgba(255, 193, 7, 0.2); color: #ffc107; }
+        .badge-approved { background: rgba(46, 204, 113, 0.2); color: #2ecc71; }
+        .badge-rejected { background: rgba(231, 76, 60, 0.2); color: #e74c3c; }
+
+        /* Pagination */
+        .pagination-custom {
+            display: flex; justify-content: flex-end; gap: 5px; margin-top: 15px;
+        }
+        .page-btn {
+            background: var(--bg-darker); border: 1px solid rgba(255,255,255,0.1); color: var(--text-muted);
+            width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;
+            border-radius: 6px; cursor: pointer; transition: 0.2s; font-size: 0.85rem; user-select: none;
+        }
+        .page-btn:hover { background: rgba(255,255,255,0.1); color: white; }
+        .page-btn.active { background: var(--primary-orange); color: white; border-color: var(--primary-orange); }
+        .page-btn.disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* Receipt Modal */
+        .modal-content { background-color: var(--bg-card); border: 1px solid rgba(255,255,255,0.1); color: white; }
+        .receipt-img { width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar mb-4">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand" href="#"><i class="fas fa-shield-alt text-warning me-2"></i> NOMROTI <span class="text-muted fw-normal fs-6">| Admin Panel</span></a>
+            <div class="d-flex align-items-center gap-3">
+                <span class="text-muted small">Logged in as <strong>Admin</strong></span>
+                <a href="index.html" class="btn btn-sm btn-outline-secondary">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid px-4">
+        
+        <!-- Stats Row -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-clock"></i></div>
+                    <div>
+                        <h3 class="stat-value" id="statPending">0</h3>
+                        <div class="stat-label">Pending Orders</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-dollar-sign"></i></div>
+                    <div>
+                        <h3 class="stat-value" id="statRevenue">$0</h3>
+                        <div class="stat-label">Revenue Total</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon text-info" style="background: rgba(13, 202, 240, 0.1);"><i class="fas fa-check-circle"></i></div>
+                    <div>
+                        <h3 class="stat-value" id="statApproved">0</h3>
+                        <div class="stat-label">Approved</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon text-danger" style="background: rgba(220, 53, 69, 0.1);"><i class="fas fa-times-circle"></i></div>
+                    <div>
+                        <h3 class="stat-value" id="statRejected">0</h3>
+                        <div class="stat-label">Rejected</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 1. PENDING ORDERS TABLE -->
+        <div class="dashboard-card">
+            <div class="card-header-custom">
+                <h5 class="fw-bold mb-0 text-warning"><i class="fas fa-exclamation-circle me-2"></i> Pending Approvals</h5>
+                <button class="btn btn-sm btn-outline-light" onclick="renderPending(1)"><i class="fas fa-sync-alt me-1"></i> Refresh</button>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-custom w-100" id="pendingTable">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>User</th>
+                            <th>Item</th>
+                            <th>Price</th>
+                            <th>Proof</th>
+                            <th>Date</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Content populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+            <div id="pendingPagination" class="pagination-custom"></div>
+        </div>
+
+        <!-- 2. HISTORY LOG -->
+        <div class="dashboard-card">
+            <div class="card-header-custom">
+                <h5 class="fw-bold mb-0"><i class="fas fa-history me-2"></i> Recent History</h5>
+                <div class="input-group w-auto">
+                    <input type="text" id="searchInput" class="form-control form-control-sm bg-dark border-secondary text-white" placeholder="Search user or ID...">
+                    <button class="btn btn-sm btn-outline-secondary"><i class="fas fa-search"></i></button>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-custom w-100">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>User</th>
+                            <th>Item</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Staff</th>
+                            <th>Processed</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyBody">
+                        <!-- Content populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+            <div id="historyPagination" class="pagination-custom"></div>
+        </div>
+
+    </div>
+
+    <!-- Receipt Viewer Modal -->
+    <div class="modal fade" id="receiptModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header border-bottom-0">
+                    <h5 class="modal-title">Payment Proof</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center p-0">
+                    <img id="receiptImageSrc" src="" class="receipt-img">
+                </div>
+                <div class="modal-footer border-top-0 justify-content-center">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                    <a href="#" target="_blank" id="openFullBtn" class="btn btn-primary btn-sm">Open Original</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // --- DATA MODEL ---
+        // Extra data added to demonstrate pagination
+        let pendingOrders = [
+            { id: 101, user: 'Steve', avatar: 'https://minotar.net/helm/Steve/30.png', platform: 'java', item: 'Titan Rank', price: 25.00, receipt: 'https://via.placeholder.com/400x600?text=Receipt+101', time: '2 mins ago' },
+            { id: 102, user: 'Alex_PvP', avatar: 'https://minotar.net/helm/Alex/30.png', platform: 'bedrock', item: 'God Key (x5)', price: 100.00, receipt: 'https://via.placeholder.com/400x600?text=Receipt+102', time: '15 mins ago' },
+            { id: 103, user: 'CraftMaster', avatar: 'https://minotar.net/helm/MHF_Steve/30.png', platform: 'java', item: 'Eco Bundle', price: 15.00, receipt: 'https://via.placeholder.com/400x600?text=Receipt+103', time: '25 mins ago' },
+            { id: 104, user: 'Miner99', avatar: 'https://minotar.net/helm/Miner99/30.png', platform: 'bedrock', item: 'Vote Key', price: 1.00, receipt: 'https://via.placeholder.com/400x600?text=Receipt+104', time: '30 mins ago' },
+            { id: 105, user: 'BuilderBob', avatar: 'https://minotar.net/helm/BuilderBob/30.png', platform: 'java', item: 'Fly Perk', price: 10.00, receipt: 'https://via.placeholder.com/400x600?text=Receipt+105', time: '45 mins ago' },
+            { id: 106, user: 'PvP_God', avatar: 'https://minotar.net/helm/PvP_God/30.png', platform: 'java', item: 'Unban', price: 20.00, receipt: 'https://via.placeholder.com/400x600?text=Receipt+106', time: '1 hour ago' },
+            { id: 107, user: 'NoobMaster', avatar: 'https://minotar.net/helm/NoobMaster/30.png', platform: 'bedrock', item: 'Iron Key', price: 2.50, receipt: 'https://via.placeholder.com/400x600?text=Receipt+107', time: '1 hour ago' }
+        ];
+
+        let orderHistory = [
+            { id: 99, user: 'Dream', item: 'Vote Key', amount: 1.00, status: 'Approved', staff: 'Admin1', time: '1 hour ago' },
+            { id: 98, user: 'Griefer007', item: 'Titan Rank', amount: 25.00, status: 'Rejected', staff: 'Mod2', time: '2 hours ago' },
+            { id: 97, user: 'Techno', item: 'God Key', amount: 20.00, status: 'Approved', staff: 'Admin1', time: '3 hours ago' },
+            { id: 96, user: 'Philza', item: 'Elytra', amount: 15.00, status: 'Approved', staff: 'You', time: '4 hours ago' },
+            { id: 95, user: 'Tommy', item: 'Unban', amount: 20.00, status: 'Rejected', staff: 'Admin1', time: '5 hours ago' },
+            { id: 94, user: 'Wilbur', item: 'Music Disc', amount: 5.00, status: 'Approved', staff: 'You', time: '6 hours ago' },
+            { id: 93, user: 'Tubbo', item: 'Bee Pet', amount: 3.00, status: 'Approved', staff: 'Mod2', time: '7 hours ago' }
+        ];
+
+        // CONFIG
+        const rowsPerPage = 5;
+        let currentPendingPage = 1;
+        let currentHistoryPage = 1;
+        let filteredHistory = [...orderHistory]; // For search
+
+        // --- INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', () => {
+            renderPending(1);
+            renderHistory(1);
+            updateStats();
+        });
+
+        // --- RENDER FUNCTIONS ---
+        function renderPending(page = 1) {
+            currentPendingPage = page;
+            const tbody = document.querySelector('#pendingTable tbody');
+            tbody.innerHTML = '';
+
+            if (pendingOrders.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4">No pending orders</td></tr>';
+                renderPagination('pendingPagination', 0, 1, renderPending);
+                return;
+            }
+
+            const start = (page - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+            const paginatedItems = pendingOrders.slice(start, end);
+
+            paginatedItems.forEach(order => {
+                const platformIcon = order.platform === 'java' 
+                    ? '<i class="fab fa-java text-warning" title="Java"></i>' 
+                    : '<i class="fas fa-gamepad text-info" title="Bedrock"></i>';
+
+                const tr = document.createElement('tr');
+                tr.id = `pending-${order.id}`;
+                tr.innerHTML = `
+                    <td class="text-muted">#${order.id}</td>
+                    <td>
+                        <div class="user-cell">
+                            <img src="${order.avatar}" class="user-avatar">
+                            ${order.user}
+                            ${platformIcon}
+                        </div>
+                    </td>
+                    <td>${order.item}</td>
+                    <td class="text-warning fw-bold">$${order.price.toFixed(2)}</td>
+                    <td><button class="btn-view" onclick="viewReceipt('${order.receipt}')"><i class="fas fa-paperclip"></i> View</button></td>
+                    <td class="text-muted small">${order.time}</td>
+                    <td class="text-end">
+                        <button class="btn-icon btn-approve" title="Approve" onclick="processOrder(${order.id}, 'Approved')"><i class="fas fa-check"></i></button>
+                        <button class="btn-icon btn-reject" title="Reject" onclick="processOrder(${order.id}, 'Rejected')"><i class="fas fa-times"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+            
+            renderPagination('pendingPagination', pendingOrders.length, page, renderPending);
+        }
+
+        function renderHistory(page = 1) {
+            currentHistoryPage = page;
+            const tbody = document.getElementById('historyBody');
+            tbody.innerHTML = '';
+
+            if (filteredHistory.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4">No records found</td></tr>';
+                renderPagination('historyPagination', 0, 1, renderHistory);
+                return;
+            }
+
+            const start = (page - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+            const paginatedItems = filteredHistory.slice(start, end);
+
+            paginatedItems.forEach(order => {
+                const badgeClass = order.status === 'Approved' ? 'badge-approved' : 'badge-rejected';
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="text-muted">#${order.id}</td>
+                    <td>${order.user}</td>
+                    <td>${order.item}</td>
+                    <td>$${order.amount.toFixed(2)}</td>
+                    <td><span class="status-badge ${badgeClass}">${order.status}</span></td>
+                    <td class="small text-muted">${order.staff}</td>
+                    <td class="small text-muted">${order.time}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            renderPagination('historyPagination', filteredHistory.length, page, renderHistory);
+        }
+
+        function renderPagination(containerId, totalItems, currentPage, callback) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            const totalPages = Math.ceil(totalItems / rowsPerPage);
+            
+            if (totalPages <= 1) return;
+
+            // Prev Button
+            const prevBtn = document.createElement('div');
+            prevBtn.className = `page-btn ${currentPage === 1 ? 'disabled' : ''}`;
+            prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
+            prevBtn.onclick = () => { if(currentPage > 1) callback(currentPage - 1); };
+            container.appendChild(prevBtn);
+
+            // Page Numbers
+            for (let i = 1; i <= totalPages; i++) {
+                const btn = document.createElement('div');
+                btn.className = `page-btn ${i === currentPage ? 'active' : ''}`;
+                btn.innerText = i;
+                btn.onclick = () => callback(i);
+                container.appendChild(btn);
+            }
+
+            // Next Button
+            const nextBtn = document.createElement('div');
+            nextBtn.className = `page-btn ${currentPage === totalPages ? 'disabled' : ''}`;
+            nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
+            nextBtn.onclick = () => { if(currentPage < totalPages) callback(currentPage + 1); };
+            container.appendChild(nextBtn);
+        }
+
+        // --- ACTIONS ---
+        function processOrder(id, status) {
+            const index = pendingOrders.findIndex(o => o.id === id);
+            if (index === -1) return;
+
+            const order = pendingOrders[index];
+            
+            if (status === 'Rejected') {
+                if (!confirm("Are you sure you want to REJECT Order #" + id + "?")) return;
+            } else {
+                if (!confirm("Confirm APPROVAL for Order #" + id + "?")) return;
+            }
+
+            // Move to history
+            const newHistoryItem = {
+                id: order.id,
+                user: order.user,
+                item: order.item,
+                amount: order.price,
+                status: status,
+                staff: 'You',
+                time: 'Just now'
+            };
+            orderHistory.unshift(newHistoryItem);
+            filteredHistory.unshift(newHistoryItem); // Add to filtered list too
+
+            // Remove from pending
+            pendingOrders.splice(index, 1);
+
+            // Re-render
+            renderPending(1); // Reset to page 1 to see changes clearly
+            renderHistory(1);
+            updateStats();
+        }
+
+        function updateStats() {
+            document.getElementById('statPending').innerText = pendingOrders.length;
+            
+            const revenue = orderHistory
+                .filter(o => o.status === 'Approved')
+                .reduce((sum, o) => sum + o.amount, 0);
+            document.getElementById('statRevenue').innerText = '$' + revenue.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0});
+
+            document.getElementById('statApproved').innerText = orderHistory.filter(o => o.status === 'Approved').length;
+            document.getElementById('statRejected').innerText = orderHistory.filter(o => o.status === 'Rejected').length;
+        }
+
+        // --- SEARCH ---
+        document.getElementById('searchInput').addEventListener('keyup', function(e) {
+            const term = e.target.value.toLowerCase();
+            filteredHistory = orderHistory.filter(o => 
+                o.user.toLowerCase().includes(term) || 
+                o.id.toString().includes(term) ||
+                o.item.toLowerCase().includes(term)
+            );
+            renderHistory(1); // Reset to page 1 on search
+        });
+
+        // Receipt Modal
+        const receiptModal = new bootstrap.Modal(document.getElementById('receiptModal'));
+        function viewReceipt(url) {
+            document.getElementById('receiptImageSrc').src = url;
+            document.getElementById('openFullBtn').href = url;
+            receiptModal.show();
+        }
+    </script>
+</body>
+</html>
