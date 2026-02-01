@@ -1,5 +1,6 @@
-import React, { useState, useCallback, useMemo } from 'react';
-import { Head, Link } from '@inertiajs/react'; // Performance: SPA-style navigation
+// resources/js/pages/Welcome.tsx
+import { Head, Link } from '@inertiajs/react';
+import { motion } from 'framer-motion';
 import { Users, ArrowRight, Copy, Check } from 'lucide-react';
 import {
     Tooltip,
@@ -7,97 +8,118 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from '@/components/ui/tooltip';
-import Layout from '@/components/homepage/layout';
+import Layout from '@/components/homepage/Layout';
 import GamemodeCard from '@/components/homepage/gamemode-card';
+import { useAnimatedCounter } from '@/hooks/use-animated-counter';
+import { useCallback, useState } from 'react';
+import { cn } from '@/lib/utils';
 
-import { motion } from 'framer-motion';
-
-// Optimized Counter: Uses requestAnimationFrame for 60FPS smoothness
-const useAnimatedCounter = (endValue: number, duration: number = 2000) => {
-    const [count, setCount] = React.useState(0);
-    React.useEffect(() => {
-        let startTime: number | null = null;
-        let frame: number;
-
-        const animate = (now: number) => {
-            if (!startTime) startTime = now;
-            const progress = Math.min((now - startTime) / duration, 1);
-            setCount(Math.floor(progress * endValue));
-            if (progress < 1) frame = requestAnimationFrame(animate);
-        };
-
-        frame = requestAnimationFrame(animate);
-        return () => cancelAnimationFrame(frame); // Security: Prevent memory leaks on page navigation
-    }, [endValue, duration]);
-    return count;
+const floatingVariants = {
+    float: {
+        y: [0, -18, 0],
+        transition: {
+            duration: 5.2,
+            repeat: Infinity,
+            ease: 'easeInOut',
+        },
+    },
 };
 
-export default function NomrotiLanding() {
+export default function Welcome() {
     const [copied, setCopied] = useState(false);
-    const playerCount = useAnimatedCounter(1420);
+    const { count: playerCount, ref: playerRef } = useAnimatedCounter(
+        1420,
+        2400,
+    );
 
-    // Memoized Copy Function: Fast and secure
-    const handleCopy = useCallback(async () => {
+    const copyIp = useCallback(async () => {
         try {
             await navigator.clipboard.writeText('nomroti.net');
             setCopied(true);
-            setTimeout(() => setCopied(false), 2000);
-        } catch (err) {
-            console.error('Secure copy failed', err);
+            setTimeout(() => setCopied(false), 2200);
+        } catch {
+            // fallback: select text or show toast
         }
     }, []);
 
     return (
         <Layout>
-            <Head title="NOMROTI | The Next Generation Network" />
+            <Head title="NOMROTI | Next-Gen Minecraft Network" />
 
-            {/* Hero Section: Optimized Background rendering */}
-            <header className="relative flex min-h-[90vh] items-center justify-center overflow-hidden pt-20">
+            {/* Hero */}
+            <section className="relative flex min-h-[90vh] items-center justify-center overflow-hidden pt-20">
+                {/* Background layers */}
                 <div
-                    className="absolute inset-0 z-0 bg-cover bg-center transition-opacity duration-1000"
+                    className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000"
                     style={{
-                        backgroundImage: `linear-gradient(to bottom, rgba(26, 26, 26, 0.85), #1a1a1a), url('https://m.gettywallpapers.com/wp-content/uploads/2023/10/Minecraft-Laptop-Wallpaper-scaled.jpg')`,
-                        willChange: 'transform', // Performance: Hardware acceleration
+                        backgroundImage: `
+        linear-gradient(to bottom, rgba(26, 26, 26, 0.88), rgba(26, 26, 26, 0.95)),
+        url('https://m.gettywallpapers.com/wp-content/uploads/2023/10/Minecraft-Laptop-Wallpaper-scaled.jpg')
+      `,
+                        backgroundBlendMode: 'multiply', // better darkening control
+                        willChange: 'transform', // helps with smooth scrolling on some devices
+                        transform: 'scale(1.02)', // subtle overscan → prevents edge flashing
                     }}
                 />
 
-                <div className="relative z-10 container mx-auto px-6">
+                {/* Optional subtle overlay grain/noise (very Minecraft vibe) – optional, comment out if not wanted */}
+                <div
+                    className="pointer-events-none absolute inset-0 z-0 opacity-[0.07]"
+                    style={{
+                        backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
+                        backgroundSize: '300px',
+                    }}
+                />
+
+                <div className="relative z-10 container mx-auto max-w-7xl px-6">
                     <div className="grid items-center gap-16 lg:grid-cols-2">
-                        <div className="animate-in space-y-8 text-center duration-700 fade-in slide-in-from-left-8 lg:text-left">
+                        {/* Left column - text content (same as before) */}
+                        <motion.div
+                            initial={{ opacity: 0, x: -40 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.9, ease: 'easeOut' }}
+                            className="space-y-8 text-center lg:text-left"
+                        >
                             <h1 className="text-6xl leading-[0.9] font-black tracking-tighter uppercase italic md:text-8xl">
                                 NOMROTI <br />
-                                <span className="text-primary drop-shadow-[0_0_15px_rgba(255,102,0,0.3)]">
+                                <span className="text-primary drop-shadow-[0_0_20px_rgba(255,102,0,0.4)]">
                                     NETWORK
                                 </span>
                             </h1>
 
-                            <p className="mx-auto max-w-lg text-lg font-medium text-muted-foreground italic opacity-80 md:text-xl lg:mx-0">
+                            <p className="mx-auto max-w-lg text-lg font-medium text-muted-foreground italic opacity-90 md:text-xl lg:mx-0">
                                 Experience custom gamemodes engineered for{' '}
-                                <span className="text-white">zero-lag</span> and
-                                high-stakes competition.
+                                <span className="font-semibold text-white not-italic">
+                                    zero-lag
+                                </span>{' '}
+                                and high-stakes competition.
                             </p>
 
-                            <div className="flex flex-col items-center justify-center gap-4 sm:flex-row lg:justify-start">
+                            <div className="flex flex-col items-center justify-center gap-5 pt-4 sm:flex-row lg:justify-start">
+                                {/* Copy IP button – same as before */}
                                 <TooltipProvider delayDuration={0}>
                                     <Tooltip open={copied}>
                                         <TooltipTrigger asChild>
                                             <button
-                                                onClick={handleCopy}
-                                                className="group flex cursor-pointer items-center gap-5 rounded-2xl border border-white/10 bg-black/60 p-4 px-8 shadow-2xl backdrop-blur-2xl transition-all hover:border-primary/50 active:scale-95"
+                                                onClick={copyIp}
+                                                className="group flex cursor-pointer items-center gap-5 rounded-2xl border border-white/10 bg-black/65 p-4 px-7 shadow-2xl backdrop-blur-xl transition-all hover:border-primary/60 active:scale-98"
                                             >
-                                                <div className="relative flex h-3 w-3">
-                                                    <span className="absolute h-full w-full animate-ping rounded-full bg-green-400 opacity-75"></span>
-                                                    <span className="relative inline-flex h-3 w-3 rounded-full bg-green-500 shadow-[0_0_12px_#22c55e]"></span>
+                                                <div className="relative flex h-3.5 w-3.5 shrink-0">
+                                                    <span className="absolute h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
+                                                    <span className="relative h-3.5 w-3.5 rounded-full bg-green-500 shadow-[0_0_14px_#22c55e]" />
                                                 </div>
-                                                <span className="font-mono text-2xl font-bold tracking-tighter text-white">
+                                                <span className="font-mono text-2xl font-bold tracking-tight text-white">
                                                     nomroti.net
                                                 </span>
-                                                <div className="flex items-center gap-3 border-l border-white/10 pl-5">
+                                                <div className="flex items-center gap-3 border-l border-white/15 pl-5">
                                                     <Users
                                                         className="text-primary"
-                                                        size={20}
+                                                        size={22}
                                                     />
-                                                    <span className="text-2xl leading-none font-black text-primary">
+                                                    <span
+                                                        ref={playerRef}
+                                                        className="text-2xl leading-none font-black text-primary tabular-nums"
+                                                    >
                                                         {playerCount.toLocaleString()}
                                                     </span>
                                                 </div>
@@ -105,7 +127,7 @@ export default function NomrotiLanding() {
                                         </TooltipTrigger>
                                         <TooltipContent
                                             side="bottom"
-                                            className="border-none bg-primary font-bold text-white"
+                                            className="border-none bg-primary px-4 py-2.5 font-bold text-white"
                                         >
                                             {copied
                                                 ? 'IP COPIED!'
@@ -116,62 +138,58 @@ export default function NomrotiLanding() {
 
                                 <Link
                                     href="/store"
-                                    className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 p-4 px-8 text-sm font-black tracking-widest uppercase transition-all hover:bg-white/10"
+                                    className="flex items-center gap-2.5 rounded-2xl border border-white/10 bg-white/5 px-7 py-4 text-base font-black tracking-wider uppercase transition hover:border-white/20 hover:bg-white/10"
                                 >
                                     Visit Store{' '}
                                     <ArrowRight
-                                        size={16}
+                                        size={18}
                                         className="text-primary"
                                     />
                                 </Link>
                             </div>
-                        </div>
+                        </motion.div>
 
-                        <div className="pointer-events-none flex hidden justify-center lg:flex">
-                            <motion.img
+                        {/* Right column - floating logo/image (same as before) */}
+                        <motion.div
+                            variants={floatingVariants}
+                            animate="float"
+                            className="pointer-events-none hidden justify-center select-none lg:flex"
+                        >
+                            <img
                                 src="/assets/img/hero.png"
-                                alt="Logo"
-                                className="max-w-[85%] drop-shadow-[0_35px_100px_rgba(0,0,0,0.8)]"
+                                alt="Nomroti Network"
+                                className="max-w-[50%] drop-shadow-[0_30px_90px_rgba(0,0,0,0.75)]"
                                 loading="eager"
-                                // Initial state
-                                initial={{ y: 0 }}
-                                // Floating/Bouncing Animation
-                                animate={{
-                                    y: [0, -20, 0], // Moves up 20px and back
-                                }}
-                                transition={{
-                                    duration: 4, // 4 seconds for a full loop makes it feel "heavy" and epic
-                                    repeat: Infinity, // Loop forever
-                                    ease: 'easeInOut', // Smooth acceleration/deceleration
-                                }}
-                                // Interactive: Subtle reaction if the user manages to hover nearby
-                                whileHover={{ scale: 1.02 }}
+                                width={720}
+                                height={720}
                             />
-                        </div>
+                        </motion.div>
                     </div>
                 </div>
-            </header>
+            </section>
 
-            {/* Gamemodes Section */}
-            <section className="relative z-20 container mx-auto -mt-24 px-6 pb-32">
-                <div className="grid gap-8 md:grid-cols-3">
+            {/* Gamemodes */}
+            <section className="relative z-10 container mx-auto -mt-16 px-5 pb-24 md:-mt-28 md:px-8 md:pb-40">
+                <div className="grid gap-7 md:grid-cols-3 md:gap-8 lg:gap-10">
                     <GamemodeCard
                         title="NOMROTI ECO"
-                        desc="The ultimate economy experience. Build towns and dominate the player-driven market."
-                        img="https://images.unsplash.com/photo-1599583724135-236357e937d3?q=80&w=600&auto=format&fit=crop"
-                        href="/product?name=Eco-Rank&price=19.99" // Performance: Static props for speed
+                        description="Player-driven towns, auctions, massive economy depth."
+                        image="/assets/img/galaxy.avif"
+                        href="/ranks/eco"
                     />
+
                     <GamemodeCard
                         title="SKYBLOCK"
-                        desc="Expand your floating empire with custom automation and unique RPG-style level ups."
-                        img="https://images.unsplash.com/photo-1502481851512-e9e2529bfbf9?q=80&w=600&auto=format&fit=crop"
-                        href="/product?name=Sky-Crate&price=5.00"
+                        description="Custom islands, automation, RPG progression, crates."
+                        image="/assets/img/gaming.avif"
+                        href="/crates/sky"
                     />
+
                     <GamemodeCard
                         title="PRACTICE"
-                        desc="Sharpen your sword skills in ranked duels and bridge practice on high-performance nodes."
-                        img="https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=600&auto=format&fit=crop"
-                        href="/product?name=Global-Unban&price=25.00"
+                        description="Ranked 1v1, bridge, speed bridging, low-latency nodes."
+                        image="https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80"
+                        href="/practice"
                     />
                 </div>
             </section>
