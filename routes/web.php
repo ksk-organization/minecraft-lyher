@@ -6,7 +6,9 @@ use Laravel\Fortify\Features;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\GameModeController;
+use App\Http\Controllers\Admin\CouponController;
 use App\Http\Controllers\StoreController;
+use App\Models\Coupon;
 
 Route::get('/', function () {
     return Inertia::render('welcome', [
@@ -34,17 +36,19 @@ Route::prefix('admin')->as('admin.')->middleware('auth')->group(function () {
     Route::resource('products', ProductController::class)->names('products');
     Route::resource('game-modes', GameModeController::class)->names('game-modes');
     Route::resource('categroies', CategoryController::class)->names('categroies');
+    Route::resource('coupons', CouponController::class)->names('coupons');
+    Route::get('checkout/coupon/check', [CouponController::class , 'check'])->name('checkout.check-coupon');
 
 
 
-    Route::resource('game-modes', GameModeController::class);
-    Route::resource('categories', CategoryController::class);
-    Route::resource('products', ProductController::class);
-    Route::resource('coupons', CouponController::class);
+    // Route::resource('game-modes', GameModeController::class);
+    // Route::resource('categories', CategoryController::class);
+    // Route::resource('products', ProductController::class);
+    // Route::resource('coupons', CouponController::class);
 
-    Route::get('orders', [OrderController::class, 'index']);
-    Route::get('orders/{order}', [OrderController::class, 'show']);
-    Route::patch('orders/{order}/status', [OrderController::class, 'updateStatus']);
+    // Route::get('orders', [OrderController::class, 'index']);
+    // Route::get('orders/{order}', [OrderController::class, 'show']);
+    // Route::patch('orders/{order}/status', [OrderController::class, 'updateStatus']);
 });
 
 
