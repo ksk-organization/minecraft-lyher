@@ -26,7 +26,7 @@ const floatingVariants = {
 };
 
 export default function Welcome({ gamemodes }: { gamemodes: any }) {
-    console.log(gamemodes);
+    // console.log(gamemodes);
     // [
     //     {
     //         "id": 1,

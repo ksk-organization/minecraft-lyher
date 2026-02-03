@@ -55,10 +55,10 @@ import { cn } from '@/lib/utils';
 // ──────────────────────────────────────────────
 
 interface ProductImage {
-    id?: number;           // existing images from DB
+    id?: number; // existing images from DB
     type: 'url' | 'file';
-    value: string;         // URL or preview URL
-    file?: File | null;    // only for new uploads
+    value: string; // URL or preview URL
+    file?: File | null; // only for new uploads
 }
 
 interface Product {
@@ -97,44 +97,59 @@ function ProductFormModalContent({
     mode: 'create' | 'edit';
     onClose: () => void;
     game_modes: any;
-    categories: any
+    categories: any;
 }) {
     const { data, setData, post, put, processing, errors, reset } = form;
 
-    const handleMainImage = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
+    const handleMainImage = useCallback(
+        (e: React.ChangeEvent<HTMLInputElement>) => {
+            const file = e.target.files?.[0];
+            if (!file) return;
 
-        const preview = URL.createObjectURL(file);
-        setData((prev: any) => ({
-            ...prev,
-            main_icon_url: file,
-            main_icon_preview: preview,
-        }));
-    }, [setData]);
+            const preview = URL.createObjectURL(file);
+            setData((prev: any) => ({
+                ...prev,
+                main_icon_url: file,
+                main_icon_preview: preview,
+            }));
+        },
+        [setData],
+    );
 
-    const addGalleryImage = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-        const files = Array.from(e.target.files || []);
-        if (!files.length) return;
+    const addGalleryImage = useCallback(
+        (e: React.ChangeEvent<HTMLInputElement>) => {
+            const files = Array.from(e.target.files || []);
+            if (!files.length) return;
 
-        const newImages = files.map(file => ({
-            type: 'file' as const,
-            value: URL.createObjectURL(file),
-            file,
-        }));
+            const newImages = files.map((file) => ({
+                type: 'file' as const,
+                value: URL.createObjectURL(file),
+                file,
+            }));
 
-        setData('images', [...(data.images || []), ...newImages]);
-    }, [data.images, setData]);
+            setData('images', [...(data.images || []), ...newImages]);
+        },
+        [data.images, setData],
+    );
 
-    const removeGalleryImage = useCallback((index: number) => {
-        setData('images', (data.images || []).filter((_, i) => i !== index));
-    }, [data.images, setData]);
+    const removeGalleryImage = useCallback(
+        (index: number) => {
+            setData(
+                'images',
+                (data.images || []).filter((_, i) => i !== index),
+            );
+        },
+        [data.images, setData],
+    );
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
 
         const method = mode === 'create' ? post : put;
-        const routeName = mode === 'create' ? 'admin.products.store' : `admin.products.update`;
+        const routeName =
+            mode === 'create'
+                ? 'admin.products.store'
+                : `admin.products.update`;
 
         method(route(routeName, mode === 'edit' ? data.id : undefined), {
             forceFormData: true,
@@ -148,55 +163,93 @@ function ProductFormModalContent({
 
     return (
         <form onSubmit={submit} className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                 {/* Left column – main fields */}
                 <div className="space-y-6">
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <Label className="text-xs font-bold uppercase tracking-wider text-zinc-400">Name</Label>
+                            <Label className="text-xs font-bold tracking-wider text-zinc-400 uppercase">
+                                Name
+                            </Label>
                             <Input
                                 value={data.name || ''}
-                                onChange={e => setData('name', e.target.value)}
-                                className="mt-1 bg-zinc-900 border-zinc-700 focus:border-orange-500"
+                                onChange={(e) =>
+                                    setData('name', e.target.value)
+                                }
+                                className="mt-1 border-zinc-700 bg-zinc-900 focus:border-orange-500"
                             />
-                            {errors.name && <p className="text-red-400 text-xs mt-1">{errors.name}</p>}
+                            {errors.name && (
+                                <p className="mt-1 text-xs text-red-400">
+                                    {errors.name}
+                                </p>
+                            )}
                         </div>
 
                         <div>
-                            <Label className="text-xs font-bold uppercase tracking-wider text-zinc-400">Slug</Label>
+                            <Label className="text-xs font-bold tracking-wider text-zinc-400 uppercase">
+                                Slug
+                            </Label>
                             <Input
                                 value={data.slug || ''}
-                                onChange={e => setData('slug', e.target.value)}
-                                className="mt-1 bg-zinc-900 border-zinc-700 focus:border-orange-500"
+                                onChange={(e) =>
+                                    setData('slug', e.target.value)
+                                }
+                                className="mt-1 border-zinc-700 bg-zinc-900 focus:border-orange-500"
                             />
-                            {errors.slug && <p className="text-red-400 text-xs mt-1">{errors.slug}</p>}
+                            {errors.slug && (
+                                <p className="mt-1 text-xs text-red-400">
+                                    {errors.slug}
+                                </p>
+                            )}
                         </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <Label className="text-xs font-bold uppercase tracking-wider text-zinc-400">Game Mode</Label>
-                            <Select value={String(data.game_mode_id || '')} onValueChange={v => setData('game_mode_id', v)}>
-                                <SelectTrigger className="mt-1 bg-zinc-900 border-zinc-700">
+                            <Label className="text-xs font-bold tracking-wider text-zinc-400 uppercase">
+                                Game Mode
+                            </Label>
+                            <Select
+                                value={String(data.game_mode_id || '')}
+                                onValueChange={(v) =>
+                                    setData('game_mode_id', v)
+                                }
+                            >
+                                <SelectTrigger className="mt-1 border-zinc-700 bg-zinc-900">
                                     <SelectValue placeholder="Select mode" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {game_modes.map(gm => (
-                                        <SelectItem key={gm.id} value={String(gm.id)}>{gm.title}</SelectItem>
+                                    {game_modes.map((gm) => (
+                                        <SelectItem
+                                            key={gm.id}
+                                            value={String(gm.id)}
+                                        >
+                                            {gm.title}
+                                        </SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
                         </div>
 
                         <div>
-                            <Label className="text-xs font-bold uppercase tracking-wider text-zinc-400">Category</Label>
-                            <Select value={String(data.category_id || '')} onValueChange={v => setData('category_id', v)}>
-                                <SelectTrigger className="mt-1 bg-zinc-900 border-zinc-700">
+                            <Label className="text-xs font-bold tracking-wider text-zinc-400 uppercase">
+                                Category
+                            </Label>
+                            <Select
+                                value={String(data.category_id || '')}
+                                onValueChange={(v) => setData('category_id', v)}
+                            >
+                                <SelectTrigger className="mt-1 border-zinc-700 bg-zinc-900">
                                     <SelectValue placeholder="Select category" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {categories.map(cat => (
-                                        <SelectItem key={cat.id} value={String(cat.id)}>{cat.name}</SelectItem>
+                                    {categories.map((cat) => (
+                                        <SelectItem
+                                            key={cat.id}
+                                            value={String(cat.id)}
+                                        >
+                                            {cat.name}
+                                        </SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
@@ -205,31 +258,39 @@ function ProductFormModalContent({
 
                     <div className="grid grid-cols-3 gap-4">
                         <div>
-                            <Label className="text-xs font-bold uppercase tracking-wider text-zinc-400">Price ($)</Label>
+                            <Label className="text-xs font-bold tracking-wider text-zinc-400 uppercase">
+                                Price ($)
+                            </Label>
                             <Input
                                 type="number"
                                 step="0.01"
                                 value={data.price || ''}
-                                onChange={e => setData('price', e.target.value)}
-                                className="mt-1 bg-zinc-900 border-zinc-700 font-mono text-orange-400"
+                                onChange={(e) =>
+                                    setData('price', e.target.value)
+                                }
+                                className="mt-1 border-zinc-700 bg-zinc-900 font-mono text-orange-400"
                             />
                         </div>
                         <div>
-                            <Label className="text-xs font-bold uppercase tracking-wider text-zinc-400">Stock</Label>
+                            <Label className="text-xs font-bold tracking-wider text-zinc-400 uppercase">
+                                Stock
+                            </Label>
                             <Input
                                 type="number"
                                 value={data.stock || ''}
-                                onChange={e => setData('stock', e.target.value)}
-                                className="mt-1 bg-zinc-900 border-zinc-700"
+                                onChange={(e) =>
+                                    setData('stock', e.target.value)
+                                }
+                                className="mt-1 border-zinc-700 bg-zinc-900"
                             />
                         </div>
                         <div className="flex items-end gap-3 pb-2">
                             <Switch
                                 checked={data.is_active}
-                                onCheckedChange={v => setData('is_active', v)}
+                                onCheckedChange={(v) => setData('is_active', v)}
                                 className="data-[state=checked]:bg-orange-600"
                             />
-                            <span className="text-xs font-bold uppercase text-zinc-400">
+                            <span className="text-xs font-bold text-zinc-400 uppercase">
                                 {data.is_active ? 'ACTIVE' : 'HIDDEN'}
                             </span>
                         </div>
@@ -240,29 +301,38 @@ function ProductFormModalContent({
                 <div className="space-y-6">
                     {/* Main Icon */}
                     <div>
-                        <Label className="text-xs font-bold uppercase tracking-wider text-zinc-400">Main Icon</Label>
+                        <Label className="text-xs font-bold tracking-wider text-zinc-400 uppercase">
+                            Main Icon
+                        </Label>
                         <div className="mt-2 flex items-start gap-4">
                             <div className="shrink-0">
-                                {data.main_icon_preview || data.main_icon_url ? (
+                                {data.main_icon_preview ||
+                                data.main_icon_url ? (
                                     <div className="relative">
                                         <img
-                                            src={data.main_icon_preview || data.main_icon_url}
+                                            src={
+                                                data.main_icon_preview ||
+                                                data.main_icon_url
+                                            }
                                             alt="Main preview"
-                                            className="h-24 w-24 object-cover rounded-md border border-zinc-700"
+                                            className="h-24 w-24 rounded-md border border-zinc-700 object-cover"
                                         />
                                         <Button
                                             size="icon"
                                             variant="destructive"
                                             className="absolute -top-2 -right-2 h-6 w-6"
                                             onClick={() => {
-                                                setData({ main_icon_url: null, main_icon_preview: null });
+                                                setData({
+                                                    main_icon_url: null,
+                                                    main_icon_preview: null,
+                                                });
                                             }}
                                         >
                                             <X className="h-3 w-3" />
                                         </Button>
                                     </div>
                                 ) : (
-                                    <div className="h-24 w-24 rounded-md border-2 border-dashed border-zinc-700 flex items-center justify-center">
+                                    <div className="flex h-24 w-24 items-center justify-center rounded-md border-2 border-dashed border-zinc-700">
                                         <ImageIcon className="h-8 w-8 text-zinc-600" />
                                     </div>
                                 )}
@@ -275,9 +345,13 @@ function ProductFormModalContent({
                                     onChange={handleMainImage}
                                     className="cursor-pointer"
                                 />
-                                <p className="text-xs text-zinc-500 mt-1">PNG, JPG, WebP • max 3MB</p>
+                                <p className="mt-1 text-xs text-zinc-500">
+                                    PNG, JPG, WebP • max 3MB
+                                </p>
                                 {errors.main_icon_url && (
-                                    <p className="text-red-400 text-xs mt-1">{errors.main_icon_url}</p>
+                                    <p className="mt-1 text-xs text-red-400">
+                                        {errors.main_icon_url}
+                                    </p>
                                 )}
                             </div>
                         </div>
@@ -285,16 +359,22 @@ function ProductFormModalContent({
 
                     {/* Gallery */}
                     <div>
-                        <div className="flex items-center justify-between mb-2">
-                            <Label className="text-xs font-bold uppercase tracking-wider text-zinc-400">Gallery Images</Label>
+                        <div className="mb-2 flex items-center justify-between">
+                            <Label className="text-xs font-bold tracking-wider text-zinc-400 uppercase">
+                                Gallery Images
+                            </Label>
                             <Button
                                 type="button"
                                 variant="outline"
                                 size="sm"
-                                onClick={() => document.getElementById('gallery-upload')?.click()}
-                                className="h-7 text-xs border-orange-600/30 hover:bg-orange-950/30 text-orange-400"
+                                onClick={() =>
+                                    document
+                                        .getElementById('gallery-upload')
+                                        ?.click()
+                                }
+                                className="h-7 border-orange-600/30 text-xs text-orange-400 hover:bg-orange-950/30"
                             >
-                                <Upload className="h-3.5 w-3.5 mr-1.5" />
+                                <Upload className="mr-1.5 h-3.5 w-3.5" />
                                 Add Images
                             </Button>
                             <input
@@ -307,9 +387,12 @@ function ProductFormModalContent({
                             />
                         </div>
 
-                        <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+                        <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
                             {data.images?.map((img, idx) => (
-                                <div key={idx} className="relative group aspect-square rounded-md overflow-hidden border border-zinc-700 bg-zinc-950">
+                                <div
+                                    key={idx}
+                                    className="group relative aspect-square overflow-hidden rounded-md border border-zinc-700 bg-zinc-950"
+                                >
                                     <img
                                         src={img.value}
                                         alt="gallery"
@@ -318,7 +401,7 @@ function ProductFormModalContent({
                                     <Button
                                         size="icon"
                                         variant="destructive"
-                                        className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                                        className="absolute top-1 right-1 h-6 w-6 opacity-0 transition-opacity group-hover:opacity-100"
                                         onClick={() => removeGalleryImage(idx)}
                                     >
                                         <X className="h-3.5 w-3.5" />
@@ -326,9 +409,11 @@ function ProductFormModalContent({
                                 </div>
                             ))}
                             {(!data.images || data.images.length === 0) && (
-                                <div className="col-span-3 sm:col-span-4 h-28 border-2 border-dashed border-zinc-700 rounded-md flex flex-col items-center justify-center text-zinc-600">
-                                    <UploadCloud className="h-8 w-8 mb-2 opacity-50" />
-                                    <p className="text-xs">No gallery images yet</p>
+                                <div className="col-span-3 flex h-28 flex-col items-center justify-center rounded-md border-2 border-dashed border-zinc-700 text-zinc-600 sm:col-span-4">
+                                    <UploadCloud className="mb-2 h-8 w-8 opacity-50" />
+                                    <p className="text-xs">
+                                        No gallery images yet
+                                    </p>
                                 </div>
                             )}
                         </div>
@@ -337,7 +422,7 @@ function ProductFormModalContent({
             </div>
 
             {/* Submit area */}
-            <div className="flex justify-end gap-3 pt-6 border-t border-zinc-800 mt-6">
+            <div className="mt-6 flex justify-end gap-3 border-t border-zinc-800 pt-6">
                 <Button
                     type="button"
                     variant="outline"
@@ -349,7 +434,7 @@ function ProductFormModalContent({
                 <Button
                     type="submit"
                     disabled={processing}
-                    className="bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-500 hover:to-orange-400 min-w-32 shadow-lg shadow-orange-900/30"
+                    className="min-w-32 bg-gradient-to-r from-orange-600 to-orange-500 shadow-lg shadow-orange-900/30 hover:from-orange-500 hover:to-orange-400"
                 >
                     {processing ? (
                         <span className="flex items-center gap-2">
@@ -371,13 +456,18 @@ function ProductFormModalContent({
 // Main Page
 // ──────────────────────────────────────────────
 
-export default function AdminProductsIndex({ products, game_modes, categories }: Props) {
-
-    console.log(products);
+export default function AdminProductsIndex({
+    products,
+    game_modes,
+    categories,
+}: Props) {
+    // console.log(products);
 
     const [search, setSearch] = useState('');
     const [modal, setModal] = useState<'create' | 'edit' | null>(null);
-    const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+    const [selectedProduct, setSelectedProduct] = useState<Product | null>(
+        null,
+    );
     const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
 
     const form = useForm({
@@ -399,29 +489,34 @@ export default function AdminProductsIndex({ products, game_modes, categories }:
         setModal('create');
     };
 
-    const openEdit = useCallback((product: Product) => {
-        form.clearErrors();
-        form.setData({
-            id: product.id,
-            game_mode_id: String(product.game_mode_id),
-            category_id: String(product.category_id),
-            name: product.name,
-            slug: product.slug,
-            price: String(product.price),
-            stock: String(product.stock),
-            is_active: !!product.is_active,
-            main_icon_url: product.main_icon_url,
-            main_icon_preview: null,
-            images: product.images.map(img => ({
-                id: img.id,
-                type: 'url',
-                value: img.image_url.startsWith('http') ? img.image_url : `/storage/${img.image_url}`,
-                file: null,
-            })),
-        });
-        setSelectedProduct(product);
-        setModal('edit');
-    }, [form]);
+    const openEdit = useCallback(
+        (product: Product) => {
+            form.clearErrors();
+            form.setData({
+                id: product.id,
+                game_mode_id: String(product.game_mode_id),
+                category_id: String(product.category_id),
+                name: product.name,
+                slug: product.slug,
+                price: String(product.price),
+                stock: String(product.stock),
+                is_active: !!product.is_active,
+                main_icon_url: product.main_icon_url,
+                main_icon_preview: null,
+                images: product.images.map((img) => ({
+                    id: img.id,
+                    type: 'url',
+                    value: img.image_url.startsWith('http')
+                        ? img.image_url
+                        : `/storage/${img.image_url}`,
+                    file: null,
+                })),
+            });
+            setSelectedProduct(product);
+            setModal('edit');
+        },
+        [form],
+    );
 
     const handleDelete = (id: number) => {
         router.delete(route('admin.products.destroy', id), {
@@ -430,68 +525,81 @@ export default function AdminProductsIndex({ products, game_modes, categories }:
         });
     };
 
-    const filtered = products.data.filter(p =>
-        p.name.toLowerCase().includes(search.toLowerCase()) ||
-        p.slug.toLowerCase().includes(search.toLowerCase())
+    const filtered = products.data.filter(
+        (p) =>
+            p.name.toLowerCase().includes(search.toLowerCase()) ||
+            p.slug.toLowerCase().includes(search.toLowerCase()),
     );
 
     return (
         <AppLayout>
             <Head title="Products • Admin" />
 
-            <div className="p-4 md:p-6 lg:p-8 space-y-6">
+            <div className="space-y-6 p-4 md:p-6 lg:p-8">
                 {/* Header */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
                     <div>
-                        <h1 className="text-3xl md:text-4xl font-black tracking-tight text-white">
+                        <h1 className="text-3xl font-black tracking-tight text-white md:text-4xl">
                             Products
                         </h1>
-                        <p className="text-zinc-400 text-sm mt-1">
+                        <p className="mt-1 text-sm text-zinc-400">
                             Manage all store items • {products.total} total
                         </p>
                     </div>
 
                     <div className="flex flex-wrap gap-3">
                         <div className="relative min-w-[220px]">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
+                            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-zinc-500" />
                             <Input
                                 placeholder="Search name or slug..."
-                                className="pl-10 bg-zinc-900 border-zinc-700 focus:border-orange-500"
+                                className="border-zinc-700 bg-zinc-900 pl-10 focus:border-orange-500"
                                 value={search}
-                                onChange={e => setSearch(e.target.value)}
+                                onChange={(e) => setSearch(e.target.value)}
                             />
                         </div>
 
                         <Button
                             onClick={openCreate}
-                            className="bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-500 hover:to-orange-400 shadow-lg shadow-orange-900/30"
+                            className="bg-gradient-to-r from-orange-600 to-orange-500 shadow-lg shadow-orange-900/30 hover:from-orange-500 hover:to-orange-400"
                         >
                             <PlusCircle className="mr-2 h-4 w-4" />
                             New Product
                         </Button>
 
-                        <Button variant="outline" size="icon" onClick={() => router.reload()}>
+                        <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => router.reload()}
+                        >
                             <RefreshCw className="h-4 w-4" />
                         </Button>
                     </div>
                 </div>
 
                 {/* Table */}
-                <Card className="bg-gradient-to-b from-zinc-950 to-black border-zinc-800/50 overflow-hidden">
+                <Card className="overflow-hidden border-zinc-800/50 bg-gradient-to-b from-zinc-950 to-black">
                     <Table>
                         <TableHeader className="bg-zinc-900/60">
                             <TableRow className="border-zinc-800 hover:bg-transparent">
-                                <TableHead className="w-24 text-orange-400 font-bold uppercase text-xs">Preview</TableHead>
-                                <TableHead className="text-zinc-300 font-bold uppercase text-xs">Product</TableHead>
-                                <TableHead className="text-zinc-300 font-bold uppercase text-xs">Price / Stock</TableHead>
-                                <TableHead className="text-right text-zinc-300 font-bold uppercase text-xs">Actions</TableHead>
+                                <TableHead className="w-24 text-xs font-bold text-orange-400 uppercase">
+                                    Preview
+                                </TableHead>
+                                <TableHead className="text-xs font-bold text-zinc-300 uppercase">
+                                    Product
+                                </TableHead>
+                                <TableHead className="text-xs font-bold text-zinc-300 uppercase">
+                                    Price / Stock
+                                </TableHead>
+                                <TableHead className="text-right text-xs font-bold text-zinc-300 uppercase">
+                                    Actions
+                                </TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {filtered.map(product => (
+                            {filtered.map((product) => (
                                 <TableRow
                                     key={product.id}
-                                    className="border-zinc-800 hover:bg-orange-950/10 transition-colors group"
+                                    className="group border-zinc-800 transition-colors hover:bg-orange-950/10"
                                 >
                                     <TableCell>
                                         <div className="flex items-center gap-2">
@@ -503,22 +611,43 @@ export default function AdminProductsIndex({ products, game_modes, categories }:
                                                 {/* <AvatarFallback className="bg-zinc-900 text-zinc-500 text-xs">
                                                     {product.name.slice(0, 2)}
                                                 </AvatarFallback> */}
-                                            <img className='w-full' src={'/storage/'+product.main_icon_url} alt="" />
+                                                <img
+                                                    className="w-full"
+                                                    src={
+                                                        '/storage/' +
+                                                        product.main_icon_url
+                                                    }
+                                                    alt=""
+                                                />
                                             </Avatar>
-
 
                                             {product.images?.length > 0 && (
                                                 <div className="flex -space-x-2">
-                                                    {product.images.slice(0, 3).map((img, i) => (
-                                                        <Avatar key={i} className="h-8 w-8 border-2 border-black rounded-full">
-                                                            {/* <AvatarImage src={img.image_url} />
+                                                    {product.images
+                                                        .slice(0, 3)
+                                                        .map((img, i) => (
+                                                            <Avatar
+                                                                key={i}
+                                                                className="h-8 w-8 rounded-full border-2 border-black"
+                                                            >
+                                                                {/* <AvatarImage src={img.image_url} />
                                                             <AvatarFallback className="text-[10px]">Img</AvatarFallback> */}
-                                                            <img className='w-full' src={'/storage/'+img.image_url} alt="" />
-                                                        </Avatar>
-                                                    ))}
-                                                    {product.images.length > 3 && (
-                                                        <div className="h-8 w-8 rounded-full bg-zinc-800 border-2 border-black flex items-center justify-center text-[10px] text-zinc-400">
-                                                            +{product.images.length - 3}
+                                                                <img
+                                                                    className="w-full"
+                                                                    src={
+                                                                        '/storage/' +
+                                                                        img.image_url
+                                                                    }
+                                                                    alt=""
+                                                                />
+                                                            </Avatar>
+                                                        ))}
+                                                    {product.images.length >
+                                                        3 && (
+                                                        <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-black bg-zinc-800 text-[10px] text-zinc-400">
+                                                            +
+                                                            {product.images
+                                                                .length - 3}
                                                         </div>
                                                     )}
                                                 </div>
@@ -527,33 +656,42 @@ export default function AdminProductsIndex({ products, game_modes, categories }:
                                     </TableCell>
 
                                     <TableCell>
-                                        <div className="font-medium text-white group-hover:text-orange-400 transition-colors">
+                                        <div className="font-medium text-white transition-colors group-hover:text-orange-400">
                                             {product.name}
                                         </div>
-                                        <div className="text-xs text-zinc-500 mt-0.5 font-mono">
-                                            {product.game_mode?.title || '—'} • {product.category?.name || 'Uncategorized'}
+                                        <div className="mt-0.5 font-mono text-xs text-zinc-500">
+                                            {product.game_mode?.title || '—'} •{' '}
+                                            {product.category?.name ||
+                                                'Uncategorized'}
                                         </div>
                                     </TableCell>
 
                                     <TableCell>
-                                        <div className="font-mono text-orange-400 font-bold">
-                                            ${Number(product.price).toFixed(2)}
+                                        <div className="font-mono font-bold text-orange-400">
+                                            {/* ${Number(product.price).toFixed(2)} */}
+                                            ${product.price}
                                         </div>
-                                        <div className="text-xs text-zinc-500 mt-0.5">
+                                        <div className="mt-0.5 text-xs text-zinc-500">
                                             {product.stock} in stock
                                         </div>
                                     </TableCell>
 
                                     <TableCell className="text-right">
                                         <div className="flex items-center justify-end gap-1">
-                                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-8 w-8"
+                                            >
                                                 <Eye className="h-4 w-4 text-zinc-400" />
                                             </Button>
                                             <Button
                                                 variant="ghost"
                                                 size="icon"
                                                 className="h-8 w-8"
-                                                onClick={() => openEdit(product)}
+                                                onClick={() =>
+                                                    openEdit(product)
+                                                }
                                             >
                                                 <Pencil className="h-4 w-4 text-blue-400" />
                                             </Button>
@@ -561,7 +699,9 @@ export default function AdminProductsIndex({ products, game_modes, categories }:
                                                 variant="ghost"
                                                 size="icon"
                                                 className="h-8 w-8"
-                                                onClick={() => setDeleteConfirm(product.id)}
+                                                onClick={() =>
+                                                    setDeleteConfirm(product.id)
+                                                }
                                             >
                                                 <Trash2 className="h-4 w-4 text-red-500" />
                                             </Button>
@@ -572,7 +712,10 @@ export default function AdminProductsIndex({ products, game_modes, categories }:
 
                             {filtered.length === 0 && (
                                 <TableRow>
-                                    <TableCell colSpan={4} className="h-64 text-center text-zinc-500">
+                                    <TableCell
+                                        colSpan={4}
+                                        className="h-64 text-center text-zinc-500"
+                                    >
                                         No products found matching your filter
                                     </TableCell>
                                 </TableRow>
@@ -586,29 +729,34 @@ export default function AdminProductsIndex({ products, game_modes, categories }:
                     <DialogContent
                         className={cn(
                             // Ultra-wide on large screens, still responsive and safe on mobile/tablet
-                            "max-w-[95vw] sm:max-w-[92vw] md:max-w-[88vw] lg:max-w-7xl xl:max-w-7xl 2xl:max-w-max-w-6xl",
+                            '2xl:max-w-max-w-6xl max-w-[95vw] sm:max-w-[92vw] md:max-w-[88vw] lg:max-w-7xl xl:max-w-7xl',
                             // Very tall – almost full viewport height
-                            "max-h-[94vh] sm:max-h-[92vh] md:max-h-[90vh]",
+                            'max-h-[94vh] sm:max-h-[92vh] md:max-h-[90vh]',
                             // No outer padding → content uses full space
-                            "p-0",
+                            'p-0',
                             // Premium dark gradient + subtle borders/shadows
-                            "bg-gradient-to-br from-zinc-950 via-black to-zinc-950",
-                            "border border-zinc-700/40",
-                            "shadow-2xl shadow-black/80",
+                            'bg-gradient-to-br from-zinc-950 via-black to-zinc-950',
+                            'border border-zinc-700/40',
+                            'shadow-2xl shadow-black/80',
                             // Smooth rounded corners + overflow handling
-                            "rounded-2xl sm:rounded-3xl overflow-hidden",
+                            'overflow-hidden rounded-2xl sm:rounded-3xl',
                             // Nice scrollbar styling
-                            "scrollbar scrollbar-thumb-zinc-700 scrollbar-track-zinc-950 scrollbar-thumb-rounded-full"
+                            'scrollbar scrollbar-thumb-zinc-700 scrollbar-track-zinc-950 scrollbar-thumb-rounded-full',
                         )}
                     >
                         {/* Header – slim but elegant */}
-                        <DialogHeader className="px-6 sm:px-8 md:px-10 pt-5 pb-4 border-b border-zinc-800/70 bg-black/40 backdrop-blur-sm">
-                            <DialogTitle className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight text-orange-500 drop-shadow-md">
-                                {modal === 'create' ? 'Create New Product' : 'Edit Product'}
+                        <DialogHeader className="border-b border-zinc-800/70 bg-black/40 px-6 pt-5 pb-4 backdrop-blur-sm sm:px-8 md:px-10">
+                            <DialogTitle className="text-2xl font-black tracking-tight text-orange-500 drop-shadow-md sm:text-3xl md:text-4xl">
+                                {modal === 'create'
+                                    ? 'Create New Product'
+                                    : 'Edit Product'}
                             </DialogTitle>
                             {modal === 'edit' && selectedProduct && (
-                                <DialogDescription className="text-zinc-400 text-sm md:text-base mt-1">
-                                    ID: <span className="font-mono text-orange-400/80">#{selectedProduct.id}</span>
+                                <DialogDescription className="mt-1 text-sm text-zinc-400 md:text-base">
+                                    ID:{' '}
+                                    <span className="font-mono text-orange-400/80">
+                                        #{selectedProduct.id}
+                                    </span>
                                     {' • '}
                                     Last updated: <span className="font-mono">{new Date(selectedProduct.updated_at).toLocaleDateString()}</span>
                                 </DialogDescription>
@@ -616,7 +764,7 @@ export default function AdminProductsIndex({ products, game_modes, categories }:
                         </DialogHeader>
 
                         {/* Main scrollable content area – generous padding */}
-                        <div className="p-6 sm:p-8 md:p-10 lg:p-12 overflow-y-auto">
+                        <div className="overflow-y-auto p-6 sm:p-8 md:p-10 lg:p-12">
                             <ProductFormModalContent
                                 form={form}
                                 mode={modal!}
@@ -629,24 +777,40 @@ export default function AdminProductsIndex({ products, game_modes, categories }:
                 </Dialog>
 
                 {/* Delete Confirmation */}
-                <Dialog open={!!deleteConfirm} onOpenChange={() => setDeleteConfirm(null)}>
-                    <DialogContent className="max-w-md bg-zinc-950 border-red-900/40">
-                        <div className="text-center py-6">
-                            <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-                            <h3 className="text-xl font-bold text-white mb-2">Delete Product?</h3>
-                            <p className="text-zinc-400 text-sm mb-6">
-                                This action cannot be undone. All associated data will be permanently removed.
+                <Dialog
+                    open={!!deleteConfirm}
+                    onOpenChange={() => setDeleteConfirm(null)}
+                >
+                    <DialogContent className="max-w-md border-red-900/40 bg-zinc-950">
+                        <div className="py-6 text-center">
+                            <AlertCircle className="mx-auto mb-4 h-12 w-12 text-red-500" />
+                            <h3 className="mb-2 text-xl font-bold text-white">
+                                Delete Product?
+                            </h3>
+                            <p className="mb-6 text-sm text-zinc-400">
+                                This action cannot be undone. All associated
+                                data will be permanently removed.
                             </p>
                             <div className="flex justify-center gap-4">
-                                <Button variant="outline" onClick={() => setDeleteConfirm(null)}>
+                                <Button
+                                    variant="outline"
+                                    onClick={() => setDeleteConfirm(null)}
+                                >
                                     Cancel
                                 </Button>
                                 <Button
                                     variant="destructive"
                                     onClick={() => {
-                                        router.delete(route('admin.products.destroy', deleteConfirm), {
-                                            onSuccess: () => setDeleteConfirm(null),
-                                        });
+                                        router.delete(
+                                            route(
+                                                'admin.products.destroy',
+                                                deleteConfirm,
+                                            ),
+                                            {
+                                                onSuccess: () =>
+                                                    setDeleteConfirm(null),
+                                            },
+                                        );
                                     }}
                                 >
                                     Delete Forever
