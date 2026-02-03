@@ -7,7 +7,8 @@ import {
     Gamepad2,
     Layers,
     Search,
-    ExternalLink
+    ExternalLink,
+    Ticket
 } from 'lucide-react';
 import { memo, useMemo } from 'react';
 
@@ -32,7 +33,7 @@ const MAIN_NAV_ITEMS: NavItem[] = [
     { title: 'Products', href: '/admin/products', icon: Package },
     { title: 'Game Modes', href: '/admin/game-modes', icon: Gamepad2 }, // Replaced with Gamepad icon
     { title: 'Categories', href: '/admin/categories', icon: Layers },
-    { title: 'Coupon', href: '/admin/coupons', icon: Layers },
+    { title: 'Coupon', href: '/admin/coupons', icon: Ticket },
 ];
 
 const FOOTER_NAV_ITEMS: NavItem[] = [

@@ -9,42 +9,37 @@ use App\Http\Controllers\Admin\GameModeController;
 use App\Http\Controllers\Admin\CouponController;
 use App\Http\Controllers\StoreController;
 use App\Models\Coupon;
+use App\Models\GameMode;
 
 Route::get('/', function () {
+
+    $gamemodes = GameMode::get();
+
     return Inertia::render('welcome', [
         'canRegister' => Features::enabled(Features::registration()),
+        'gamemodes' => $gamemodes
     ]);
 })->name('home');
 
 
-// Route::get('/game-mode', function () {
-//     return Inertia::render('game-mode');
-// });
 Route::get('/store', [StoreController::class, 'index']);
 Route::resource('/products', StoreController::class)->names('product');
 Route::get('/detail', function () {
     return Inertia::render('product-detail');
 });
 
+Route::get('checkout/coupon/check', [CouponController::class, 'check'])->name('checkout.check-coupon');
 
 
-Route::prefix('admin')->as('admin.')->middleware('auth')->group(function () {
+Route::prefix('admin')->as('admin.')->middleware(['auth', 'can:access-admin-page',])->group(function () {
 
-    Route::get('dashboard', [App\Http\Controllers\Admin\DashboardController::class , 'index']);
-    // Route::resource('products', App\Http\Controllers\Admin\ProductController::class)->names('products');
+    Route::get('dashboard', [App\Http\Controllers\Admin\DashboardController::class, 'index']);
 
     Route::resource('products', ProductController::class)->names('products');
     Route::resource('game-modes', GameModeController::class)->names('game-modes');
-    Route::resource('categroies', CategoryController::class)->names('categroies');
+    Route::resource('categories', CategoryController::class)->names('categories');
     Route::resource('coupons', CouponController::class)->names('coupons');
-    Route::get('checkout/coupon/check', [CouponController::class , 'check'])->name('checkout.check-coupon');
 
-
-
-    // Route::resource('game-modes', GameModeController::class);
-    // Route::resource('categories', CategoryController::class);
-    // Route::resource('products', ProductController::class);
-    // Route::resource('coupons', CouponController::class);
 
     // Route::get('orders', [OrderController::class, 'index']);
     // Route::get('orders/{order}', [OrderController::class, 'show']);

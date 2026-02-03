@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Head, router, useForm } from '@inertiajs/react';
 import {
   PlusCircle,
@@ -69,6 +69,32 @@ function GameModeForm({
   processing: boolean;
   isEdit?: boolean;
 }) {
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+
+  // Set preview from existing image_url when editing or data changes
+  useEffect(() => {
+    if (data.image_url && typeof data.image_url === 'string') {
+      setImagePreview(data.image_url);
+    } else if (!data.image_url) {
+      setImagePreview(null);
+    }
+    // Note: when a new file is selected, preview is set in handleImageChange
+  }, [data.image_url]);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const objectUrl = URL.createObjectURL(file);
+    setImagePreview(objectUrl);
+
+    // Set the actual File object — Inertia will send it as multipart
+    setData('image_url', file);
+
+    // Cleanup previous object URL when component unmounts or file changes
+    return () => URL.revokeObjectURL(objectUrl);
+  };
+
   return (
     <div className="space-y-6 py-4">
       <div className="grid md:grid-cols-2 gap-6">
@@ -119,24 +145,49 @@ function GameModeForm({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="image_url">Image URL (optional)</Label>
-          <Input
-            id="image_url"
-            value={data.image_url || ''}
-            onChange={(e) => setData('image_url', e.target.value)}
-            placeholder="https://example.com/image.jpg"
-          />
-          {data.image_url && (
-            <div className="mt-3">
-              <img
-                src={data.image_url}
-                alt="Preview"
-                className="h-20 w-auto max-w-full rounded border border-border object-contain"
-                onError={(e) => (e.currentTarget.style.display = 'none')}
+          <Label htmlFor="image_url">Game Mode Image</Label>
+
+          <div className="flex flex-col items-start gap-6">
+            <div className="flex-1 space-y-2">
+              <Input
+                id="image_url"
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                disabled={processing}
+                className="cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
               />
+              {/* <p className="text-xs text-muted-foreground">
+                PNG, JPG, JPEG, WebP • Max 2MB • Recommended square (512×512 or similar)
+              </p> */}
+              {errors.image_url && (
+                <p className="text-sm text-destructive">{errors.image_url}</p>
+              )}
+              {isEdit && data.image_url && typeof data.image_url === 'string' && !imagePreview?.startsWith('blob:') && (
+                <p className="text-xs text-muted-foreground italic">
+                  Current image will be kept unless you select a new one.
+                </p>
+              )}
             </div>
-          )}
-          {errors.image_url && <p className="text-sm text-destructive">{errors.image_url}</p>}
+
+            {/* Preview */}
+            <div className="w-32 h-32 rounded-lg border border-border overflow-hidden bg-muted flex-shrink-0">
+              {imagePreview ? (
+                <img
+                  src={imagePreview}
+                  alt="Preview"
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground text-center p-2">
+                  No image selected
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -164,17 +215,17 @@ export default function AdminGameModesIndex({ game_modes }: Props) {
     slug: '',
     description: '',
     server_ip: 'nomroti.net',
-    image_url: '',
+    image_url: null as File | null,
     is_active: true,
   });
 
-  const editForm = useForm<GameMode>({
+  const editForm = useForm<GameMode & { image_url: string | File | null }>({
     id: 0,
     title: '',
     slug: '',
     description: '',
     server_ip: '',
-    image_url: '',
+    image_url: null,
     is_active: true,
   });
 
@@ -194,7 +245,10 @@ export default function AdminGameModesIndex({ game_modes }: Props) {
   };
 
   const handleEdit = (gm: GameMode) => {
-    editForm.setData(gm);
+    editForm.setData({
+      ...gm,
+      image_url: gm.image_url || null, // keep string or null
+    });
     setEditOpen(true);
   };
 

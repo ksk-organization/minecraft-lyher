@@ -25,7 +25,43 @@ const floatingVariants = {
     },
 };
 
-export default function Welcome() {
+export default function Welcome({ gamemodes }: { gamemodes: any }) {
+    console.log(gamemodes);
+    // [
+    //     {
+    //         "id": 1,
+    //         "title": "Aut dolorem soluta e",
+    //         "slug": "Commodi vitae ipsum",
+    //         "description": "Voluptatibus sit cum",
+    //         "server_ip": "Est error quo distin",
+    //         "image_url": "/storage/game-modes/f5a6e4fc-fa97-4b84-85cb-9a3310c63c0d.png",
+    //         "is_active": 1,
+    //         "created_at": "2026-02-02T05:09:42.000000Z",
+    //         "updated_at": "2026-02-02T05:09:42.000000Z"
+    //     },
+    //     {
+    //         "id": 2,
+    //         "title": "Aut ipsum dolores s",
+    //         "slug": "Exercitationem quae",
+    //         "description": "Esse nisi nulla et",
+    //         "server_ip": "Cupidatat voluptatem",
+    //         "image_url": "/storage/game-modes/9b873cf7-f8be-4957-a6a1-6e8d95af5306.png",
+    //         "is_active": 1,
+    //         "created_at": "2026-02-02T05:09:51.000000Z",
+    //         "updated_at": "2026-02-02T05:09:51.000000Z"
+    //     },
+    //     {
+    //         "id": 3,
+    //         "title": "Suscipit est amet a",
+    //         "slug": "Distinctio Odio id",
+    //         "description": "Accusamus dolore off",
+    //         "server_ip": "Cupiditate quis vel",
+    //         "image_url": "/storage/game-modes/8273a993-654f-4bd3-9b87-9d378e0b48b8.png",
+    //         "is_active": 1,
+    //         "created_at": "2026-02-02T05:10:08.000000Z",
+    //         "updated_at": "2026-02-02T05:10:08.000000Z"
+    //     }
+    // ]
     const [copied, setCopied] = useState(false);
     const { count: playerCount, ref: playerRef } = useAnimatedCounter(
         1420,
@@ -171,14 +207,16 @@ export default function Welcome() {
             {/* Gamemodes */}
             <section className="relative z-10 container mx-auto -mt-16 px-5 pb-24 md:-mt-28 md:px-8 md:pb-40">
                 <div className="grid gap-7 md:grid-cols-3 md:gap-8 lg:gap-10">
-                    <GamemodeCard
-                        title="NOMROTI ECO"
-                        description="Player-driven towns, auctions, massive economy depth."
-                        image="/assets/img/galaxy.avif"
-                        href="/ranks/eco"
-                    />
+                    {gamemodes.map((gamemodes, index) => (
+                        <GamemodeCard
+                            title={gamemodes.title}
+                            description={gamemodes.description}
+                            image={gamemodes.image_url}
+                            href={route('product.index' , {gamemodes: gamemodes.id})}
+                        />
+                    ))}
 
-                    <GamemodeCard
+                    {/* <GamemodeCard
                         title="SKYBLOCK"
                         description="Custom islands, automation, RPG progression, crates."
                         image="/assets/img/gaming.avif"
@@ -190,7 +228,7 @@ export default function Welcome() {
                         description="Ranked 1v1, bridge, speed bridging, low-latency nodes."
                         image="https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80"
                         href="/practice"
-                    />
+                    /> */}
                 </div>
             </section>
         </Layout>

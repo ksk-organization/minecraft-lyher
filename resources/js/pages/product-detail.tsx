@@ -26,6 +26,10 @@ import {
 import Layout from '@/components/homepage/layout';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
+import { ImageGallery } from '@/components/product/image-preview';
+import ReceiptUpload from '@/components/product/receipt-upload';
+import { PaymentSection } from '@/components/product/payment';
+import { PlatformSelector } from '@/components/product/plateform';
 
 // ──────────────────────────────────────────────
 // Types
@@ -70,7 +74,7 @@ interface CouponStatus {
 // Main Component
 // ──────────────────────────────────────────────
 
-const CHECK_COUPON_ROUTE = route('admin.checkout.check-coupon'); // ← adjust route name if different
+const CHECK_COUPON_ROUTE = route('checkout.check-coupon'); // ← adjust route name if different
 
 export default function ProductDetail({ product }: ProductDetailProps) {
     const [activeImg, setActiveImg] = useState<string>(
@@ -439,183 +443,9 @@ export default function ProductDetail({ product }: ProductDetailProps) {
     );
 }
 
-// ──────────────────────────────────────────────
-// Reusable Components
-// ──────────────────────────────────────────────
 
-function ImageGallery({
-    mainImage,
-    thumbnails,
-    alt,
-    onThumbClick,
-}: {
-    mainImage: string;
-    thumbnails: string[];
-    alt: string;
-    onThumbClick: (src: string) => void;
-}) {
-    return (
-        <div className="space-y-5">
-            <div className="relative aspect-square overflow-hidden rounded-2xl border border-white/5 bg-[#0f0f0f] shadow-2xl">
-                <img
-                    src={mainImage}
-                    alt={alt}
-                    className="h-full w-full object-contain p-8 transition-transform duration-700 hover:scale-105 md:p-12"
-                    loading="eager"
-                />
-            </div>
 
-            {thumbnails.length > 1 && (
-                <div className="scrollbar-thin scrollbar-thumb-white/10 flex gap-3 overflow-x-auto pb-2">
-                    {thumbnails.map((src, idx) => (
-                        <button
-                            key={idx}
-                            type="button"
-                            onClick={() => onThumbClick(src)}
-                            className={cn(
-                                'h-20 w-20 flex-shrink-0 rounded-xl border-2 bg-[#121212] p-2 transition-all',
-                                mainImage === src
-                                    ? 'border-primary shadow-[0_0_15px_rgba(var(--primary),0.4)]'
-                                    : 'border-transparent opacity-60 hover:opacity-90',
-                            )}
-                        >
-                            <img
-                                src={src}
-                                alt={`${alt} preview ${idx + 1}`}
-                                className="h-full w-full object-contain"
-                            />
-                        </button>
-                    ))}
-                </div>
-            )}
-        </div>
-    );
-}
 
-function PlatformSelector({
-    value,
-    onChange,
-}: {
-    value: 'java' | 'bedrock' | 'pocket';
-    onChange: (v: 'java' | 'bedrock' | 'pocket') => void;
-}) {
-    const platforms = [
-        { id: 'java', label: 'Java', icon: Monitor },
-        { id: 'bedrock', label: 'Bedrock', icon: Gamepad2 },
-        { id: 'pocket', label: 'Pocket', icon: Smartphone },
-    ] as const;
 
-    return (
-        <TooltipProvider>
-            <div className="grid grid-cols-3 gap-3">
-                {platforms.map(({ id, label, icon: Icon }) => (
-                    <Tooltip key={id}>
-                        <TooltipTrigger asChild>
-                            <button
-                                type="button"
-                                onClick={() => onChange(id)}
-                                className={cn(
-                                    'flex flex-col items-center gap-2 rounded-xl border p-4 transition-all',
-                                    value === id
-                                        ? 'border-primary bg-primary/10 text-primary shadow-sm'
-                                        : 'border-white/5 bg-black/20 text-muted-foreground hover:border-white/20',
-                                )}
-                            >
-                                <Icon size={20} />
-                                <span className="text-xs font-black uppercase">
-                                    {label}
-                                </span>
-                            </button>
-                        </TooltipTrigger>
-                        <TooltipContent>{label} Edition</TooltipContent>
-                    </Tooltip>
-                ))}
-            </div>
-        </TooltipProvider>
-    );
-}
 
-function PaymentSection({
-    finalPrice,
-    platform,
-}: {
-    finalPrice: number;
-    platform: string;
-}) {
-    return (
-        <div className="space-y-5 rounded-2xl border border-white/5 bg-black/40 p-6 text-center">
-            <div className="text-xs font-black tracking-widest uppercase opacity-50">
-                Scan to Pay ({platform.toUpperCase()})
-            </div>
 
-            <div className="mx-auto h-40 w-40 rounded-xl bg-white p-4 shadow-inner">
-                <QrCode size={128} className="mx-auto text-black" />
-            </div>
-
-            <div className="flex items-center justify-between border-t border-white/10 pt-4 text-sm font-semibold">
-                <span className="uppercase opacity-70">Total Due</span>
-                <span className="font-mono text-2xl text-primary">
-                    ${finalPrice.toFixed(2)}
-                </span>
-            </div>
-        </div>
-    );
-}
-
-function ReceiptUpload({
-    file,
-    onFileChange,
-}: {
-    file: File | null;
-    onFileChange: (f: File | null) => void;
-}) {
-    const handleDrop = (e: React.DragEvent) => {
-        e.preventDefault();
-        const dropped = e.dataTransfer.files[0];
-        if (dropped?.type.startsWith('image/')) onFileChange(dropped);
-    };
-
-    return (
-        <div className="space-y-2">
-            <Label className="text-xs font-black tracking-widest text-muted-foreground uppercase">
-                Upload Payment Proof
-            </Label>
-
-            <div
-                onDrop={handleDrop}
-                onDragOver={(e) => e.preventDefault()}
-                className={cn(
-                    'cursor-pointer rounded-2xl border-2 border-dashed p-10 text-center transition-all',
-                    file
-                        ? 'border-green-600/50 bg-green-950/20'
-                        : 'border-white/10 bg-black/20 hover:border-primary/40',
-                )}
-            >
-                <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => onFileChange(e.target.files?.[0] ?? null)}
-                    className="hidden"
-                    id="receipt-upload"
-                />
-                <label htmlFor="receipt-upload" className="cursor-pointer">
-                    {file ? (
-                        <div className="space-y-2">
-                            <CheckCircle2 className="mx-auto h-10 w-10 text-green-500" />
-                            <p className="text-sm font-medium text-green-400">
-                                {file.name}
-                            </p>
-                        </div>
-                    ) : (
-                        <>
-                            <Upload className="mx-auto mb-3 h-8 w-8 text-muted-foreground" />
-                            <p className="text-xs font-bold uppercase opacity-60">
-                                Drop Screenshot or Click to Browse
-                            </p>
-                        </>
-                    )}
-                </label>
-            </div>
-        </div>
-    );
-}
