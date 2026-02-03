@@ -204,7 +204,7 @@ export default function AdminDashboard({
                           </div>
                         </TableCell>
                         <TableCell>{order.item}</TableCell>
-                        <TableCell className="font-bold text-orange-400">${order.price.toFixed(2)}</TableCell>
+                        <TableCell className="font-bold text-orange-400">${order.price}</TableCell>
                         <TableCell>
                           {order.receipt ? (
                             <Button variant="ghost" size="sm" onClick={() => setSelectedReceipt(order.receipt!)}>
@@ -285,7 +285,7 @@ export default function AdminDashboard({
                         <TableCell className="text-muted-foreground">#{entry.id}</TableCell>
                         <TableCell>{entry.user}</TableCell>
                         <TableCell>{entry.item}</TableCell>
-                        <TableCell>${entry.amount.toFixed(2)}</TableCell>
+                        <TableCell>${entry.amount}</TableCell>
                         <TableCell>
                           <Badge
                             variant={entry.status === 'Paid' || entry.status === 'Completed' ? 'default' : 'destructive'}

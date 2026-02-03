@@ -20,7 +20,7 @@ export function PaymentSection({
             <div className="flex items-center justify-between border-t border-white/10 pt-4 text-sm font-semibold">
                 <span className="uppercase opacity-70">Total Due</span>
                 <span className="font-mono text-2xl text-primary">
-                    ${finalPrice.toFixed(2)}
+                    ${finalPrice}
                 </span>
             </div>
         </div>

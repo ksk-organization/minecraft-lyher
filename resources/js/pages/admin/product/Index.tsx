@@ -670,7 +670,6 @@ export default function AdminProductsIndex({
 
                                     <TableCell>
                                         <div className="font-mono font-bold text-orange-400">
-                                            {/* ${Number(product.price).toFixed(2)} */}
                                             ${product.price}
                                         </div>
                                         <div className="mt-0.5 text-xs text-zinc-500">

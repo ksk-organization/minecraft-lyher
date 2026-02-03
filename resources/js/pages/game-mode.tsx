@@ -102,7 +102,7 @@ const ProductCard = ({ product }: { product: Product }) => {
                 {product.name}
               </h3>
               <p className="mb-4 text-2xl font-black text-orange-500 font-mono">
-                ${Number(product.price).toFixed(2)}
+                ${product.price}
               </p>
 
               {/* Short description or fallback */}
@@ -218,7 +218,7 @@ export default function GamemodeEco({ categories }: Props) {
                       className="rounded-2xl bg-primary px-12 py-8 text-xl font-black text-white shadow-[0_10px_40px_rgba(255,102,0,0.3)] hover:scale-105 active:scale-95 transition-all uppercase italic tracking-tighter"
                       aria-label={`Purchase ${rank.name} for $${rank.price}`}
                     >
-                      PURCHASE RANK — ${rank.price.toFixed(2)}
+                      PURCHASE RANK — ${rank.price}
                     </Button>
                   </Link>
                 </div>
