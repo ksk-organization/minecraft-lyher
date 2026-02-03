@@ -529,6 +529,8 @@ export default function AdminProductsIndex({
         (p) =>
             p.name.toLowerCase().includes(search.toLowerCase()) ||
             p.slug.toLowerCase().includes(search.toLowerCase()),
+            // p.name.toLowerCase().includes(search.toLowerCase()) ||
+            // p.slug.toLowerCase().includes(search.toLowerCase()),
     );
 
     return (
@@ -758,7 +760,7 @@ export default function AdminProductsIndex({
                                         #{selectedProduct.id}
                                     </span>
                                     {' • '}
-                                    Last updated: <span className="font-mono">{new Date(selectedProduct.updated_at).toLocaleDateString()}</span>
+                                    {/* Last updated: <span className="font-mono">{new Date(selectedProduct.updated_at).toLocaleDateString()}</span> */}
                                 </DialogDescription>
                             )}
                         </DialogHeader>
