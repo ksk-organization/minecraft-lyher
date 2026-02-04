@@ -13,8 +13,9 @@ export function PaymentSection({
                 Scan to Pay ({platform.toUpperCase()})
             </div>
 
-            <div className="mx-auto h-40 w-40 rounded-xl bg-white p-4 shadow-inner">
-                <QrCode size={128} className="mx-auto text-black" />
+            <div className="mx-auto flex justify-center ">
+                {/* <QrCode size={128} className="mx-auto text-black" /> */}
+                <img className="max-w-128 shadow-inner rounded-2xl " src="/assets/qr/qr.jpg" alt="" />
             </div>
 
             <div className="flex items-center justify-between border-t border-white/10 pt-4 text-sm font-semibold">

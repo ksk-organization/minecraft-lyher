@@ -76,10 +76,11 @@ return new class extends Migration
 
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
-
+            $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('product_id')->constrained()->cascadeOnDelete();
             $table->string('minecraft_username');
             $table->string('email');
-            $table->enum('platform', ['Java','Bedrock','Pocket'])->default('Java');
+            $table->enum('platform', ['Java', 'Bedrock', 'Pocket'])->default('Java');
 
             $table->decimal('subtotal', 10, 2);
 

@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\GameModeController;
 use App\Http\Controllers\Admin\CouponController;
 use App\Http\Controllers\StoreController;
+use App\Http\Controllers\PaymentController;
 use App\Models\Coupon;
 use App\Models\GameMode;
 
@@ -21,54 +22,9 @@ Route::get('/', function () {
     ]);
 })->name('home');
 
-    Route::get('/storage-link', function () {
-        $targetFolder = storage_path('app/public');
-        $linkFolder = $_SERVER['DOCUMENT_ROOT'] . '/storage';
-        symlink($targetFolder, $linkFolder);
-    });
-
-    Route::get('/build', function () {
-        $targetFolder = public_path('build');
-        $linkFolder = $_SERVER['DOCUMENT_ROOT'] . '/build';
-
-        try {
-            // Check if the symlink already exists
-            if (!file_exists($linkFolder)) {
-                // Create the symbolic link
-                symlink($targetFolder, $linkFolder);
-                return 'Symbolic link created successfully.';
-            } else {
-                return 'Symbolic link already exists.';
-            }
-        } catch (\Throwable $e) {
-            return 'Error creating symbolic link: ' . $e->getMessage();
-        }
-    });
-
-    Route::get('/assets', function () {
-        $targetFolder = public_path('assets');
-        $linkFolder = $_SERVER['DOCUMENT_ROOT'] . '/assets';
-
-        try {
-            // Check if the symlink already exists
-            if (!file_exists($linkFolder)) {
-                // Create the symbolic link
-                symlink($targetFolder, $linkFolder);
-                return 'Symbolic link created successfully.';
-            } else {
-                return 'Symbolic link already exists.';
-            }
-        } catch (\Throwable $e) {
-            return 'Error creating symbolic link: ' . $e->getMessage();
-        }
-    });
-
 Route::get('/store', [StoreController::class, 'index']);
 Route::resource('/products', StoreController::class)->names('product');
-Route::get('/detail', function () {
-    return Inertia::render('product-detail');
-});
-
+Route::resource('/payment', PaymentController::class)->names('payment');
 Route::get('checkout/coupon/check', [CouponController::class, 'check'])->name('checkout.check-coupon');
 
 

@@ -70,6 +70,7 @@ interface Product {
     price: number;
     stock: number;
     is_active: boolean;
+    short_description: string;
     main_icon_url: string | null;
     game_mode?: { id: number; title: string };
     category?: { id: number; name: string };
@@ -160,6 +161,8 @@ function ProductFormModalContent({
             },
         });
     };
+
+    console.log(data);
 
     return (
         <form onSubmit={submit} className="space-y-6">
@@ -255,7 +258,20 @@ function ProductFormModalContent({
                             </Select>
                         </div>
                     </div>
-
+                    {/* Descriptions */}
+                    <div className="space-y-4">
+                        <div>
+                            <Label>Short Description</Label>
+                            <Textarea
+                                value={data.short_description}
+                                onChange={(e) =>
+                                    setData('short_description', e.target.value)
+                                }
+                                rows={2}
+                                className="mt-1 border-zinc-700 bg-zinc-900 focus:border-orange-500"
+                            />
+                        </div>
+                    </div>
                     <div className="grid grid-cols-3 gap-4">
                         <div>
                             <Label className="text-xs font-bold tracking-wider text-zinc-400 uppercase">
@@ -478,6 +494,7 @@ export default function AdminProductsIndex({
         slug: '',
         price: '',
         stock: '',
+        short_description: '',
         is_active: true,
         main_icon_url: null as File | string | null,
         main_icon_preview: null as string | null,
@@ -498,6 +515,7 @@ export default function AdminProductsIndex({
                 category_id: String(product.category_id),
                 name: product.name,
                 slug: product.slug,
+                short_description: product.short_description,
                 price: String(product.price),
                 stock: String(product.stock),
                 is_active: !!product.is_active,
@@ -529,8 +547,8 @@ export default function AdminProductsIndex({
         (p) =>
             p.name.toLowerCase().includes(search.toLowerCase()) ||
             p.slug.toLowerCase().includes(search.toLowerCase()),
-            // p.name.toLowerCase().includes(search.toLowerCase()) ||
-            // p.slug.toLowerCase().includes(search.toLowerCase()),
+        // p.name.toLowerCase().includes(search.toLowerCase()) ||
+        // p.slug.toLowerCase().includes(search.toLowerCase()),
     );
 
     return (
@@ -588,6 +606,9 @@ export default function AdminProductsIndex({
                                 </TableHead>
                                 <TableHead className="text-xs font-bold text-zinc-300 uppercase">
                                     Product
+                                </TableHead>
+                                <TableHead className="text-xs font-bold text-zinc-300 uppercase">
+                                    Description
                                 </TableHead>
                                 <TableHead className="text-xs font-bold text-zinc-300 uppercase">
                                     Price / Stock
@@ -668,6 +689,11 @@ export default function AdminProductsIndex({
                                         </div>
                                     </TableCell>
 
+                                    <TableCell>
+                                        <div className="mt-0.5 text-xs text-zinc-500">
+                                            {product.short_description}
+                                        </div>
+                                    </TableCell>
                                     <TableCell>
                                         <div className="font-mono font-bold text-orange-400">
                                             ${product.price}

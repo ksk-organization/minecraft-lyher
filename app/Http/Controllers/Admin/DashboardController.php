@@ -27,24 +27,41 @@ public function index()
         ->sum('total');
 
     // Pending orders – latest 10
-    $pendingOrders = Order::with(['orderItems.product'])
+    $pendingOrders = Order::with(['product'])
         ->where('status', 'pending')
         ->latest()
         ->take(10)
-        ->get()
-        ->map(function ($order) {
-            $firstItem = $order->orderItems->first();
-            return [
-                'id'       => $order->id,
-                'minecraft_username' => $order->minecraft_username,
-                'avatar'   => "https://minotar.net/helm/{$order->minecraft_username}/64.png",
-                'platform' => $order->platform,
-                'item'     => $firstItem ? $firstItem->product->name : 'Multiple items',
-                'price'    => $order->total,
-                'receipt'  => $order->attachment_url,
-                'time'     => $order->created_at->diffForHumans(),
-            ];
-        });
+        ->get();
+        // ->map(function ($order) {
+        //     $firstItem = $order->orderItems->first();
+        //     return [
+        //         'id'       => $order->id,
+        //         'minecraft_username' => $order->minecraft_username,
+        //         'avatar'   => "https://minotar.net/helm/{$order->minecraft_username}/64.png",
+        //         'platform' => $order->platform,
+        //         'item'     => $firstItem ? $firstItem->product->name : 'Multiple items',
+        //         'price'    => $order->total,
+        //         'receipt'  => $order->attachment_url,
+        //         'time'     => $order->created_at->diffForHumans(),
+        //     ];
+        // });
+
+    // dd($pendingOrders);
+    // "id" => 3
+    // "user_id" => 1
+    // "product_id" => 1
+    // "minecraft_username" => "qajive"
+    // "email" => "jytaqyvy@mailinator.com"
+    // "platform" => "Java"
+    // "subtotal" => "93.00"
+    // "coupon_id" => null
+    // "discount_total" => "0.00"
+    // "total" => "93.00"
+    // "status" => "pending"
+    // "transaction_id" => null
+    // "attachment_url" => "receipts/2026-02/IR0LwWgeZWKGWT8BAf9QQuYPiNsxGqK7ek2eBxQF.png"
+    // "created_at" => "2026-02-04 05:57:09"
+    // "updated_at" => "2026-02-04 05:57:09"
 
     // Recent history – last 20 processed orders
     $history = Order::with(['orderItems.product', 'coupon'])

@@ -21,12 +21,12 @@ export function PlatformSelector({
     const platforms = [
         { id: 'java', label: 'Java', icon: Monitor },
         { id: 'bedrock', label: 'Bedrock', icon: Gamepad2 },
-        { id: 'pocket', label: 'Pocket', icon: Smartphone },
+        // { id: 'pocket', label: 'Pocket', icon: Smartphone },
     ] as const;
 
     return (
         <TooltipProvider>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 gap-3">
                 {platforms.map(({ id, label, icon: Icon }) => (
                     <Tooltip key={id}>
                         <TooltipTrigger asChild>

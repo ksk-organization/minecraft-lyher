@@ -50,7 +50,7 @@ public function index()
         return Inertia::render('admin/product/Index', [
             // Performance: Select only necessary columns and eager load with constraints
             'products' => Product::query()
-                ->select(['id', 'game_mode_id', 'category_id', 'name', 'slug', 'price', 'stock', 'is_active', 'main_icon_url'])
+                ->select(['id', 'game_mode_id', 'short_description','category_id', 'name', 'slug', 'price', 'stock', 'is_active', 'main_icon_url'])
                 ->with([
                     'gameMode:id,title',
                     'category:id,name',
@@ -77,6 +77,7 @@ public function store(Request $request)
         'price'        => 'required|numeric',
         'stock'        => 'nullable|integer',
         'is_active'    => 'boolean',
+        'short_description' => 'nullable|string',
         'long_description' => 'nullable|string',
 
         'main_icon_url' => 'nullable|image|max:2048',
@@ -130,7 +131,7 @@ public function update(Request $request, Product $product)
     \DB::transaction(function () use ($request, $product) {
         // 1. Update Core Product Data
         $product->update($request->only([
-            'game_mode_id', 'category_id', 'name', 'slug', 'price', 'stock', 'is_active', 'main_icon_url', 'long_description'
+            'game_mode_id', 'category_id', 'name', 'slug', 'price', 'stock', 'is_active', 'main_icon_url', 'short_description'
         ]));
 
         // 2. Sync Multimedia Gallery

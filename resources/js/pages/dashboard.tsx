@@ -49,7 +49,7 @@ interface OrderItem {
   platform: string;
   item: string;
   price: number;
-  receipt: string | null;
+  attachment_url: string | null;
   time: string;
 }
 
@@ -110,7 +110,7 @@ export default function AdminDashboard({
   categories,
 }: Props) {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedReceipt, setSelectedReceipt] = useState<string | null>(null);
+  const [selectedattachment_url, setSelectedattachment_url] = useState<string | null>(null);
   const [createModalOpen, setCreateModalOpen] = useState(false);
 
   const filteredHistory = history.filter(entry =>
@@ -203,18 +203,18 @@ export default function AdminDashboard({
                             </div>
                           </div>
                         </TableCell>
-                        <TableCell>{order.item}</TableCell>
-                        <TableCell className="font-bold text-orange-400">${order.price}</TableCell>
+                        <TableCell>{order.product.name}</TableCell>
+                        <TableCell className="font-bold text-orange-400">${order.total}</TableCell>
                         <TableCell>
-                          {order.receipt ? (
-                            <Button variant="ghost" size="sm" onClick={() => setSelectedReceipt(order.receipt!)}>
+                          {order.attachment_url ? (
+                            <Button variant="ghost" size="sm" onClick={() => setSelectedattachment_url(order.attachment_url!)}>
                               <Eye size={16} className="mr-2" /> View
                             </Button>
                           ) : (
                             <span className="text-muted-foreground text-sm">No proof</span>
                           )}
                         </TableCell>
-                        <TableCell className="text-muted-foreground text-sm">{order.time}</TableCell>
+                        <TableCell className="text-muted-foreground text-sm">{order.created_at}</TableCell>
                         <TableCell className="text-right space-x-2">
                           <Button
                             size="icon"
@@ -310,26 +310,26 @@ export default function AdminDashboard({
         </Card>
       </div>
 
-      {/* Receipt Modal */}
-      <Dialog open={!!selectedReceipt} onOpenChange={() => setSelectedReceipt(null)}>
+      {/* attachment_url Modal */}
+      <Dialog open={!!selectedattachment_url} onOpenChange={() => setSelectedattachment_url(null)}>
         <DialogContent className="sm:max-w-3xl bg-[#1a1a1a] border-white/10">
           <DialogHeader>
             <DialogTitle>Payment Proof</DialogTitle>
           </DialogHeader>
-          {selectedReceipt && (
+          {selectedattachment_url && (
             <div className="py-4">
               <img
-                src={selectedReceipt}
-                alt="Receipt"
+                src={'/storage/'+selectedattachment_url}
+                alt="attachment_url"
                 className="w-full rounded-lg border border-white/10 max-h-[70vh] object-contain mx-auto"
               />
             </div>
           )}
           <DialogFooter>
-            <Button variant="outline" onClick={() => setSelectedReceipt(null)}>Close</Button>
-            {selectedReceipt && (
+            <Button variant="outline" onClick={() => setSelectedattachment_url(null)}>Close</Button>
+            {selectedattachment_url && (
               <Button asChild>
-                <a href={selectedReceipt} target="_blank" rel="noopener noreferrer">
+                <a href={selectedattachment_url} target="_blank" rel="noopener noreferrer">
                   Open Original
                 </a>
               </Button>

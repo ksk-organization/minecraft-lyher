@@ -1,6 +1,6 @@
 // resources/js/Pages/ProductDetail.tsx
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';           // ← add useForm
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -21,7 +21,7 @@ import { PlatformSelector } from '@/components/product/plateform';
 import Layout from '@/components/homepage/layout';
 
 // ──────────────────────────────────────────────
-// Types
+// Types (unchanged)
 // ──────────────────────────────────────────────
 
 interface ProductImage {
@@ -39,7 +39,7 @@ interface Product {
   slug: string;
   short_description: string | null;
   long_description: string | null;
-  price: number | string | null;     // more flexible type
+  price: number | string | null;
   stock: number;
   main_icon_url: string | null;
   is_active: number | boolean;
@@ -64,9 +64,9 @@ interface CouponStatus {
 // ──────────────────────────────────────────────
 
 const CHECK_COUPON_ROUTE = route('checkout.check-coupon');
+const PAYMENT_STORE_ROUTE = route('payment.store');           // ← define here
 
 export default function ProductDetail({ product }: ProductDetailProps) {
-  // ─── Stable list of all images ───────────────────────────────
   const allImages = useMemo<string[]>(() => {
     const fallback = 'https://cdn-icons-png.flaticon.com/512/2317/2317997.png';
     const main = product?.main_icon_url
@@ -75,7 +75,6 @@ export default function ProductDetail({ product }: ProductDetailProps) {
 
     const extras = product?.images?.map((img) => `/storage/${img.image_url}`) ?? [];
 
-    // Remove duplicates & keep main image first
     const unique = [main, ...extras].filter((v, i, a) => a.indexOf(v) === i);
 
     return unique.length > 0 ? unique : [fallback];
@@ -83,15 +82,19 @@ export default function ProductDetail({ product }: ProductDetailProps) {
 
   const [activeImg, setActiveImg] = useState(allImages[0]);
 
-  const [platform, setPlatform] = useState<'java' | 'bedrock' | 'pocket'>('java');
-  const [minecraftName, setMinecraftName] = useState('');
-  const [promoCode, setPromoCode] = useState('');
-  const [debouncedPromoCode, setDebouncedPromoCode] = useState('');
+  // ─── Form setup with useForm ────────────────────────────────────────
+  const { data, setData, post, processing, errors, setError, clearErrors } = useForm({
+    product_id: product.id,
+    minecraft_name: '',
+    platform: 'java' as 'java' | 'bedrock' | 'pocket',
+    promo_code: '',
+    receipt: null as File | null,
+  });
+
   const [couponStatus, setCouponStatus] = useState<CouponStatus | null>(null);
   const [isCheckingCoupon, setIsCheckingCoupon] = useState(false);
-  const [receiptFile, setReceiptFile] = useState<File | null>(null);
 
-  // ─── Safe price handling ─────────────────────────────────────
+  // ─── Price calculations (unchanged) ─────────────────────────────────
   const numericPrice = useMemo(() => {
     const val = product?.price;
     if (val == null) return 0;
@@ -105,58 +108,95 @@ export default function ProductDetail({ product }: ProductDetailProps) {
     [numericPrice, discountPercent]
   );
 
-  // ─── Debounce promo code ─────────────────────────────────────
+  // ─── Sync local state → form data ───────────────────────────────────
+  // useEffect(() => {
+  //   setData('minecraft_name', minecraftName.trim());
+  // }, [minecraftName]); // assuming you keep useState for minecraftName or remove it
+
+  // Better: remove separate useState for most fields and use form.data directly
+  // But keeping your current structure for minimal changes
+
+  // ─── Debounce promo code (updated) ──────────────────────────────────
   useEffect(() => {
     const timer = setTimeout(() => {
-      setDebouncedPromoCode(promoCode.trim().toUpperCase());
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [promoCode]);
+      const code = data.promo_code.trim().toUpperCase();
+      if (!code) {
+        setCouponStatus(null);
+        return;
+      }
 
-  // ─── Coupon check ────────────────────────────────────────────
-  useEffect(() => {
-    if (!debouncedPromoCode) {
-      setCouponStatus(null);
-      return;
-    }
+      setIsCheckingCoupon(true);
 
-    setIsCheckingCoupon(true);
-
-    fetch(`${CHECK_COUPON_ROUTE}?code=${encodeURIComponent(debouncedPromoCode)}`, {
-      headers: { Accept: 'application/json' },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.valid) {
-          setCouponStatus({
-            valid: true,
-            discount: data.discount ?? 0,
-            message: data.message || `${data.discount}% off`,
-          });
-        } else {
+      fetch(`${CHECK_COUPON_ROUTE}?code=${encodeURIComponent(code)}`, {
+        headers: { Accept: 'application/json' },
+      })
+        .then((res) => res.json())
+        .then((resData) => {
+          if (resData.valid) {
+            setCouponStatus({
+              valid: true,
+              discount: resData.discount ?? 0,
+              message: resData.message || `${resData.discount}% off`,
+            });
+            clearErrors('promo_code');
+          } else {
+            setCouponStatus({
+              valid: false,
+              discount: 0,
+              message: resData.message || 'Invalid or expired code',
+            });
+            setError('promo_code', resData.message || 'Invalid code');
+          }
+        })
+        .catch(() => {
           setCouponStatus({
             valid: false,
             discount: 0,
-            message: data.message || 'Invalid or expired code',
+            message: 'Error checking code. Try again.',
           });
-        }
-      })
-      .catch(() => {
-        setCouponStatus({
-          valid: false,
-          discount: 0,
-          message: 'Error checking code. Try again.',
-        });
-      })
-      .finally(() => setIsCheckingCoupon(false));
-  }, [debouncedPromoCode]);
+          setError('promo_code', 'Network error');
+        })
+        .finally(() => setIsCheckingCoupon(false));
+    }, 500);
 
-  const handleApplyPromo = useCallback(() => {
-    if (!promoCode.trim()) return;
-    setDebouncedPromoCode(promoCode.trim().toUpperCase());
-  }, [promoCode]);
+    return () => clearTimeout(timer);
+  }, [data.promo_code]);
 
-  // ─── Render ──────────────────────────────────────────────────
+  // ─── Form submission ────────────────────────────────────────────────
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Optional: final validation before send
+    if (!data.minecraft_name.trim()) {
+      setError('minecraft_name', 'Minecraft username is required');
+      return;
+    }
+    if (!data.receipt) {
+      setError('receipt', 'Please upload a payment receipt');
+      return;
+    }
+    if (product.stock <= 0) {
+      setError('general', 'Product is out of stock');
+      return;
+    }
+    if (couponStatus && !couponStatus.valid && data.promo_code.trim()) {
+      setError('promo_code', 'Please use a valid promo code or clear it');
+      return;
+    }
+
+    post(PAYMENT_STORE_ROUTE, {
+      preserveScroll: true,
+      onSuccess: () => {
+        // optional: reset form / show success message / redirect
+        // Inertia will usually handle redirect from controller
+      },
+      onError: (errs) => {
+        console.log('Submission errors:', errs);
+      },
+    });
+  };
+
+  // ─── Render ─────────────────────────────────────────────────────────
   return (
     <Layout>
       <Head title={`NOMROTI | ${product.name}`} />
@@ -164,7 +204,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
       <nav className="sticky top-0 z-40 border-b border-white/5 bg-black/70 backdrop-blur-lg">
         <div className="container mx-auto px-5 py-4 md:px-6">
           <Link
-            href="/catalog"
+            href="/products"
             className="inline-flex items-center gap-1.5 text-sm font-semibold text-muted-foreground transition-colors hover:text-primary"
           >
             <ChevronLeft size={16} />
@@ -192,13 +232,13 @@ export default function ProductDetail({ product }: ProductDetailProps) {
 
               <div className="flex flex-wrap items-baseline gap-4">
                 <span className="font-mono text-4xl font-bold text-primary md:text-5xl">
-                  ${numericPrice}
+                  ${numericPrice.toFixed(2)}
                 </span>
 
                 {discountPercent > 0 && (
                   <>
                     <span className="text-xl text-muted-foreground line-through opacity-70 md:text-2xl">
-                      ${numericPrice}
+                      ${numericPrice.toFixed(2)}
                     </span>
                     <Badge className="border-green-500/40 bg-green-600/30 text-green-400">
                       -{discountPercent}%
@@ -234,103 +274,142 @@ export default function ProductDetail({ product }: ProductDetailProps) {
               </CardHeader>
 
               <CardContent className="space-y-8 p-6 md:p-8">
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="ign"
-                    className="text-xs font-black tracking-widest text-muted-foreground uppercase"
-                  >
-                    Minecraft Username (IGN)
-                  </Label>
-                  <div className="relative">
-                    <Input
-                      id="ign"
-                      value={minecraftName}
-                      onChange={(e) => setMinecraftName(e.target.value.trim())}
-                      placeholder="Your in-game name"
-                      className="h-12 border-white/10 bg-black/30 pr-10"
-                    />
-                    {minecraftName.length > 2 && (
-                      <CheckCircle2 className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-green-500" />
-                    )}
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="text-xs font-black tracking-widest text-muted-foreground uppercase">
-                    Platform
-                  </Label>
-                  <PlatformSelector value={platform} onChange={setPlatform} />
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="text-xs font-black tracking-widest text-muted-foreground uppercase">
-                    Promo Code
-                  </Label>
-
-                  <div className="flex gap-2">
-                    <div className="relative flex-1">
+                <form onSubmit={handleSubmit} className="space-y-8">
+                  {/* Minecraft Username */}
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="minecraft_name"
+                      className="text-xs font-black tracking-widest text-muted-foreground uppercase"
+                    >
+                      Minecraft Username (IGN)
+                    </Label>
+                    <div className="relative">
                       <Input
-                        value={promoCode}
-                        onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
-                        placeholder="Enter code (e.g. WELCOME10)"
-                        className={cn(
-                          'h-12 border-white/10 bg-black/30 pr-10 transition-colors duration-200',
-                          couponStatus?.valid && 'border-green-500/60 focus:border-green-500',
-                          !couponStatus?.valid &&
-                            promoCode &&
-                            'border-red-500/60 focus:border-red-500'
-                        )}
+                        id="minecraft_name"
+                        value={data.minecraft_name}
+                        onChange={(e) => setData('minecraft_name', e.target.value.trim())}
+                        placeholder="Your in-game name"
+                        className="h-12 border-white/10 bg-black/30 pr-10"
                       />
-                      {isCheckingCoupon && (
-                        <Loader2 className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 animate-spin text-muted-foreground" />
-                      )}
-                      {!isCheckingCoupon && couponStatus?.valid && (
+                      {data.minecraft_name.length > 2 && (
                         <CheckCircle2 className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-green-500" />
                       )}
-                      {!isCheckingCoupon && !couponStatus?.valid && promoCode && (
-                        <AlertCircle className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-red-500" />
-                      )}
                     </div>
-
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={handleApplyPromo}
-                      disabled={isCheckingCoupon || !promoCode.trim()}
-                      className="h-12 px-6"
-                    >
-                      Apply
-                    </Button>
+                    {errors.minecraft_name && (
+                      <p className="text-sm text-red-400">{errors.minecraft_name}</p>
+                    )}
                   </div>
 
-                  {couponStatus && (
-                    <p
-                      className={cn(
-                        'mt-1.5 text-sm',
-                        couponStatus.valid ? 'text-green-400' : 'text-red-400'
-                      )}
-                    >
-                      {couponStatus.message}
-                    </p>
+                  {/* Platform */}
+                  <div className="space-y-2">
+                    <Label className="text-xs font-black tracking-widest text-muted-foreground uppercase">
+                      Platform
+                    </Label>
+                    <PlatformSelector
+                      value={data.platform}
+                      onChange={(value) => setData('platform', value)}
+                    />
+                  </div>
+
+                  {/* Promo Code */}
+                  <div className="space-y-2">
+                    <Label className="text-xs font-black tracking-widest text-muted-foreground uppercase">
+                      Promo Code
+                    </Label>
+
+                    <div className="flex gap-2">
+                      <div className="relative flex-1">
+                        <Input
+                          value={data.promo_code}
+                          onChange={(e) => setData('promo_code', e.target.value.toUpperCase())}
+                          placeholder="Enter code (e.g. WELCOME10)"
+                          className={cn(
+                            'h-12 border-white/10 bg-black/30 pr-10 transition-colors duration-200',
+                            couponStatus?.valid && 'border-green-500/60 focus:border-green-500',
+                            !couponStatus?.valid &&
+                              data.promo_code &&
+                              'border-red-500/60 focus:border-red-500'
+                          )}
+                        />
+                        {isCheckingCoupon && (
+                          <Loader2 className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 animate-spin text-muted-foreground" />
+                        )}
+                        {!isCheckingCoupon && couponStatus?.valid && (
+                          <CheckCircle2 className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-green-500" />
+                        )}
+                        {!isCheckingCoupon &&
+                          !couponStatus?.valid &&
+                          data.promo_code && (
+                            <AlertCircle className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-red-500" />
+                          )}
+                      </div>
+
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => setData('promo_code', data.promo_code.trim().toUpperCase())}
+                        disabled={isCheckingCoupon || !data.promo_code.trim()}
+                        className="h-12 px-6"
+                      >
+                        Apply
+                      </Button>
+                    </div>
+
+                    {couponStatus && (
+                      <p
+                        className={cn(
+                          'mt-1.5 text-sm',
+                          couponStatus.valid ? 'text-green-400' : 'text-red-400'
+                        )}
+                      >
+                        {couponStatus.message}
+                      </p>
+                    )}
+                    {errors.promo_code && (
+                      <p className="text-sm text-red-400">{errors.promo_code}</p>
+                    )}
+                  </div>
+
+                  <PaymentSection finalPrice={finalPrice} platform={data.platform} />
+
+                  <ReceiptUpload
+                    file={data.receipt}
+                    onFileChange={(file) => setData('receipt', file)}
+                  />
+                  {errors.receipt && (
+                    <p className="text-sm text-red-400">{errors.receipt}</p>
                   )}
-                </div>
 
-                <PaymentSection finalPrice={finalPrice} platform={platform} />
+                  {/* General errors */}
+                  {errors.general && (
+                    <p className="text-center text-red-400">{errors.general}</p>
+                  )}
 
-                <ReceiptUpload file={receiptFile} onFileChange={setReceiptFile} />
-
-                <Button
-                  disabled={
-                    !minecraftName.trim() ||
-                    !receiptFile ||
-                    product.stock <= 0 ||
-                    (couponStatus && !couponStatus.valid && promoCode.trim())
-                  }
-                  className="h-14 w-full bg-primary text-lg font-black tracking-wider uppercase hover:bg-primary/90 transition-all"
-                >
-                  <ShoppingCart className="mr-2 h-5 w-5" />
-                  Submit Payment
-                </Button>
+                  <Button
+                    type="submit"
+                    disabled={
+                      processing ||
+                      !data.minecraft_name.trim() ||
+                      !data.receipt ||
+                      product.stock <= 0 ||
+                      (couponStatus && !couponStatus.valid && data.promo_code.trim())
+                    }
+                    className="h-14 w-full bg-primary text-lg font-black tracking-wider uppercase hover:bg-primary/90 transition-all"
+                  >
+                    {processing ? (
+                      <>
+                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      <>
+                        <ShoppingCart className="mr-2 h-5 w-5" />
+                        Submit Payment
+                      </>
+                    )}
+                  </Button>
+                </form>
               </CardContent>
             </Card>
 

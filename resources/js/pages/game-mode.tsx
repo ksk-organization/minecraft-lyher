@@ -191,7 +191,7 @@ export default function GamemodeEco({ categories }: Props) {
 
       <div className="container mx-auto space-y-24 py-20 px-6">
         {/* Ranks Section (example filter – adjust as needed) */}
-        <section>
+        {/* <section>
           <SectionHeader title="Exclusive Ranks" icon={<Crown className="text-orange-500" />} />
                     <AnimatePresence>
             {usedRanks.map((rank, index) => (
@@ -211,7 +211,6 @@ export default function GamemodeEco({ categories }: Props) {
                   <h2 className="mb-4 text-5xl font-black tracking-tighter text-foreground italic">{rank.name}</h2>
                   <p className="mx-auto mb-8 max-w-xl text-muted-foreground font-medium">{rank.description}</p>
                   <Link
-                //   href={route('product.detail', { name: rank.name, price: rank.price, img: rank.img })}
                   >
                     <Button
                       size="lg"
@@ -225,14 +224,7 @@ export default function GamemodeEco({ categories }: Props) {
               </motion.div>
             ))}
           </AnimatePresence>
-          {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {allProducts
-              .filter(p => p.name.toLowerCase().includes('rank') || p.name.toLowerCase().includes('titan'))
-              .map(product => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-          </div> */}
-        </section>
+        </section> */}
 
         {/* All Products – grouped by category */}
         {categories.map(category => (

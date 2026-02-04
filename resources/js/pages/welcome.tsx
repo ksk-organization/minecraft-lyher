@@ -13,6 +13,7 @@ import GamemodeCard from '@/components/homepage/gamemode-card';
 import { useAnimatedCounter } from '@/hooks/use-animated-counter';
 import { useCallback, useState } from 'react';
 import { cn } from '@/lib/utils';
+import {useMaxPlayers} from '@/components/homepage/useMaxPlayers';
 
 const floatingVariants = {
     float: {
@@ -26,45 +27,12 @@ const floatingVariants = {
 };
 
 export default function Welcome({ gamemodes }: { gamemodes: any }) {
-    // console.log(gamemodes);
-    // [
-    //     {
-    //         "id": 1,
-    //         "title": "Aut dolorem soluta e",
-    //         "slug": "Commodi vitae ipsum",
-    //         "description": "Voluptatibus sit cum",
-    //         "server_ip": "Est error quo distin",
-    //         "image_url": "/storage/game-modes/f5a6e4fc-fa97-4b84-85cb-9a3310c63c0d.png",
-    //         "is_active": 1,
-    //         "created_at": "2026-02-02T05:09:42.000000Z",
-    //         "updated_at": "2026-02-02T05:09:42.000000Z"
-    //     },
-    //     {
-    //         "id": 2,
-    //         "title": "Aut ipsum dolores s",
-    //         "slug": "Exercitationem quae",
-    //         "description": "Esse nisi nulla et",
-    //         "server_ip": "Cupidatat voluptatem",
-    //         "image_url": "/storage/game-modes/9b873cf7-f8be-4957-a6a1-6e8d95af5306.png",
-    //         "is_active": 1,
-    //         "created_at": "2026-02-02T05:09:51.000000Z",
-    //         "updated_at": "2026-02-02T05:09:51.000000Z"
-    //     },
-    //     {
-    //         "id": 3,
-    //         "title": "Suscipit est amet a",
-    //         "slug": "Distinctio Odio id",
-    //         "description": "Accusamus dolore off",
-    //         "server_ip": "Cupiditate quis vel",
-    //         "image_url": "/storage/game-modes/8273a993-654f-4bd3-9b87-9d378e0b48b8.png",
-    //         "is_active": 1,
-    //         "created_at": "2026-02-02T05:10:08.000000Z",
-    //         "updated_at": "2026-02-02T05:10:08.000000Z"
-    //     }
-    // ]
+    const player = useMaxPlayers();
+    console.log(player);
+
     const [copied, setCopied] = useState(false);
     const { count: playerCount, ref: playerRef } = useAnimatedCounter(
-        1420,
+        player,
         2400,
     );
 
@@ -157,6 +125,7 @@ export default function Welcome({ gamemodes }: { gamemodes: any }) {
                                                         className="text-2xl leading-none font-black text-primary tabular-nums"
                                                     >
                                                         {playerCount.toLocaleString()}
+                                                        {/* <ServerStatus /> */}
                                                     </span>
                                                 </div>
                                             </button>
@@ -212,7 +181,9 @@ export default function Welcome({ gamemodes }: { gamemodes: any }) {
                             title={gamemodes.title}
                             description={gamemodes.description}
                             image={gamemodes.image_url}
-                            href={route('product.index' , {gamemodes: gamemodes.id})}
+                            href={route('product.index', {
+                                gamemodes: gamemodes.id,
+                            })}
                         />
                     ))}
 
