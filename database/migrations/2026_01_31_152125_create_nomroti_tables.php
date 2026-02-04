@@ -79,6 +79,7 @@ return new class extends Migration
             $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('product_id')->constrained()->cascadeOnDelete();
             $table->string('minecraft_username');
+            $table->decimal('qty');
             $table->string('email');
             $table->enum('platform', ['Java', 'Bedrock', 'Pocket'])->default('Java');
 

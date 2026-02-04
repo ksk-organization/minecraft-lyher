@@ -14,25 +14,13 @@ class PaymentController extends Controller
 {
     public function store(Request $request)
     {
-
-    // array:5 [▼ // app\Http\Controllers\PaymentController.php:18
-    //   "product_id" => "1"
-    //   "minecraft_name" => "duhiwu"
-    //   "platform" => "java"
-    //   "promo_code" => null
-    //   "receipt" => 
-    // Illuminate\Http
-    // \
-    // UploadedFile
-    //  {#1581 ▶}
-    // ]
-        
         $user = Auth::user(); // ← remove or make optional if guest checkout is allowed
 
         $validated = $request->validate([
             'product_id'     => 'required|exists:products,id',
             'minecraft_name' => 'required|string|min:3|max:16|regex:/^[a-zA-Z0-9_]+$/',
             'platform'       => ['required', Rule::in(['java', 'bedrock', 'pocket'])],
+            'qty'     => 'required|integer',
             'promo_code'     => 'nullable|string|max:50',
             'receipt'        => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120', // 5MB
         ]);
@@ -51,11 +39,11 @@ class PaymentController extends Controller
 
         if (filled($validated['promo_code'])) {
             $coupon = Coupon::where('code', strtoupper($validated['promo_code']))
-                ->where('is_active', true)
-                ->where(function ($query) {
-                    $query->whereNull('expires_at')
-                          ->orWhere('expires_at', '>=', now());
-                })
+                // ->where('is_active', true)
+                // ->where(function ($query) {
+                //     $query->whereNull('expires_at')
+                //         ->orWhere('expires_at', '>=', now());
+                // })
                 ->first();
 
             if (!$coupon) {
@@ -80,14 +68,15 @@ class PaymentController extends Controller
         // ─── Create order ───────────────────────────────────────────────────────
         $order = Order::create([
             'minecraft_username' => $validated['minecraft_name'],
-            'email'              => $user?->email ?? null,           // or make required if needed
+            'email'              => $user?->email ?? ' ',           // or make required if needed
+            'qty'           => $validated['qty'],
             'platform'           => $validated['platform'],
             'subtotal'           => $subtotal,
             'coupon_id'          => $coupon?->id,
             'discount_total'     => $discountAmount,
             'total'              => $total,
             'status'             => 'pending',
-            'transaction_id'     => null,                             // fill later if you add gateway
+            'transaction_id'     => ' ',                             // fill later if you add gateway
             'attachment_url'     => $receiptPath,
             'user_id'         => $user?->id,                       // ← uncomment if you add user_id column
             'product_id'      => $product->id,                     // ← optional if using items relation
@@ -106,9 +95,20 @@ class PaymentController extends Controller
         // Optional: generate friendly transaction ID
         // $order->update(['transaction_id' => 'ORD-' . $order->id . '-' . Str::upper(Str::random(4))]);
 
+
+        // ... after Order::create(...)
+
+        // return redirect()->route('payment.success')
+        //     ->with('payment', 'success')
+        //     ->with('order_id', $order->id)           // optional - pass order for display
+        //     ->with('success', 'Payment receipt submitted! We will review it soon.');
+
         return redirect()
-            // ->route('orders.show', $order->id)   // or wherever you want to redirect
             ->back()
             ->with('success', 'Your payment receipt has been submitted successfully. We will review it shortly.');
+    }
+
+    public function show($id){
+
     }
 }

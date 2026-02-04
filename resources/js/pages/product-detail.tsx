@@ -1,433 +1,565 @@
 // resources/js/Pages/ProductDetail.tsx
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { Head, Link, useForm } from '@inertiajs/react';           // ← add useForm
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
+import { useMemo, useState, useEffect } from 'react';
+import {
+    ChevronLeft,
+    ShoppingCart,
+    CheckCircle2,
+    AlertCircle,
+    Loader2,
+    X,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import {
-  ChevronLeft,
-  ShoppingCart,
-  CheckCircle2,
-  AlertCircle,
-  Loader2,
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
+import Layout from '@/components/homepage/layout';
 import { ImageGallery } from '@/components/product/image-preview';
 import ReceiptUpload from '@/components/product/receipt-upload';
 import { PaymentSection } from '@/components/product/payment';
 import { PlatformSelector } from '@/components/product/plateform';
-import Layout from '@/components/homepage/layout';
+import { route } from 'ziggy-js';
 
 // ──────────────────────────────────────────────
-// Types (unchanged)
+// Types
 // ──────────────────────────────────────────────
 
 interface ProductImage {
-  id: number;
-  product_id: number;
-  image_url: string;
-  sort_order: number;
+    id: number;
+    product_id: number;
+    image_url: string;
+    sort_order: number;
 }
 
 interface Product {
-  id: number;
-  game_mode_id: number;
-  category_id: number;
-  name: string;
-  slug: string;
-  short_description: string | null;
-  long_description: string | null;
-  price: number | string | null;
-  stock: number;
-  main_icon_url: string | null;
-  is_active: number | boolean;
-  created_at: string;
-  updated_at: string;
-  deleted_at: string | null;
-  images: ProductImage[];
+    id: number;
+    name: string;
+    slug: string;
+    price: number | string | null; // ← accept string from Laravel JSON
+    stock: number;
+    main_icon_url: string | null;
+    short_description: string | null;
+    long_description: string | null;
+    images: ProductImage[];
+    // ... other fields
 }
 
-interface ProductDetailProps {
-  product: Product;
+interface Props {
+    product: Product;
 }
 
-interface CouponStatus {
-  valid: boolean;
-  discount: number; // percentage
-  message?: string;
+interface CouponResponse {
+    valid: boolean;
+    discount?: number;
+    message?: string;
+}
+
+// ──────────────────────────────────────────────
+// Helpers
+// ──────────────────────────────────────────────
+
+function formatPrice(value: number | string | null): string {
+    const num = Number(value ?? 0);
+    return Number.isFinite(num)
+        ? num.toLocaleString('en-US', {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+          })
+        : '0.00';
 }
 
 // ──────────────────────────────────────────────
 // Main Component
 // ──────────────────────────────────────────────
 
-const CHECK_COUPON_ROUTE = route('checkout.check-coupon');
-const PAYMENT_STORE_ROUTE = route('payment.store');           // ← define here
+export default function ProductDetail({ product }: Props) {
+    const { flash } = usePage().props as { flash?: { success?: string } };
 
-export default function ProductDetail({ product }: ProductDetailProps) {
-  const allImages = useMemo<string[]>(() => {
-    const fallback = 'https://cdn-icons-png.flaticon.com/512/2317/2317997.png';
-    const main = product?.main_icon_url
-      ? `/storage/${product.main_icon_url}`
-      : fallback;
+    const [showSuccessModal, setShowSuccessModal] = useState(!!flash?.success);
 
-    const extras = product?.images?.map((img) => `/storage/${img.image_url}`) ?? [];
+    const allImages = useMemo(() => {
+        const fallback =
+            'https://cdn-icons-png.flaticon.com/512/2317/2317997.png';
+        const main = product.main_icon_url
+            ? `/storage/${product.main_icon_url}`
+            : fallback;
+        const extras =
+            product.images?.map((img) => `/storage/${img.image_url}`) ?? [];
+        return [main, ...extras].filter((v, i, a) => a.indexOf(v) === i)
+            .length > 0
+            ? [main, ...extras]
+            : [fallback];
+    }, [product]);
 
-    const unique = [main, ...extras].filter((v, i, a) => a.indexOf(v) === i);
+    const [activeImg, setActiveImg] = useState(allImages[0]);
 
-    return unique.length > 0 ? unique : [fallback];
-  }, [product]);
+    const numericPrice = useMemo(
+        () => Number(product.price ?? 0),
+        [product.price],
+    );
 
-  const [activeImg, setActiveImg] = useState(allImages[0]);
-
-  // ─── Form setup with useForm ────────────────────────────────────────
-  const { data, setData, post, processing, errors, setError, clearErrors } = useForm({
-    product_id: product.id,
-    minecraft_name: '',
-    platform: 'java' as 'java' | 'bedrock' | 'pocket',
-    promo_code: '',
-    receipt: null as File | null,
-  });
-
-  const [couponStatus, setCouponStatus] = useState<CouponStatus | null>(null);
-  const [isCheckingCoupon, setIsCheckingCoupon] = useState(false);
-
-  // ─── Price calculations (unchanged) ─────────────────────────────────
-  const numericPrice = useMemo(() => {
-    const val = product?.price;
-    if (val == null) return 0;
-    const num = Number(val);
-    return Number.isNaN(num) ? 0 : num;
-  }, [product]);
-
-  const discountPercent = couponStatus?.valid ? couponStatus.discount : 0;
-  const finalPrice = useMemo(
-    () => Math.max(0, numericPrice * (1 - discountPercent / 100)),
-    [numericPrice, discountPercent]
-  );
-
-  // ─── Sync local state → form data ───────────────────────────────────
-  // useEffect(() => {
-  //   setData('minecraft_name', minecraftName.trim());
-  // }, [minecraftName]); // assuming you keep useState for minecraftName or remove it
-
-  // Better: remove separate useState for most fields and use form.data directly
-  // But keeping your current structure for minimal changes
-
-  // ─── Debounce promo code (updated) ──────────────────────────────────
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      const code = data.promo_code.trim().toUpperCase();
-      if (!code) {
-        setCouponStatus(null);
-        return;
-      }
-
-      setIsCheckingCoupon(true);
-
-      fetch(`${CHECK_COUPON_ROUTE}?code=${encodeURIComponent(code)}`, {
-        headers: { Accept: 'application/json' },
-      })
-        .then((res) => res.json())
-        .then((resData) => {
-          if (resData.valid) {
-            setCouponStatus({
-              valid: true,
-              discount: resData.discount ?? 0,
-              message: resData.message || `${resData.discount}% off`,
-            });
-            clearErrors('promo_code');
-          } else {
-            setCouponStatus({
-              valid: false,
-              discount: 0,
-              message: resData.message || 'Invalid or expired code',
-            });
-            setError('promo_code', resData.message || 'Invalid code');
-          }
-        })
-        .catch(() => {
-          setCouponStatus({
-            valid: false,
-            discount: 0,
-            message: 'Error checking code. Try again.',
-          });
-          setError('promo_code', 'Network error');
-        })
-        .finally(() => setIsCheckingCoupon(false));
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, [data.promo_code]);
-
-  // ─── Form submission ────────────────────────────────────────────────
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    // Optional: final validation before send
-    if (!data.minecraft_name.trim()) {
-      setError('minecraft_name', 'Minecraft username is required');
-      return;
-    }
-    if (!data.receipt) {
-      setError('receipt', 'Please upload a payment receipt');
-      return;
-    }
-    if (product.stock <= 0) {
-      setError('general', 'Product is out of stock');
-      return;
-    }
-    if (couponStatus && !couponStatus.valid && data.promo_code.trim()) {
-      setError('promo_code', 'Please use a valid promo code or clear it');
-      return;
-    }
-
-    post(PAYMENT_STORE_ROUTE, {
-      preserveScroll: true,
-      onSuccess: () => {
-        // optional: reset form / show success message / redirect
-        // Inertia will usually handle redirect from controller
-      },
-      onError: (errs) => {
-        console.log('Submission errors:', errs);
-      },
+    const form = useForm({
+        product_id: product.id,
+        minecraft_name: '',
+        platform: 'java' as 'java' | 'bedrock' | 'pocket',
+        promo_code: '',
+        qty: '',
+        receipt: null as File | null,
     });
-  };
 
-  // ─── Render ─────────────────────────────────────────────────────────
-  return (
-    <Layout>
-      <Head title={`NOMROTI | ${product.name}`} />
+    const [couponStatus, setCouponStatus] = useState<{
+        valid: boolean;
+        discount: number;
+        message: string;
+    } | null>(null);
 
-      <nav className="sticky top-0 z-40 border-b border-white/5 bg-black/70 backdrop-blur-lg">
-        <div className="container mx-auto px-5 py-4 md:px-6">
-          <Link
-            href="/products"
-            className="inline-flex items-center gap-1.5 text-sm font-semibold text-muted-foreground transition-colors hover:text-primary"
-          >
-            <ChevronLeft size={16} />
-            Back to Catalog
-          </Link>
-        </div>
-      </nav>
+    const [checkingCoupon, setCheckingCoupon] = useState(false);
 
-      <main className="container mx-auto px-5 py-10 md:px-6 md:py-16">
-        <div className="grid gap-10 lg:grid-cols-2 lg:gap-16">
-          {/* Left: Images */}
-          <ImageGallery
-            mainImage={activeImg}
-            thumbnails={allImages}
-            alt={product.name}
-            onThumbClick={setActiveImg}
-          />
+    // Debounced coupon validation via Inertia (preserves CSRF, shows progress)
+    useEffect(() => {
+        const code = form.data.promo_code.trim().toUpperCase();
+        if (!code) {
+            setCouponStatus(null);
+            form.clearErrors('promo_code');
+            return;
+        }
 
-          {/* Right: Info + Form */}
-          <div className="space-y-10">
-            <header className="space-y-4">
-              <h1 className="text-4xl font-black tracking-tight text-white uppercase italic md:text-5xl">
-                {product.name}
-              </h1>
+        const timer = setTimeout(async () => {
+            setCheckingCoupon(true);
+            try {
+                const response = await fetch(
+                    `${route('checkout.check-coupon')}?code=${encodeURIComponent(code)}`,
+                    {
+                        headers: {
+                            Accept: 'application/json',
+                            // If needed: 'X-Requested-With': 'XMLHttpRequest' (Laravel often auto-detects)
+                        },
+                    },
+                );
 
-              <div className="flex flex-wrap items-baseline gap-4">
-                <span className="font-mono text-4xl font-bold text-primary md:text-5xl">
-                  ${numericPrice.toFixed(2)}
-                </span>
+                if (!response.ok)
+                    throw new Error('Network response was not ok');
 
-                {discountPercent > 0 && (
-                  <>
-                    <span className="text-xl text-muted-foreground line-through opacity-70 md:text-2xl">
-                      ${numericPrice.toFixed(2)}
-                    </span>
-                    <Badge className="border-green-500/40 bg-green-600/30 text-green-400">
-                      -{discountPercent}%
-                    </Badge>
-                  </>
-                )}
+                const data = await response.json();
 
-                <Badge
-                  variant="outline"
-                  className={cn(
-                    'ml-2',
-                    product.stock > 0
-                      ? 'border-green-600/40 bg-green-950/30 text-green-400'
-                      : 'border-red-600/40 bg-red-950/30 text-red-400'
-                  )}
-                >
-                  {product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}
-                </Badge>
-              </div>
+                if (data.valid) {
+                    setCouponStatus({
+                        valid: true,
+                        discount: data.discount ?? 0,
+                        message:
+                            data.message || `${data.discount}% off applied`,
+                    });
+                    form.clearErrors('promo_code');
+                } else {
+                    setCouponStatus({
+                        valid: false,
+                        discount: 0,
+                        message: data.message || 'Invalid or expired code',
+                    });
+                    form.setError('promo_code', data.message || 'Invalid code');
+                }
+            } catch (err) {
+                setCouponStatus({
+                    valid: false,
+                    discount: 0,
+                    message: 'Error checking code. Try again.',
+                });
+                form.setError('promo_code', 'Network or server error');
+            } finally {
+                setCheckingCoupon(false);
+            }
+        }, 600);
 
-              {product.short_description && (
-                <p className="text-lg leading-relaxed text-zinc-300">
-                  {product.short_description}
-                </p>
-              )}
-            </header>
+        return () => clearTimeout(timer);
+    }, [form.data.promo_code]);
 
-            <Card className="border-white/5 bg-gradient-to-b from-[#1a1a1a] to-[#121212] shadow-2xl">
-              <CardHeader className="pb-4">
-                <CardTitle className="text-xl font-black tracking-wide uppercase">
-                  Complete Your Purchase
-                </CardTitle>
-              </CardHeader>
+    const discountPercent = couponStatus?.valid ? couponStatus.discount : 0;
+    const finalPrice = formatPrice(Math.max(0, numericPrice * (1 - discountPercent / 100)));
 
-              <CardContent className="space-y-8 p-6 md:p-8">
-                <form onSubmit={handleSubmit} className="space-y-8">
-                  {/* Minecraft Username */}
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="minecraft_name"
-                      className="text-xs font-black tracking-widest text-muted-foreground uppercase"
-                    >
-                      Minecraft Username (IGN)
-                    </Label>
-                    <div className="relative">
-                      <Input
-                        id="minecraft_name"
-                        value={data.minecraft_name}
-                        onChange={(e) => setData('minecraft_name', e.target.value.trim())}
-                        placeholder="Your in-game name"
-                        className="h-12 border-white/10 bg-black/30 pr-10"
-                      />
-                      {data.minecraft_name.length > 2 && (
-                        <CheckCircle2 className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-green-500" />
-                      )}
-                    </div>
-                    {errors.minecraft_name && (
-                      <p className="text-sm text-red-400">{errors.minecraft_name}</p>
-                    )}
-                  </div>
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
 
-                  {/* Platform */}
-                  <div className="space-y-2">
-                    <Label className="text-xs font-black tracking-widest text-muted-foreground uppercase">
-                      Platform
-                    </Label>
-                    <PlatformSelector
-                      value={data.platform}
-                      onChange={(value) => setData('platform', value)}
+        if (!form.data.minecraft_name.trim()) {
+            form.setError('minecraft_name', 'Minecraft username is required');
+            return;
+        }
+        if (!form.data.receipt) {
+            form.setError('receipt', 'Please upload a payment receipt');
+            return;
+        }
+        if (product.stock <= 0) {
+            form.setError('general', 'Product is out of stock');
+            return;
+        }
+
+        form.post(route('payment.store'), {
+            preserveScroll: true,
+            onSuccess: () => {
+                setShowSuccessModal(true);
+            },
+        });
+    };
+
+    return (
+        <Layout>
+            <Head title={`NOMROTI | ${product.name}`} />
+
+            {/* ... nav unchanged ... */}
+
+            <main className="container max-w-7xl mx-auto mt-8 px-5 py-10 md:px-6 md:py-16">
+                <div className="grid gap-10 lg:grid-cols-2 lg:gap-16">
+                    <ImageGallery
+                        mainImage={activeImg}
+                        thumbnails={allImages}
+                        alt={product.name}
+                        onThumbClick={setActiveImg}
                     />
-                  </div>
 
-                  {/* Promo Code */}
-                  <div className="space-y-2">
-                    <Label className="text-xs font-black tracking-widest text-muted-foreground uppercase">
-                      Promo Code
-                    </Label>
+                    <div className="space-y-4">
+                        <header className="space-y-2">
+                            <h1 className="text-3xl font-black tracking-tight text-white uppercase italic md:text-4xl">
+                                {product.name}
+                            </h1>
 
-                    <div className="flex gap-2">
-                      <div className="relative flex-1">
-                        <Input
-                          value={data.promo_code}
-                          onChange={(e) => setData('promo_code', e.target.value.toUpperCase())}
-                          placeholder="Enter code (e.g. WELCOME10)"
-                          className={cn(
-                            'h-12 border-white/10 bg-black/30 pr-10 transition-colors duration-200',
-                            couponStatus?.valid && 'border-green-500/60 focus:border-green-500',
-                            !couponStatus?.valid &&
-                              data.promo_code &&
-                              'border-red-500/60 focus:border-red-500'
-                          )}
-                        />
-                        {isCheckingCoupon && (
-                          <Loader2 className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 animate-spin text-muted-foreground" />
+                            <div className="flex flex-wrap items-baseline gap-4">
+                                <span className="font-mono text-3xl font-bold text-primary md:text-4xl">
+                                    {/* ${formatPrice(numericPrice)} */}
+                                    {discountPercent
+                                        ? formatPrice(finalPrice)
+                                        : formatPrice(numericPrice)}
+                                </span>
+
+                                {discountPercent > 0 && (
+                                    <>
+                                        <span className="text-xl text-muted-foreground line-through opacity-70 md:text-2xl">
+                                            ${formatPrice(numericPrice)}
+                                        </span>
+                                        <Badge className="border-green-500/40 bg-green-600/30 text-green-400">
+                                            -{discountPercent}%
+                                        </Badge>
+                                    </>
+                                )}
+
+                                <Badge
+                                    variant="outline"
+                                    className={cn(
+                                        'ml-2',
+                                        product.stock > 0
+                                            ? 'border-green-600/40 bg-green-950/30 text-green-400'
+                                            : 'border-red-600/40 bg-red-950/30 text-red-400',
+                                    )}
+                                >
+                                    {product.stock > 0
+                                        ? `${product.stock} in stock`
+                                        : 'Out of stock'}
+                                </Badge>
+                            </div>
+
+                            {product.short_description && (
+                                <p className="text-md leading-relaxed text-zinc-300">
+                                    {product.short_description}
+                                </p>
+                            )}
+                        </header>
+
+                        {/* Form Card */}
+                        <Card className="border-white/5 bg-gradient-to-b from-[#1a1a1a] to-[#121212] shadow-2xl gap-0">
+                            <CardHeader className="pt-6">
+                                <CardTitle className="text-xl font-black tracking-wide uppercase">
+                                    Complete Your Purchase
+                                </CardTitle>
+                            </CardHeader>
+
+                            <CardContent className="space-y-6 p-6 md:p-8">
+                                <form
+                                    onSubmit={handleSubmit}
+                                    className="space-y-5"
+                                >
+                                    {/* Minecraft Username */}
+                                    <div className="space-y-2">
+                                        <Label
+                                            htmlFor="minecraft_name"
+                                            className="text-xs font-black tracking-widest text-muted-foreground uppercase"
+                                        >
+                                            Minecraft Username (IGN)
+                                        </Label>
+                                        <div className="relative">
+                                            <Input
+                                                id="minecraft_name"
+                                                value={form.data.minecraft_name}
+                                                onChange={(e) =>
+                                                    form.setData(
+                                                        'minecraft_name',
+                                                        e.target.value.trim(),
+                                                    )
+                                                }
+                                                placeholder="Your in-game name"
+                                                className="h-10 border-white/10 bg-black/30 pr-10"
+                                                disabled={form.processing}
+                                            />
+                                            {form.data.minecraft_name.length >
+                                                2 &&
+                                                !form.errors.minecraft_name && (
+                                                    <CheckCircle2 className="absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 text-green-500" />
+                                                )}
+                                        </div>
+                                        {form.errors.minecraft_name && (
+                                            <p className="text-sm text-red-400">
+                                                {form.errors.minecraft_name}
+                                            </p>
+                                        )}
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label
+                                            htmlFor="minecraft_name"
+                                            className="text-xs font-black tracking-widest text-muted-foreground uppercase"
+                                        >
+                                            Quantity
+                                        </Label>
+                                        <div className="relative">
+                                            <Input
+                                                id="qty"
+                                                value={form.data.qty}
+                                                onChange={(e) =>
+                                                    form.setData(
+                                                        'qty',
+                                                        e.target.value.trim(),
+                                                    )
+                                                }
+                                                placeholder="eg. 1"
+                                                className="h-10 border-white/10 bg-black/30 pr-10"
+                                                disabled={form.processing}
+                                                type='number'
+                                            />
+                                            {form.data.qty.length >
+                                                2 &&
+                                                !form.errors.qty && (
+                                                    <CheckCircle2 className="absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 text-green-500" />
+                                                )}
+                                        </div>
+                                        {form.errors.qty && (
+                                            <p className="text-sm text-red-400">
+                                                {form.errors.qty}
+                                            </p>
+                                        )}
+                                    </div>
+
+                                    {/* Platform Selector */}
+                                    <div className="space-y-2">
+                                        <Label className="text-xs font-black tracking-widest text-muted-foreground uppercase">
+                                            Platform
+                                        </Label>
+                                        <PlatformSelector
+                                            value={form.data.platform}
+                                            onChange={(value) =>
+                                                form.setData('platform', value)
+                                            }
+                                            disabled={form.processing}
+                                        />
+                                    </div>
+
+                                    {/* Promo Code */}
+                                    <div className="space-y-2">
+                                        <Label className="text-xs font-black tracking-widest text-muted-foreground uppercase">
+                                            Promo Code
+                                        </Label>
+                                        <div className="flex gap-2">
+                                            <div className="relative flex-1">
+                                                <Input
+                                                    value={form.data.promo_code}
+                                                    onChange={(e) =>
+                                                        form.setData(
+                                                            'promo_code',
+                                                            e.target.value.toUpperCase(),
+                                                        )
+                                                    }
+                                                    placeholder="e.g. WELCOME10"
+                                                    className={cn(
+                                                        'h-10 border-white/10 bg-black/30 pr-10 transition-colors',
+                                                        couponStatus?.valid &&
+                                                            'border-green-500/60',
+                                                        couponStatus?.valid ===
+                                                            false &&
+                                                            form.data
+                                                                .promo_code &&
+                                                            'border-red-500/60',
+                                                    )}
+                                                    disabled={
+                                                        form.processing ||
+                                                        checkingCoupon
+                                                    }
+                                                />
+                                                {checkingCoupon && (
+                                                    <Loader2 className="absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 animate-spin text-muted-foreground" />
+                                                )}
+                                                {!checkingCoupon &&
+                                                    couponStatus?.valid && (
+                                                        <CheckCircle2 className="absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 text-green-500" />
+                                                    )}
+                                                {!checkingCoupon &&
+                                                    couponStatus?.valid ===
+                                                        false &&
+                                                    form.data.promo_code && (
+                                                        <AlertCircle className="absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 text-red-500" />
+                                                    )}
+                                            </div>
+                                            <Button
+                                                type="button"
+                                                variant="secondary"
+                                                size="sm"
+                                                onClick={() =>
+                                                    form.setData(
+                                                        'promo_code',
+                                                        form.data.promo_code
+                                                            .trim()
+                                                            .toUpperCase(),
+                                                    )
+                                                }
+                                                disabled={
+                                                    form.processing ||
+                                                    checkingCoupon ||
+                                                    !form.data.promo_code.trim()
+                                                }
+                                                className="h-10 px-6"
+                                            >
+                                                Apply
+                                            </Button>
+                                        </div>
+
+                                        {couponStatus && (
+                                            <p
+                                                className={cn(
+                                                    'mt-1.5 text-sm',
+                                                    couponStatus.valid
+                                                        ? 'text-green-400'
+                                                        : 'text-red-400',
+                                                )}
+                                            >
+                                                {couponStatus.message}
+                                            </p>
+                                        )}
+                                        {form.errors.promo_code && (
+                                            <p className="text-sm text-red-400">
+                                                {form.errors.promo_code}
+                                            </p>
+                                        )}
+                                    </div>
+
+                                    <PaymentSection
+                                        finalPrice={finalPrice}
+                                        platform={form.data.platform}
+                                    />
+
+                                    <ReceiptUpload
+                                        file={form.data.receipt}
+                                        onFileChange={(file) =>
+                                            form.setData('receipt', file)
+                                        }
+                                        disabled={form.processing}
+                                    />
+                                    {form.errors.receipt && (
+                                        <p className="text-sm text-red-400">
+                                            {form.errors.receipt}
+                                        </p>
+                                    )}
+
+                                    {form.errors.general && (
+                                        <p className="text-center text-red-400">
+                                            {form.errors.general}
+                                        </p>
+                                    )}
+
+                                    <Button
+                                        type="submit"
+                                        disabled={
+                                            form.processing ||
+                                            product.stock <= 0
+                                        }
+                                        className="h-14 w-full bg-primary text-lg font-black tracking-wider uppercase hover:bg-primary/90"
+                                    >
+                                        {form.processing ? (
+                                            <>
+                                                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                                                Processing...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <ShoppingCart className="mr-2 h-5 w-5" />
+                                                Submit Payment
+                                            </>
+                                        )}
+                                    </Button>
+                                </form>
+                            </CardContent>
+                        </Card>
+
+                        {product.long_description && (
+                            <Card className="border-white/5 bg-[#1a1a1a] shadow-xl">
+                                <CardHeader>
+                                    <CardTitle className="text-lg font-black uppercase">
+                                        Product Details
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="leading-relaxed whitespace-pre-line text-zinc-300">
+                                    {product.long_description}
+                                </CardContent>
+                            </Card>
                         )}
-                        {!isCheckingCoupon && couponStatus?.valid && (
-                          <CheckCircle2 className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-green-500" />
-                        )}
-                        {!isCheckingCoupon &&
-                          !couponStatus?.valid &&
-                          data.promo_code && (
-                            <AlertCircle className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-red-500" />
-                          )}
-                      </div>
-
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        size="sm"
-                        onClick={() => setData('promo_code', data.promo_code.trim().toUpperCase())}
-                        disabled={isCheckingCoupon || !data.promo_code.trim()}
-                        className="h-12 px-6"
-                      >
-                        Apply
-                      </Button>
                     </div>
+                </div>
+            </main>
 
-                    {couponStatus && (
-                      <p
-                        className={cn(
-                          'mt-1.5 text-sm',
-                          couponStatus.valid ? 'text-green-400' : 'text-red-400'
-                        )}
-                      >
-                        {couponStatus.message}
-                      </p>
-                    )}
-                    {errors.promo_code && (
-                      <p className="text-sm text-red-400">{errors.promo_code}</p>
-                    )}
-                  </div>
+            {/* Success Modal */}
+            {showSuccessModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+                    <div className="relative w-full max-w-md rounded-2xl border border-green-500/30 bg-gradient-to-b from-[#1a2a1a] to-[#121f12] p-8 shadow-2xl">
+                        <button
+                            onClick={() => setShowSuccessModal(false)}
+                            className="absolute top-5 right-5 text-zinc-400 hover:text-white"
+                            aria-label="Close"
+                        >
+                            <X size={24} />
+                        </button>
 
-                  <PaymentSection finalPrice={finalPrice} platform={data.platform} />
-
-                  <ReceiptUpload
-                    file={data.receipt}
-                    onFileChange={(file) => setData('receipt', file)}
-                  />
-                  {errors.receipt && (
-                    <p className="text-sm text-red-400">{errors.receipt}</p>
-                  )}
-
-                  {/* General errors */}
-                  {errors.general && (
-                    <p className="text-center text-red-400">{errors.general}</p>
-                  )}
-
-                  <Button
-                    type="submit"
-                    disabled={
-                      processing ||
-                      !data.minecraft_name.trim() ||
-                      !data.receipt ||
-                      product.stock <= 0 ||
-                      (couponStatus && !couponStatus.valid && data.promo_code.trim())
-                    }
-                    className="h-14 w-full bg-primary text-lg font-black tracking-wider uppercase hover:bg-primary/90 transition-all"
-                  >
-                    {processing ? (
-                      <>
-                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                        Processing...
-                      </>
-                    ) : (
-                      <>
-                        <ShoppingCart className="mr-2 h-5 w-5" />
-                        Submit Payment
-                      </>
-                    )}
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
-
-            {product.long_description && (
-              <Card className="border-white/5 bg-[#1a1a1a] shadow-xl">
-                <CardHeader>
-                  <CardTitle className="text-lg font-black uppercase">
-                    Product Details
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="leading-relaxed whitespace-pre-line text-zinc-300">
-                  {product.long_description}
-                </CardContent>
-              </Card>
+                        <div className="text-center">
+                            <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-green-900/40">
+                                <CheckCircle2 className="h-10 w-12 text-green-500" />
+                            </div>
+                            <h2 className="mb-4 text-3xl font-black text-white">
+                                Payment Submitted!
+                            </h2>
+                            <p className="mb-8 text-lg text-zinc-300">
+                                {flash?.success ||
+                                    'Your receipt has been received. We will verify it shortly and activate your order.'}
+                            </p>
+                            <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
+                                <Button
+                                    variant="outline"
+                                    onClick={() => setShowSuccessModal(false)}
+                                    className="border-green-600/50 text-green-400 hover:bg-green-950/50"
+                                >
+                                    Close
+                                </Button>
+                                <Button
+                                    asChild
+                                    className="bg-green-600 hover:bg-green-700"
+                                >
+                                    <Link
+                                        href="/products"
+                                        onClick={() =>
+                                            setShowSuccessModal(false)
+                                        }
+                                    >
+                                        Back to Catalog
+                                    </Link>
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             )}
-          </div>
-        </div>
-      </main>
-    </Layout>
-  );
+        </Layout>
+    );
 }

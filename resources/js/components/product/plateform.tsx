@@ -20,7 +20,7 @@ export function PlatformSelector({
 }) {
     const platforms = [
         { id: 'java', label: 'Java', icon: Monitor },
-        { id: 'bedrock', label: 'Bedrock', icon: Gamepad2 },
+        { id: 'bedrock', label: 'Bedrock', icon: Smartphone },
         // { id: 'pocket', label: 'Pocket', icon: Smartphone },
     ] as const;
 
@@ -34,7 +34,7 @@ export function PlatformSelector({
                                 type="button"
                                 onClick={() => onChange(id)}
                                 className={cn(
-                                    'flex flex-col items-center gap-2 rounded-xl border p-4 transition-all',
+                                    'flex flex-col items-center gap-2 rounded-xl border p-3 transition-all',
                                     value === id
                                         ? 'border-primary bg-primary/10 text-primary shadow-sm'
                                         : 'border-white/5 bg-black/20 text-muted-foreground hover:border-white/20',

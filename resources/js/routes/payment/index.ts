@@ -212,7 +212,7 @@ store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     store.form = storeForm
 /**
 * @see \App\Http\Controllers\PaymentController::show
- * @see app/Http/Controllers/PaymentController.php:0
+ * @see app/Http/Controllers/PaymentController.php:111
  * @route '/payment/{payment}'
  */
 export const show = (args: { payment: string | number } | [payment: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -227,7 +227,7 @@ show.definition = {
 
 /**
 * @see \App\Http\Controllers\PaymentController::show
- * @see app/Http/Controllers/PaymentController.php:0
+ * @see app/Http/Controllers/PaymentController.php:111
  * @route '/payment/{payment}'
  */
 show.url = (args: { payment: string | number } | [payment: string | number ] | string | number, options?: RouteQueryOptions) => {
@@ -255,7 +255,7 @@ show.url = (args: { payment: string | number } | [payment: string | number ] | s
 
 /**
 * @see \App\Http\Controllers\PaymentController::show
- * @see app/Http/Controllers/PaymentController.php:0
+ * @see app/Http/Controllers/PaymentController.php:111
  * @route '/payment/{payment}'
  */
 show.get = (args: { payment: string | number } | [payment: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -264,7 +264,7 @@ show.get = (args: { payment: string | number } | [payment: string | number ] | s
 })
 /**
 * @see \App\Http\Controllers\PaymentController::show
- * @see app/Http/Controllers/PaymentController.php:0
+ * @see app/Http/Controllers/PaymentController.php:111
  * @route '/payment/{payment}'
  */
 show.head = (args: { payment: string | number } | [payment: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -274,7 +274,7 @@ show.head = (args: { payment: string | number } | [payment: string | number ] | 
 
     /**
 * @see \App\Http\Controllers\PaymentController::show
- * @see app/Http/Controllers/PaymentController.php:0
+ * @see app/Http/Controllers/PaymentController.php:111
  * @route '/payment/{payment}'
  */
     const showForm = (args: { payment: string | number } | [payment: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -284,7 +284,7 @@ show.head = (args: { payment: string | number } | [payment: string | number ] | 
 
             /**
 * @see \App\Http\Controllers\PaymentController::show
- * @see app/Http/Controllers/PaymentController.php:0
+ * @see app/Http/Controllers/PaymentController.php:111
  * @route '/payment/{payment}'
  */
         showForm.get = (args: { payment: string | number } | [payment: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -293,7 +293,7 @@ show.head = (args: { payment: string | number } | [payment: string | number ] | 
         })
             /**
 * @see \App\Http\Controllers\PaymentController::show
- * @see app/Http/Controllers/PaymentController.php:0
+ * @see app/Http/Controllers/PaymentController.php:111
  * @route '/payment/{payment}'
  */
         showForm.head = (args: { payment: string | number } | [payment: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -595,6 +595,77 @@ destroy.delete = (args: { payment: string | number } | [payment: string | number
         })
     
     destroy.form = destroyForm
+/**
+ * @see routes/web.php:30
+ * @route '/payment/success'
+ */
+export const success = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: success.url(options),
+    method: 'get',
+})
+
+success.definition = {
+    methods: ["get","head"],
+    url: '/payment/success',
+} satisfies RouteDefinition<["get","head"]>
+
+/**
+ * @see routes/web.php:30
+ * @route '/payment/success'
+ */
+success.url = (options?: RouteQueryOptions) => {
+    return success.definition.url + queryParams(options)
+}
+
+/**
+ * @see routes/web.php:30
+ * @route '/payment/success'
+ */
+success.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: success.url(options),
+    method: 'get',
+})
+/**
+ * @see routes/web.php:30
+ * @route '/payment/success'
+ */
+success.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+    url: success.url(options),
+    method: 'head',
+})
+
+    /**
+ * @see routes/web.php:30
+ * @route '/payment/success'
+ */
+    const successForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+        action: success.url(options),
+        method: 'get',
+    })
+
+            /**
+ * @see routes/web.php:30
+ * @route '/payment/success'
+ */
+        successForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+            action: success.url(options),
+            method: 'get',
+        })
+            /**
+ * @see routes/web.php:30
+ * @route '/payment/success'
+ */
+        successForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+            action: success.url({
+                        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+                            _method: 'HEAD',
+                            ...(options?.query ?? options?.mergeQuery ?? {}),
+                        }
+                    }),
+            method: 'get',
+        })
+    
+    success.form = successForm
 const payment = {
     index: Object.assign(index, index),
 create: Object.assign(create, create),
@@ -603,6 +674,7 @@ show: Object.assign(show, show),
 edit: Object.assign(edit, edit),
 update: Object.assign(update, update),
 destroy: Object.assign(destroy, destroy),
+success: Object.assign(success, success),
 }
 
 export default payment

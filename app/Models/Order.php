@@ -11,6 +11,7 @@ class Order extends Model
         'user_id',              // ← add if login required / nullable
         'product_id',           // ← add to directly reference the product
         'minecraft_username',
+        'qty',
         'email',
         'platform',
         'subtotal',

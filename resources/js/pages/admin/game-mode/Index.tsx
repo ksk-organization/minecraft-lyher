@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+// resources/js/pages/admin/GameModes.tsx
+import React, { useState, useCallback, useMemo } from 'react';
 import { Head, router, useForm } from '@inertiajs/react';
 import {
   PlusCircle,
@@ -7,11 +8,9 @@ import {
   Search,
   RefreshCw,
   Eye,
-  X,
   AlertCircle,
+  Loader2,
 } from 'lucide-react';
-
-import AdminLayout from '@/components/layout/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -26,20 +25,19 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
   DialogDescription,
   DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { cn } from '@/lib/utils';
-import AppLayout from '@/layouts/app-layout';
 import { route } from 'ziggy-js';
+import AppLayout from '@/layouts/app-layout';
+import GameModeForm from '@/components/admin/modal/GameModes';
 
+// ────────────────────────────────────────────────
+// Types
+// ────────────────────────────────────────────────
 interface GameMode {
   id: number;
   title: string;
@@ -56,448 +54,336 @@ interface Props {
   game_modes: GameMode[];
 }
 
-function GameModeForm({
-  data,
-  setData,
-  errors,
-  processing,
-  isEdit = false,
-}: {
-  data: any;
-  setData: any;
-  errors: any;
-  processing: boolean;
-  isEdit?: boolean;
-}) {
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
-  // Set preview from existing image_url when editing or data changes
-  useEffect(() => {
-    if (data.image_url && typeof data.image_url === 'string') {
-      setImagePreview(data.image_url);
-    } else if (!data.image_url) {
-      setImagePreview(null);
-    }
-    // Note: when a new file is selected, preview is set in handleImageChange
-  }, [data.image_url]);
-
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const objectUrl = URL.createObjectURL(file);
-    setImagePreview(objectUrl);
-
-    // Set the actual File object — Inertia will send it as multipart
-    setData('image_url', file);
-
-    // Cleanup previous object URL when component unmounts or file changes
-    return () => URL.revokeObjectURL(objectUrl);
-  };
-
-  return (
-    <div className="space-y-6 py-4">
-      <div className="grid md:grid-cols-2 gap-6">
-        <div className="space-y-2">
-          <Label htmlFor="title">Title *</Label>
-          <Input
-            id="title"
-            value={data.title}
-            onChange={(e) => setData('title', e.target.value)}
-            placeholder="NOMROTI ECO"
-          />
-          {errors.title && <p className="text-sm text-destructive">{errors.title}</p>}
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="slug">Slug *</Label>
-          <Input
-            id="slug"
-            value={data.slug}
-            onChange={(e) => setData('slug', e.target.value)}
-            placeholder="nomroti-eco"
-          />
-          {errors.slug && <p className="text-sm text-destructive">{errors.slug}</p>}
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="description">Description</Label>
-        <Textarea
-          id="description"
-          value={data.description || ''}
-          onChange={(e) => setData('description', e.target.value)}
-          placeholder="Describe this game mode..."
-          rows={3}
-        />
-      </div>
-
-      <div className="grid md:grid-cols-2 gap-6">
-        <div className="space-y-2">
-          <Label htmlFor="server_ip">Server IP *</Label>
-          <Input
-            id="server_ip"
-            value={data.server_ip}
-            onChange={(e) => setData('server_ip', e.target.value)}
-            placeholder="nomroti.net"
-          />
-          {errors.server_ip && <p className="text-sm text-destructive">{errors.server_ip}</p>}
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="image_url">Game Mode Image</Label>
-
-          <div className="flex flex-col items-start gap-6">
-            <div className="flex-1 space-y-2">
-              <Input
-                id="image_url"
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                disabled={processing}
-                className="cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
-              />
-              {/* <p className="text-xs text-muted-foreground">
-                PNG, JPG, JPEG, WebP • Max 2MB • Recommended square (512×512 or similar)
-              </p> */}
-              {errors.image_url && (
-                <p className="text-sm text-destructive">{errors.image_url}</p>
-              )}
-              {isEdit && data.image_url && typeof data.image_url === 'string' && !imagePreview?.startsWith('blob:') && (
-                <p className="text-xs text-muted-foreground italic">
-                  Current image will be kept unless you select a new one.
-                </p>
-              )}
-            </div>
-
-            {/* Preview */}
-            <div className="w-32 h-32 rounded-lg border border-border overflow-hidden bg-muted flex-shrink-0">
-              {imagePreview ? (
-                <img
-                  src={imagePreview}
-                  alt="Preview"
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                  }}
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground text-center p-2">
-                  No image selected
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="flex items-center space-x-2 pt-4">
-        <Switch
-          id="is_active"
-          checked={data.is_active}
-          onCheckedChange={(checked) => setData('is_active', checked)}
-        />
-        <Label htmlFor="is_active">Active / Visible in frontend</Label>
-      </div>
-    </div>
-  );
-}
-
+// ────────────────────────────────────────────────
+// Main Component
+// ────────────────────────────────────────────────
 export default function AdminGameModesIndex({ game_modes }: Props) {
   const [search, setSearch] = useState('');
-  const [createOpen, setCreateOpen] = useState(false);
-  const [editOpen, setEditOpen] = useState(false);
-  const [deleteOpen, setDeleteOpen] = useState<number | null>(null);
-  const [viewOpen, setViewOpen] = useState<GameMode | null>(null);
+  const [modalMode, setModalMode] = useState<'create' | 'edit' | null>(null);
+  const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [viewMode, setViewMode] = useState<GameMode | null>(null);
 
-  const createForm = useForm({
-    title: '',
-    slug: '',
-    description: '',
-    server_ip: 'nomroti.net',
-    image_url: null as File | null,
-    is_active: true,
-  });
-
-  const editForm = useForm<GameMode & { image_url: string | File | null }>({
+  const form = useForm({
     id: 0,
     title: '',
     slug: '',
     description: '',
-    server_ip: '',
-    image_url: null,
+    server_ip: 'nomroti.net',
+    image_url: null as File | string | null,
     is_active: true,
   });
 
-  const filteredModes = game_modes.filter((gm) =>
-    gm.title.toLowerCase().includes(search.toLowerCase()) ||
-    gm.slug.toLowerCase().includes(search.toLowerCase())
-  );
+  const isCreate = modalMode === 'create';
+  const isEdit = modalMode === 'edit';
 
-  const handleCreate = () => {
-    createForm.post(route('admin.game-modes.store'), {
+  const filteredModes = useMemo(() =>
+    game_modes.filter(gm =>
+      gm.title.toLowerCase().includes(search.toLowerCase()) ||
+      gm.slug.toLowerCase().includes(search.toLowerCase())
+    ),
+  [game_modes, search]);
+
+  const openCreate = useCallback(() => {
+    form.reset();
+    setModalMode('create');
+  }, [form]);
+
+  const openEdit = useCallback((gm: GameMode) => {
+    form.setData({
+      id: gm.id,
+      title: gm.title,
+      slug: gm.slug,
+      description: gm.description ?? '',
+      server_ip: gm.server_ip,
+      image_url: gm.image_url ?? null,
+      is_active: gm.is_active,
+    });
+    setModalMode('edit');
+  }, [form]);
+
+  const handleSubmit = useCallback(() => {
+    const routeName = isCreate ? 'admin.game-modes.store' : 'admin.game-modes.update';
+    const method = isCreate ? 'post' : 'put';
+    const params = isCreate ? [] : [form.data.id];
+
+    (form as any)[method](route(routeName, ...params), {
+      preserveScroll: true,
       onSuccess: () => {
-        createForm.reset();
-        setCreateOpen(false);
+        form.reset();
+        setModalMode(null);
         router.reload({ only: ['game_modes'] });
       },
     });
-  };
+  }, [form, isCreate, isEdit]);
 
-  const handleEdit = (gm: GameMode) => {
-    editForm.setData({
-      ...gm,
-      image_url: gm.image_url || null, // keep string or null
-    });
-    setEditOpen(true);
-  };
-
-  const submitEdit = () => {
-    editForm.put(route('admin.game-modes.update', editForm.data.id), {
+  const confirmDelete = useCallback((id: number) => setDeleteId(id), []);
+  const executeDelete = useCallback(() => {
+    if (!deleteId) return;
+    router.delete(route('admin.game-modes.destroy', deleteId), {
+      preserveScroll: true,
       onSuccess: () => {
-        setEditOpen(false);
+        setDeleteId(null);
         router.reload({ only: ['game_modes'] });
       },
     });
-  };
+  }, [deleteId]);
 
-  const handleDelete = (id: number) => {
-    router.delete(route('admin.game-modes.destroy', id), {
-      onSuccess: () => {
-        setDeleteOpen(null);
-        router.reload({ only: ['game_modes'] });
-      },
-    });
-  };
+  const refresh = useCallback(() => router.reload({ only: ['game_modes'] }), []);
 
   return (
     <AppLayout>
-      <Head title="Manage Game Modes" />
+      <Head title="Admin | Game Modes" />
 
       <div className="p-6 lg:p-8 space-y-8">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5">
           <div>
             <h1 className="text-3xl font-black tracking-tight">Game Modes</h1>
-            <p className="text-muted-foreground mt-1">
-              Create and manage game modes (Eco, Skyblock, Practice, etc.)
+            <p className="mt-1.5 text-muted-foreground">
+              Manage gamemodes (Eco, Skyblock, Practice, Survival, ...)
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="relative w-64">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="relative w-64 lg:w-72">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 placeholder="Search game modes..."
-                className="pl-10"
+                className="pl-10 bg-black/30 border-white/10"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
             </div>
-            <Button onClick={() => setCreateOpen(true)}>
-              <PlusCircle className="mr-2 h-4 w-4" />
+
+            <Button onClick={openCreate} className="gap-2">
+              <PlusCircle size={18} />
               New Game Mode
+            </Button>
+
+            <Button variant="outline" size="icon" onClick={refresh} title="Refresh">
+              <RefreshCw size={18} />
             </Button>
           </div>
         </div>
 
         {/* Table */}
-        <Card className="border-white/5 bg-[#1f1f1f]">
+        <Card className="border-white/5 bg-[#1f1f1f] overflow-hidden">
           <CardHeader className="border-b border-white/5">
-            <CardTitle className="flex justify-between items-center">
-              <span>All Game Modes</span>
-              <Button variant="ghost" size="sm" onClick={() => router.reload()}>
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Refresh
-              </Button>
+            <CardTitle className="flex items-center justify-between">
+              <span>All Game Modes ({filteredModes.length})</span>
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-0 pt-1">
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow className="hover:bg-transparent">
-                    <TableHead>Image</TableHead>
-                    <TableHead>Title</TableHead>
-                    <TableHead>Slug</TableHead>
-                    <TableHead>Server IP</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredModes.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={6} className="text-center py-12 text-muted-foreground">
-                        No game modes found
-                      </TableCell>
+
+          <CardContent className="p-0">
+            {filteredModes.length === 0 ? (
+              <div className="py-16 text-center text-muted-foreground">
+                <p className="text-lg font-medium">
+                  {search ? 'No matching game modes' : 'No game modes created yet'}
+                </p>
+                {!search && <p className="mt-2">Click "New Game Mode" to add one.</p>}
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="hover:bg-transparent border-b border-white/5">
+                      <TableHead>Image</TableHead>
+                      <TableHead>Title</TableHead>
+                      <TableHead>Slug</TableHead>
+                      <TableHead>Server IP</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right pr-6">Actions</TableHead>
                     </TableRow>
-                  ) : (
-                    filteredModes.map((mode) => (
-                      <TableRow key={mode.id} className="hover:bg-white/3">
+                  </TableHeader>
+                  <TableBody>
+                    {filteredModes.map((mode) => (
+                      <TableRow key={mode.id} className="hover:bg-white/5 border-b border-white/5">
                         <TableCell>
                           {mode.image_url ? (
                             <img
                               src={mode.image_url}
                               alt={mode.title}
-                              className="h-10 w-16 object-cover rounded border border-border"
+                              className="h-12 w-20 object-cover rounded border border-border shadow-sm"
                               onError={(e) => (e.currentTarget.style.display = 'none')}
                             />
                           ) : (
-                            <div className="h-10 w-16 rounded bg-muted flex items-center justify-center text-xs text-muted-foreground">
-                              No img
+                            <div className="h-12 w-20 rounded bg-muted/50 flex items-center justify-center text-xs text-muted-foreground">
+                              No image
                             </div>
                           )}
                         </TableCell>
                         <TableCell className="font-medium">{mode.title}</TableCell>
-                        <TableCell className="text-muted-foreground">{mode.slug}</TableCell>
+                        <TableCell className="font-mono text-muted-foreground">{mode.slug}</TableCell>
                         <TableCell className="font-mono">{mode.server_ip}</TableCell>
                         <TableCell>
                           <Badge variant={mode.is_active ? 'default' : 'secondary'}>
                             {mode.is_active ? 'Active' : 'Inactive'}
                           </Badge>
                         </TableCell>
-                        <TableCell className="text-right space-x-2">
-                          <Button variant="ghost" size="icon" onClick={() => setViewOpen(mode)}>
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="icon" onClick={() => handleEdit(mode)}>
-                            <Pencil className="h-4 w-4" />
+                        <TableCell className="text-right space-x-1 pr-4">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => setViewMode(mode)}
+                            title="View details"
+                          >
+                            <Eye size={16} />
                           </Button>
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="text-destructive hover:text-destructive/90"
-                            onClick={() => setDeleteOpen(mode.id)}
+                            className="h-8 w-8"
+                            onClick={() => openEdit(mode)}
+                            title="Edit"
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Pencil size={16} />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-destructive hover:text-destructive/90"
+                            onClick={() => setDeleteId(mode.id)}
+                            title="Delete"
+                          >
+                            <Trash2 size={16} />
                           </Button>
                         </TableCell>
                       </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </div>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
           </CardContent>
         </Card>
 
-        {/* View Modal */}
-        <Dialog open={!!viewOpen} onOpenChange={() => setViewOpen(null)}>
-          <DialogContent className="max-w-lg">
+        {/* Create / Edit Dialog */}
+        <Dialog open={!!modalMode} onOpenChange={() => setModalMode(null)}>
+          <DialogContent className="sm:max-w-3xl bg-[#1f1f1f] border-white/10">
             <DialogHeader>
-              <DialogTitle>{viewOpen?.title}</DialogTitle>
+              <DialogTitle>{isCreate ? 'Create Game Mode' : 'Edit Game Mode'}</DialogTitle>
+              <DialogDescription>
+                {isCreate
+                  ? 'Add a new game mode to the store.'
+                  : 'Update game mode details and visibility.'}
+              </DialogDescription>
             </DialogHeader>
-            <div className="space-y-6 py-4">
-              {viewOpen?.image_url && (
-                <div className="flex justify-center">
-                  <img
-                    src={viewOpen.image_url}
-                    alt={viewOpen.title}
-                    className="max-h-48 object-contain rounded-lg border border-border"
-                  />
-                </div>
-              )}
-              <div className="grid grid-cols-2 gap-6">
-                <div>
-                  <h4 className="font-semibold mb-1">Slug</h4>
-                  <p className="text-muted-foreground font-mono">{viewOpen?.slug}</p>
-                </div>
-                <div>
-                  <h4 className="font-semibold mb-1">Server IP</h4>
-                  <p className="font-mono">{viewOpen?.server_ip}</p>
-                </div>
-              </div>
-              {viewOpen?.description && (
-                <div>
-                  <h4 className="font-semibold mb-2">Description</h4>
-                  <p className="text-muted-foreground whitespace-pre-line">
-                    {viewOpen.description}
-                  </p>
-                </div>
-              )}
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setViewOpen(null)}>
-                Close
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
 
-        {/* Create Modal */}
-        <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-          <DialogContent className="max-w-3xl">
-            <DialogHeader>
-              <DialogTitle>Create New Game Mode</DialogTitle>
-            </DialogHeader>
             <GameModeForm
-              data={createForm.data}
-              setData={createForm.setData}
-              errors={createForm.errors}
-              processing={createForm.processing}
+              data={form.data}
+              setData={form.setData}
+              errors={form.errors}
+              processing={form.processing}
             />
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setCreateOpen(false)}>
+
+            <DialogFooter className="gap-3">
+              <Button
+                variant="outline"
+                onClick={() => setModalMode(null)}
+                disabled={form.processing}
+              >
                 Cancel
               </Button>
-              <Button onClick={handleCreate} disabled={createForm.processing}>
-                {createForm.processing ? 'Creating...' : 'Create Game Mode'}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
-        {/* Edit Modal */}
-        <Dialog open={editOpen} onOpenChange={setEditOpen}>
-          <DialogContent className="max-w-3xl">
-            <DialogHeader>
-              <DialogTitle>Edit Game Mode</DialogTitle>
-            </DialogHeader>
-            <GameModeForm
-              data={editForm.data}
-              setData={editForm.setData}
-              errors={editForm.errors}
-              processing={editForm.processing}
-              isEdit
-            />
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setEditOpen(false)}>
-                Cancel
-              </Button>
-              <Button onClick={submitEdit} disabled={editForm.processing}>
-                {editForm.processing ? 'Saving...' : 'Save Changes'}
+              <Button
+                onClick={handleSubmit}
+                disabled={form.processing}
+                className="min-w-[160px]"
+              >
+                {form.processing ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    {isCreate ? 'Creating...' : 'Saving...'}
+                  </>
+                ) : isCreate ? (
+                  'Create Game Mode'
+                ) : (
+                  'Save Changes'
+                )}
               </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
 
         {/* Delete Confirmation */}
-        <Dialog open={deleteOpen !== null} onOpenChange={() => setDeleteOpen(null)}>
-          <DialogContent>
+        <Dialog open={deleteId !== null} onOpenChange={() => setDeleteId(null)}>
+          <DialogContent className="sm:max-w-md">
             <DialogHeader>
-              <DialogTitle className="text-destructive flex items-center gap-2">
+              <DialogTitle className="flex items-center gap-2 text-destructive">
                 <AlertCircle className="h-5 w-5" />
-                Confirm Delete
+                Confirm Deletion
               </DialogTitle>
-              <DialogDescription>
-                Are you sure you want to delete this game mode? All associated products will also be affected.
+              <DialogDescription className="pt-2">
+                Are you sure you want to delete this game mode?<br />
+                <span className="text-destructive font-medium">
+                  All associated products and purchases may be affected.
+                </span>
               </DialogDescription>
             </DialogHeader>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setDeleteOpen(null)}>
+            <DialogFooter className="gap-3">
+              <Button variant="outline" onClick={() => setDeleteId(null)}>
                 Cancel
               </Button>
-              <Button
-                variant="destructive"
-                onClick={() => deleteOpen && handleDelete(deleteOpen)}
-              >
+              <Button variant="destructive" onClick={executeDelete}>
                 Delete Game Mode
               </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/* View Details Dialog */}
+        <Dialog open={!!viewMode} onOpenChange={() => setViewMode(null)}>
+          <DialogContent className="sm:max-w-lg">
+            <DialogHeader>
+              <DialogTitle>{viewMode?.title}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-6 py-5">
+              {viewMode?.image_url && (
+                <div className="flex justify-center">
+                  <img
+                    src={viewMode.image_url}
+                    alt={viewMode.title}
+                    className="max-h-64 object-contain rounded-lg border border-border shadow-md"
+                    onError={(e) => (e.currentTarget.style.display = 'none')}
+                  />
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                <div>
+                  <h4 className="font-semibold text-sm mb-1 text-muted-foreground">Slug</h4>
+                  <p className="font-mono">{viewMode?.slug}</p>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-sm mb-1 text-muted-foreground">Server IP</h4>
+                  <p className="font-mono">{viewMode?.server_ip}</p>
+                </div>
+              </div>
+
+              {viewMode?.description && (
+                <div>
+                  <h4 className="font-semibold text-sm mb-2 text-muted-foreground">Description</h4>
+                  <p className="text-muted-foreground whitespace-pre-line leading-relaxed">
+                    {viewMode.description}
+                  </p>
+                </div>
+              )}
+
+              <div className="text-xs text-muted-foreground pt-2">
+                Created: {viewMode?.created_at ? new Date(viewMode.created_at).toLocaleString() : '—'}
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setViewMode(null)}>
+                Close
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
+      
     </AppLayout>
   );
 }

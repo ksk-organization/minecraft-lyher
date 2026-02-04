@@ -1,14 +1,21 @@
-import React from 'react';
-import { Head, Link } from '@inertiajs/react';
-import { AnimatePresence, motion } from 'framer-motion';
-import { Crown, Key, Package, MapPin } from 'lucide-react';
+// resources/js/pages/GamemodeEco.tsx
+import { Head, Link, router } from '@inertiajs/react';
+import { motion } from 'framer-motion';
+import { Crown, Package, MapPin } from 'lucide-react';
 import Layout from '@/components/homepage/layout';
 import { Badge } from '@/components/ui/badge';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+import { route } from 'ziggy-js';
 
 // ──────────────────────────────────────────────
-// Types (matching your backend response)
+// Types
 // ──────────────────────────────────────────────
 
 interface ProductImage {
@@ -42,30 +49,72 @@ interface Props {
   categories: Category[];
 }
 
-  const defaultRanks = [
-    { name: 'NOMROTI TITAN', price: 25.00, description: 'The ultimate prestige. Includes Flight, 50 Homes, and Custom Particles to dominate the server.', img: '2317997' },
-  ];
-    const usedRanks = defaultRanks;
+// If ranks come from backend later → replace hardcoded array
+interface Rank {
+  id?: number;
+  name: string;
+  price: number;
+  description: string;
+  icon_url?: string;
+}
+
+// For now – can be moved to backend response later
+const defaultRanks: Rank[] = [
+  {
+    name: 'NOMROTI TITAN',
+    price: 25.00,
+    description:
+      'The ultimate prestige. Includes Flight, 50 Homes, and Custom Particles to dominate the server.',
+    icon_url: undefined, // can be '/ranks/titan.png' later
+  },
+];
 
 // ──────────────────────────────────────────────
-// Reusable Components
+// Reusable Pieces
 // ──────────────────────────────────────────────
 
-const SectionHeader = ({ title, icon }: { title: string; icon: React.ReactNode }) => (
-  <div className="mb-12 flex items-center gap-4 border-l-4 border-orange-600 pl-6">
-    <div className="rounded-xl bg-orange-950/40 p-4 text-orange-500 shadow-inner">
-      {icon}
+function SectionHeader({
+  title,
+  icon,
+  count,
+}: {
+  title: string;
+  icon: React.ReactNode;
+  count?: number;
+}) {
+  return (
+    <div className="mb-10 flex items-center gap-4 border-l-4 border-orange-600 pl-5 md:pl-6">
+      <div className="rounded-xl bg-orange-950/50 p-3.5 text-orange-500 shadow-inner">
+        {icon}
+      </div>
+      <div className="flex items-baseline gap-4">
+        <h2 className="text-4xl md:text-5xl font-black tracking-tighter uppercase italic text-white">
+          {title}
+        </h2>
+        {count !== undefined && (
+          <Badge variant="outline" className="border-orange-600/40 text-orange-400">
+            {count}
+          </Badge>
+        )}
+      </div>
     </div>
-    <h2 className="text-4xl md:text-5xl font-black tracking-tighter uppercase italic text-white">
-      {title}
-    </h2>
-  </div>
-);
+  );
+}
 
-const ProductCard = ({ product }: { product: Product }) => {
-  const mainImg = product.main_icon_url
+function ProductImageFallback({ name }: { name: string }) {
+  return (
+    <div className="flex h-full w-full items-center justify-center bg-zinc-900 text-zinc-600 text-xs font-mono uppercase tracking-widest">
+      {name.slice(0, 8)}
+    </div>
+  );
+}
+
+function ProductCard({ product }: { product: Product }) {
+  const mainImageSrc = product.main_icon_url
     ? `/storage/${product.main_icon_url}`
-    : `https://ui-avatars.com/api/?background=111&color=ea580c&name=${encodeURIComponent(product.name)}`;
+    : null;
+
+  const hasLowStock = product.stock > 0 && product.stock <= 5;
 
   return (
     <TooltipProvider>
@@ -73,50 +122,58 @@ const ProductCard = ({ product }: { product: Product }) => {
         <TooltipTrigger asChild>
           <Link
             href={route('product.show', { product: product.id })}
-            className="group block h-full"
+            // href={router.resolve('product.show', { product: product.id }).href}
+            className="group block h-full focus:outline-none focus:ring-2 focus:ring-orange-600 rounded-2xl"
           >
             <motion.div
-              whileHover={{ y: -12, scale: 1.03 }}
+              whileHover={{ y: -10, scale: 1.025 }}
               whileTap={{ scale: 0.98 }}
-              className="relative h-full overflow-hidden rounded-2xl border border-white/5 bg-gradient-to-b from-zinc-950 to-black p-6 shadow-xl transition-all hover:border-orange-600/40 hover:shadow-[0_0_30px_rgba(234,88,12,0.15)]"
+              className={cn(
+                'relative h-full overflow-hidden rounded-2xl border bg-gradient-to-b from-zinc-950 to-black p-5 md:p-6 shadow-xl transition-all',
+                'hover:border-orange-600/50 hover:shadow-[0_0_35px_rgba(234,88,12,0.18)]',
+              )}
             >
-              {/* Badge if special */}
-              {product.stock <= 5 && product.stock > 0 && (
-                <Badge className="absolute top-4 right-4 bg-red-600/80 text-white font-bold uppercase text-xs">
+              {hasLowStock && (
+                <Badge className="absolute right-4 top-4 bg-red-600/90 px-2.5 py-1 text-xs font-bold uppercase tracking-wide">
                   Low Stock
                 </Badge>
               )}
 
-              {/* Main Image */}
-              <div className="relative mx-auto mb-6 h-28 w-28 overflow-hidden rounded-xl border border-orange-600/20 bg-black/40">
-                <img
-                  src={mainImg}
-                  alt={product.name}
-                  loading="lazy"
-                  className="h-full w-full object-cover transition-transform group-hover:scale-110"
-                />
+              {/* Image container */}
+              <div className="relative mx-auto mb-6 h-28 w-28 overflow-hidden rounded-xl border border-orange-600/20 bg-black/50">
+                {mainImageSrc ? (
+                  <img
+                    src={mainImageSrc}
+                    alt={product.name}
+                    loading="lazy"
+                    decoding="async"
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  />
+                ) : (
+                  <ProductImageFallback name={product.name} />
+                )}
               </div>
 
-              {/* Name & Price */}
               <h3 className="mb-2 text-xl font-black uppercase tracking-tight text-white group-hover:text-orange-400 transition-colors">
                 {product.name}
               </h3>
-              <p className="mb-4 text-2xl font-black text-orange-500 font-mono">
-                ${product.price}
+
+              <p className="mb-4 text-2xl font-black font-mono text-orange-500">
+                ${Number(product.price).toFixed(2)}
+                {/* ${product.price.toFixed(2)} */}
               </p>
 
-              {/* Short description or fallback */}
-              <p className="text-sm text-zinc-400 line-clamp-2">
+              <p className="line-clamp-2 text-sm leading-relaxed text-zinc-400">
                 {product.short_description || 'Premium item with exclusive perks'}
               </p>
 
-              {/* Gallery preview (small thumbnails) */}
-              {product.images?.length > 0 && (
-                <div className="mt-4 flex -space-x-2 justify-center opacity-70 group-hover:opacity-100 transition-opacity">
+              {/* Mini gallery preview */}
+              {product.images.length > 0 && (
+                <div className="mt-5 flex -space-x-2 justify-center opacity-70 transition-opacity group-hover:opacity-100">
                   {product.images.slice(0, 4).map((img) => (
                     <div
                       key={img.id}
-                      className="h-8 w-8 overflow-hidden rounded-full border-2 border-black shadow-md"
+                      className="h-9 w-9 overflow-hidden rounded-full border-2 border-black shadow-sm"
                     >
                       <img
                         src={`/storage/${img.image_url}`}
@@ -126,7 +183,7 @@ const ProductCard = ({ product }: { product: Product }) => {
                     </div>
                   ))}
                   {product.images.length > 4 && (
-                    <div className="h-8 w-8 rounded-full bg-zinc-800 border-2 border-black flex items-center justify-center text-[10px] text-zinc-400 font-bold">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-black bg-zinc-800 text-[10px] font-bold text-zinc-400">
                       +{product.images.length - 4}
                     </div>
                   )}
@@ -135,24 +192,22 @@ const ProductCard = ({ product }: { product: Product }) => {
             </motion.div>
           </Link>
         </TooltipTrigger>
-        <TooltipContent className="max-w-xs bg-zinc-900 border-zinc-700 text-zinc-200">
-          {product.long_description || product.short_description || 'No description available'}
+
+        <TooltipContent className="max-w-sm bg-zinc-900 border-zinc-700 text-zinc-200">
+          {product.long_description || product.short_description || 'No description available.'}
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
   );
-};
+}
 
 // ──────────────────────────────────────────────
-// Main Component
+// Main Page
 // ──────────────────────────────────────────────
 
 export default function GamemodeEco({ categories }: Props) {
-  // Flatten all products from all categories (or filter by category if needed)
-  const allProducts = categories.flatMap(cat => cat.products);
-
-  // Optional: group by category if you want separate sections
-  const ecoCategory = categories.find(cat => cat.slug.includes('eco')) || categories[0];
+  // You can later sort categories by display_order if needed
+  // categories.sort((a, b) => a.display_order - b.display_order);
 
   return (
     <Layout>
@@ -162,115 +217,117 @@ export default function GamemodeEco({ categories }: Props) {
       />
 
       {/* Hero */}
-      <header className="relative min-h-[60vh] flex items-center justify-center overflow-hidden pt-20">
+      <header className="relative flex min-h-[55vh] items-center justify-center overflow-hidden pt-20">
         <div
-          className="absolute inset-0 bg-cover bg-center"
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
-            backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.7), rgba(0,0,0,0.9)), url('https://images.unsplash.com/photo-1587573089737-43b8f0f39e3e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80')`,
+            backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.75), rgba(0,0,0,0.92)), url('https://images.unsplash.com/photo-1587573089737-43b8f0f39e3e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80')`,
           }}
         />
         <div className="relative z-10 container px-6 text-center">
           <motion.h1
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 35 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="mb-6 text-5xl md:text-7xl font-black tracking-tighter uppercase italic text-white drop-shadow-2xl"
+            transition={{ duration: 0.9, ease: 'easeOut' }}
+            className="mb-5 text-5xl font-black tracking-tighter uppercase italic text-white drop-shadow-2xl sm:text-6xl md:text-7xl"
           >
             NOMROTI <span className="text-orange-500">ECO</span>
           </motion.h1>
+
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.3, duration: 0.8 }}
-            className="mx-auto max-w-3xl text-xl md:text-2xl text-zinc-300 font-medium"
+            transition={{ delay: 0.35, duration: 0.9 }}
+            className="mx-auto max-w-3xl text-lg sm:text-xl md:text-2xl text-zinc-300 font-medium"
           >
             Build towns. Trade freely. Dominate the economy.
           </motion.p>
         </div>
       </header>
 
-      <div className="container mx-auto space-y-24 py-20 px-6">
-        {/* Ranks Section (example filter – adjust as needed) */}
-        {/* <section>
-          <SectionHeader title="Exclusive Ranks" icon={<Crown className="text-orange-500" />} />
-                    <AnimatePresence>
-            {usedRanks.map((rank, index) => (
+      <main className="container mx-auto space-y-20 py-16 px-5 md:space-y-24 md:py-20 md:px-6 lg:px-8">
+        {/* Ranks – currently static, ready to become dynamic */}
+        <section>
+          <SectionHeader title="Exclusive Ranks" icon={<Crown size={28} />} />
+
+          <div className="grid gap-8 md:grid-cols-1 lg:grid-cols-1">
+            {defaultRanks.map((rank) => (
               <motion.div
                 key={rank.name}
-                initial={{ opacity: 0, y: 50 }}
+                initial={{ opacity: 0, y: 40 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1, duration: 0.5 }}
-                className="group relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-[#121212] p-10 text-center shadow-2xl md:p-16 transition-all hover:border-primary/40 hover:shadow-[0_0_30px_rgba(255,102,0,0.2)]"
+                viewport={{ once: true, margin: '-80px' }}
+                transition={{ duration: 0.6 }}
+                className="group relative overflow-hidden rounded-3xl border border-white/8 bg-gradient-to-b from-zinc-950 to-black p-8 shadow-2xl transition-all hover:border-orange-600/40 hover:shadow-[0_0_40px_rgba(234,88,12,0.15)] md:p-10"
               >
-                <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent opacity-60 group-hover:opacity-80 transition-opacity" />
-                <div className="relative z-10">
-                  <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-primary/20 border border-primary/30">
-                    <Crown size={56} className="animate-pulse text-primary" />
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-orange-600/5 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+
+                <div className="relative z-10 text-center">
+                  <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full border border-orange-600/30 bg-orange-950/40">
+                    <Crown size={44} className="text-orange-500" />
                   </div>
-                  <h2 className="mb-4 text-5xl font-black tracking-tighter text-foreground italic">{rank.name}</h2>
-                  <p className="mx-auto mb-8 max-w-xl text-muted-foreground font-medium">{rank.description}</p>
-                  <Link
+
+                  <h3 className="mb-4 text-3xl md:text-4xl font-black tracking-tight text-white">
+                    {rank.name}
+                  </h3>
+
+                  <p className="mb-8 text-zinc-300">{rank.description}</p>
+
+                  <Button
+                    asChild
+                    size="lg"
+                    className="rounded-2xl bg-orange-600 px-10 py-7 text-lg font-black uppercase italic tracking-wide shadow-xl hover:bg-orange-700 hover:scale-105 active:scale-95 transition-all"
                   >
-                    <Button
-                      size="lg"
-                      className="rounded-2xl bg-primary px-12 py-8 text-xl font-black text-white shadow-[0_10px_40px_rgba(255,102,0,0.3)] hover:scale-105 active:scale-95 transition-all uppercase italic tracking-tighter"
-                      aria-label={`Purchase ${rank.name} for $${rank.price}`}
+                    <Link 
+                    // href={route('ranks.purchase', { rank: rank.name.toLowerCase().replace(/\s+/g, '-') })}
                     >
-                      PURCHASE RANK — ${rank.price}
-                    </Button>
-                  </Link>
+                      Purchase — ${rank.price.toFixed(2)}
+                    </Link>
+                  </Button>
                 </div>
               </motion.div>
             ))}
-          </AnimatePresence>
-        </section> */}
+          </div>
+        </section>
 
-        {/* All Products – grouped by category */}
-        {categories.map(category => (
+        {/* Product Categories */}
+        {categories.map((category) => (
           <section key={category.id}>
             <SectionHeader
               title={category.name}
-              icon={<Badge className="bg-orange-600/20 text-orange-400">{category.products.length}</Badge>}
+              icon={<Package size={28} />}
+              count={category.products.length}
             />
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {category.products.map(product => (
+
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:gap-7">
+              {category.products.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>
           </section>
         ))}
 
-        {/* Gallery Teaser / World Preview */}
-        <section className="relative rounded-3xl overflow-hidden border border-orange-600/20 bg-black/40">
+        {/* World Teaser */}
+        <section className="relative overflow-hidden rounded-3xl border border-orange-600/20 bg-black">
           <img
             src="https://images.unsplash.com/photo-1587573089737-43b8f0f39e3e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80"
-            alt="NOMROTI Eco World"
-            className="w-full h-96 object-cover opacity-80"
+            alt="NOMROTI Eco gameplay world"
+            loading="lazy"
+            decoding="async"
+            className="h-80 w-full object-cover opacity-75 sm:h-96"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
-          <div className="absolute bottom-10 left-10 right-10 text-center">
-            <h3 className="text-3xl font-black text-white mb-3">Explore Endless Worlds</h3>
-            <p className="text-zinc-300 max-w-2xl mx-auto">
-              Join thousands of players building, trading, and competing in the ultimate Minecraft economy experience.
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-transparent" />
+
+          <div className="absolute inset-x-0 bottom-0 p-8 text-center sm:p-10 md:p-12">
+            <h3 className="mb-4 text-3xl font-black text-white md:text-4xl">
+              Endless Worlds Await
+            </h3>
+            <p className="mx-auto max-w-2xl text-lg text-zinc-300">
+              Join a thriving community — build, trade, conquer, and shape the economy of NOMROTI Eco.
             </p>
           </div>
         </section>
-      </div>
+      </main>
     </Layout>
   );
 }
-
-// Reusable header
-// function SectionHeader({ title, icon }: { title: string; icon: React.ReactNode }) {
-//   return (
-//     <div className="mb-10 flex items-center gap-4">
-//       <div className="rounded-xl bg-orange-950/50 p-3 text-orange-500 shadow-inner">
-//         {icon}
-//       </div>
-//       <h2 className="text-4xl font-black tracking-tighter uppercase text-white">
-//         {title}
-//       </h2>
-//     </div>
-//   );
-// }

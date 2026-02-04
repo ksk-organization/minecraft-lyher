@@ -15,7 +15,7 @@ export function PaymentSection({
 
             <div className="mx-auto flex justify-center ">
                 {/* <QrCode size={128} className="mx-auto text-black" /> */}
-                <img className="max-w-128 shadow-inner rounded-2xl " src="/assets/qr/qr.jpg" alt="" />
+                <img className="max-w-68 shadow-inner rounded-2xl " src="/assets/qr/qr.jpg" alt="" />
             </div>
 
             <div className="flex items-center justify-between border-t border-white/10 pt-4 text-sm font-semibold">

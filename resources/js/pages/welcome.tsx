@@ -1,5 +1,5 @@
 // resources/js/pages/Welcome.tsx
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import { Users, ArrowRight, Copy, Check } from 'lucide-react';
 import {
@@ -11,10 +11,28 @@ import {
 import Layout from '@/components/homepage/Layout';
 import GamemodeCard from '@/components/homepage/gamemode-card';
 import { useAnimatedCounter } from '@/hooks/use-animated-counter';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { cn } from '@/lib/utils';
-import {useMaxPlayers} from '@/components/homepage/useMaxPlayers';
+import { useMaxPlayers } from '@/components/homepage/useMaxPlayers';
+import { route } from 'ziggy-js';
 
+// ────────────────────────────────────────────────
+// Types
+// ────────────────────────────────────────────────
+interface Gamemode {
+    id: number | string;
+    title: string;
+    description: string;
+    image_url: string;
+}
+
+interface WelcomeProps {
+    gamemodes: Gamemode[];
+}
+
+// ────────────────────────────────────────────────
+// Variants (extracted for clarity & reuse)
+// ────────────────────────────────────────────────
 const floatingVariants = {
     float: {
         y: [0, -18, 0],
@@ -26,58 +44,78 @@ const floatingVariants = {
     },
 };
 
-export default function Welcome({ gamemodes }: { gamemodes: any }) {
-    const player = useMaxPlayers();
-    console.log(player);
+// ────────────────────────────────────────────────
+// Hero Background (separated concern)
+// ────────────────────────────────────────────────
+function HeroBackground() {
+    return (
+        <>
+            {/* Main background + gradient overlay */}
+            <div
+                className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
+                style={{
+                    backgroundImage: `
+            linear-gradient(to bottom, rgba(26,26,26,0.88), rgba(26,26,26,0.95)),
+            url('https://m.gettywallpapers.com/wp-content/uploads/2023/10/Minecraft-Laptop-Wallpaper-scaled.jpg')
+          `,
+                    backgroundBlendMode: 'multiply',
+                    willChange: 'transform',
+                    transform: 'scale(1.02)', // prevent edge flash on scroll/resize
+                }}
+            />
 
-    const [copied, setCopied] = useState(false);
-    const { count: playerCount, ref: playerRef } = useAnimatedCounter(
-        player,
+            {/* Optional Minecraft-style subtle noise */}
+            <div
+                className="pointer-events-none absolute inset-0 z-0 opacity-[0.07]"
+                style={{
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
+                    backgroundSize: '300px',
+                }}
+            />
+        </>
+    );
+}
+
+// ────────────────────────────────────────────────
+// Main Component
+// ────────────────────────────────────────────────
+export default function Welcome({ gamemodes }: WelcomeProps) {
+    const onlinePlayers = useMaxPlayers();
+
+    const { count: animatedPlayers, ref: playerCountRef } = useAnimatedCounter(
+        onlinePlayers,
         2400,
     );
 
-    const copyIp = useCallback(async () => {
+    const [hasCopied, setHasCopied] = useState(false);
+
+    const copyServerIp = useCallback(async () => {
         try {
             await navigator.clipboard.writeText('nomroti.net');
-            setCopied(true);
-            setTimeout(() => setCopied(false), 2200);
+            setHasCopied(true);
+            setTimeout(() => setHasCopied(false), 2200);
         } catch {
-            // fallback: select text or show toast
+            // TODO: fallback toast / select text (optional)
         }
     }, []);
+
+    // Memoize tooltip content to avoid unnecessary renders
+    const tooltipContent = useMemo(
+        () => (hasCopied ? 'IP COPIED!' : 'CLICK TO COPY'),
+        [hasCopied],
+    );
 
     return (
         <Layout>
             <Head title="NOMROTI | Next-Gen Minecraft Network" />
 
-            {/* Hero */}
+            {/* ── Hero ─────────────────────────────────────── */}
             <section className="relative flex min-h-[90vh] items-center justify-center overflow-hidden pt-20">
-                {/* Background layers */}
-                <div
-                    className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000"
-                    style={{
-                        backgroundImage: `
-        linear-gradient(to bottom, rgba(26, 26, 26, 0.88), rgba(26, 26, 26, 0.95)),
-        url('https://m.gettywallpapers.com/wp-content/uploads/2023/10/Minecraft-Laptop-Wallpaper-scaled.jpg')
-      `,
-                        backgroundBlendMode: 'multiply', // better darkening control
-                        willChange: 'transform', // helps with smooth scrolling on some devices
-                        transform: 'scale(1.02)', // subtle overscan → prevents edge flashing
-                    }}
-                />
-
-                {/* Optional subtle overlay grain/noise (very Minecraft vibe) – optional, comment out if not wanted */}
-                <div
-                    className="pointer-events-none absolute inset-0 z-0 opacity-[0.07]"
-                    style={{
-                        backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
-                        backgroundSize: '300px',
-                    }}
-                />
+                <HeroBackground />
 
                 <div className="relative z-10 container mx-auto max-w-7xl px-6">
                     <div className="grid items-center gap-16 lg:grid-cols-2">
-                        {/* Left column - text content (same as before) */}
+                        {/* Left – Content */}
                         <motion.div
                             initial={{ opacity: 0, x: -40 }}
                             animate={{ opacity: 1, x: 0 }}
@@ -85,7 +123,8 @@ export default function Welcome({ gamemodes }: { gamemodes: any }) {
                             className="space-y-8 text-center lg:text-left"
                         >
                             <h1 className="text-6xl leading-[0.9] font-black tracking-tighter uppercase italic md:text-8xl">
-                                NOMROTI <br />
+                                NOMROTI
+                                <br />
                                 <span className="text-primary drop-shadow-[0_0_20px_rgba(255,102,0,0.4)]">
                                     NETWORK
                                 </span>
@@ -100,32 +139,38 @@ export default function Welcome({ gamemodes }: { gamemodes: any }) {
                             </p>
 
                             <div className="flex flex-col items-center justify-center gap-5 pt-4 sm:flex-row lg:justify-start">
-                                {/* Copy IP button – same as before */}
+                                {/* IP Copy Button */}
                                 <TooltipProvider delayDuration={0}>
-                                    <Tooltip open={copied}>
+                                    <Tooltip open={hasCopied}>
                                         <TooltipTrigger asChild>
                                             <button
-                                                onClick={copyIp}
-                                                className="group flex cursor-pointer items-center gap-5 rounded-2xl border border-white/10 bg-black/65 p-4 px-7 shadow-2xl backdrop-blur-xl transition-all hover:border-primary/60 active:scale-98"
+                                                onClick={copyServerIp}
+                                                className={cn(
+                                                    'group flex cursor-pointer items-center gap-5 rounded-2xl border p-4 px-7 shadow-2xl backdrop-blur-xl transition-all active:scale-98',
+                                                    hasCopied
+                                                        ? 'border-green-500/60 bg-green-950/30'
+                                                        : 'border-white/10 bg-black/65 hover:border-primary/60',
+                                                )}
                                             >
                                                 <div className="relative flex h-3.5 w-3.5 shrink-0">
                                                     <span className="absolute h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
                                                     <span className="relative h-3.5 w-3.5 rounded-full bg-green-500 shadow-[0_0_14px_#22c55e]" />
                                                 </div>
+
                                                 <span className="font-mono text-2xl font-bold tracking-tight text-white">
                                                     nomroti.net
                                                 </span>
+
                                                 <div className="flex items-center gap-3 border-l border-white/15 pl-5">
                                                     <Users
                                                         className="text-primary"
                                                         size={22}
                                                     />
                                                     <span
-                                                        ref={playerRef}
+                                                        ref={playerCountRef}
                                                         className="text-2xl leading-none font-black text-primary tabular-nums"
                                                     >
-                                                        {playerCount.toLocaleString()}
-                                                        {/* <ServerStatus /> */}
+                                                        {animatedPlayers.toLocaleString()}
                                                     </span>
                                                 </div>
                                             </button>
@@ -134,15 +179,14 @@ export default function Welcome({ gamemodes }: { gamemodes: any }) {
                                             side="bottom"
                                             className="border-none bg-primary px-4 py-2.5 font-bold text-white"
                                         >
-                                            {copied
-                                                ? 'IP COPIED!'
-                                                : 'CLICK TO COPY'}
+                                            {tooltipContent}
                                         </TooltipContent>
                                     </Tooltip>
                                 </TooltipProvider>
 
+                                {/* Store CTA */}
                                 <Link
-                                    href="/store"
+                                    href="#game-mode" // or better: route('store') if it exists
                                     className="flex items-center gap-2.5 rounded-2xl border border-white/10 bg-white/5 px-7 py-4 text-base font-black tracking-wider uppercase transition hover:border-white/20 hover:bg-white/10"
                                 >
                                     Visit Store{' '}
@@ -154,7 +198,7 @@ export default function Welcome({ gamemodes }: { gamemodes: any }) {
                             </div>
                         </motion.div>
 
-                        {/* Right column - floating logo/image (same as before) */}
+                        {/* Right – Floating Hero Image (hidden on mobile) */}
                         <motion.div
                             variants={floatingVariants}
                             animate="float"
@@ -162,44 +206,34 @@ export default function Welcome({ gamemodes }: { gamemodes: any }) {
                         >
                             <img
                                 src="/assets/img/hero.png"
-                                alt="Nomroti Network"
+                                alt="Nomroti Network Logo / Hero Art"
                                 className="max-w-[50%] drop-shadow-[0_30px_90px_rgba(0,0,0,0.75)]"
                                 loading="eager"
                                 width={720}
                                 height={720}
+                                // Consider adding decoding="async" if image is large
                             />
                         </motion.div>
                     </div>
                 </div>
             </section>
 
-            {/* Gamemodes */}
-            <section className="relative z-10 container mx-auto -mt-16 px-5 pb-24 md:-mt-28 md:px-8 md:pb-40">
+            {/* ── Gamemodes Grid ─────────────────────────────── */}
+            <section
+                id="game-mode"
+                className="relative z-10 container mx-auto -mt-16 px-5 pb-24 md:-mt-28 md:px-8 md:pb-40"
+            >
                 <div className="grid gap-7 md:grid-cols-3 md:gap-8 lg:gap-10">
-                    {gamemodes.map((gamemodes, index) => (
+                    {gamemodes.map((mode) => (
                         <GamemodeCard
-                            title={gamemodes.title}
-                            description={gamemodes.description}
-                            image={gamemodes.image_url}
-                            href={route('product.index', {
-                                gamemodes: gamemodes.id,
-                            })}
+                            key={mode.id}
+                            title={mode.title}
+                            description={mode.description}
+                            image={mode.image_url}
+                            href={route('product.index', { gamemode: mode.id })}
+                            //   href={router.resolve('product.index', { gamemodes: mode.id }).href}
                         />
                     ))}
-
-                    {/* <GamemodeCard
-                        title="SKYBLOCK"
-                        description="Custom islands, automation, RPG progression, crates."
-                        image="/assets/img/gaming.avif"
-                        href="/crates/sky"
-                    />
-
-                    <GamemodeCard
-                        title="PRACTICE"
-                        description="Ranked 1v1, bridge, speed bridging, low-latency nodes."
-                        image="https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80"
-                        href="/practice"
-                    /> */}
                 </div>
             </section>
         </Layout>

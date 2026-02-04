@@ -11,6 +11,8 @@ import { Head } from '@inertiajs/react';
 import Navigation from './nav';
 import Footer from './footer';
 import { motion, AnimatePresence } from 'framer-motion';
+import FlashMessage from '../notify/FlashMessage';
+import { Toaster as HotToast } from 'react-hot-toast';
 interface LayoutProps {
     children: React.ReactNode;
     title?: string;
@@ -37,6 +39,8 @@ export default function Layout({
             <div className="flex min-h-screen flex-col bg-background text-foreground antialiased selection:bg-primary/30">
                 {/* Navigation */}
                 <Navigation />
+                <HotToast position="bottom-right" reverseOrder={false} />
+                <FlashMessage />
 
                 {/* Main Content Area */}
                 <AnimatePresence mode="wait">

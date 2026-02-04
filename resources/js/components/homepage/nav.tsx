@@ -47,7 +47,7 @@ export default function Navigation() {
                         <Home size={14} /> Home
                     </Link>
                     <Link
-                        href="/products"
+                        href="/#game-mode"
                         className="flex items-center gap-1.5 transition-colors hover:text-primary"
                     >
                         <ShoppingCart size={14} /> Store
