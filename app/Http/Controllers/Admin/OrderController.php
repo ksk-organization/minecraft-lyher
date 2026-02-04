@@ -10,8 +10,14 @@ class OrderController extends Controller
 {
     public function approve(Request $request)
     {
-        Order::where('id', $request->orderId)->update(['status' => 'completed']);
 
+        if ($request->action == "reject") {
+
+            Order::where('id', $request->orderId)->update(['status' => "failed"]);
+        } else {
+
+            Order::where('id', $request->orderId)->update(['status' => "completed"]);
+        }
         return back()->with('success', 'Approval Successfully');
     }
 }

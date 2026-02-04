@@ -2,36 +2,46 @@ import { usePage } from '@inertiajs/react';
 import { useEffect, useRef } from 'react';
 import toast from 'react-hot-toast';
 
-export default function FlashMessage() {
-    // Specify the shape of your flash props for better type safety
-    const { flash } = usePage<{ flash: { success?: string; error?: string } }>().props;
+interface FlashProps {
+    success?: string;
+    error?: string;
+    payment?: string;
+}
 
-    console.log(flash)
-    
-    // Use a ref to keep track of the last shown message to prevent duplicates
-    const shownMessage = useRef<string | null>(null);
+export default function FlashMessage() {
+    const { flash } = usePage<{ flash: FlashProps }>().props;
+    const lastToastId = useRef<string | null>(null);
 
     useEffect(() => {
-        const message = flash?.success || flash?.error;
-        const type = flash?.success ? 'success' : 'error';
+        const message = flash?.success || flash?.error || flash?.payment;
+        if (!message) return;
 
-        // 1. If there is no message, reset the "shown" tracker and exit
-        if (!message) {
-            shownMessage.current = null;
-            return;
+        // Prevent identical toast spam if the page re-renders
+        if (lastToastId.current === message) return;
+
+        const toastOptions = { 
+            duration: 3000, 
+            position: 'top-right' as const,
+            // Optimization: unique ID prevents duplicate toast stacking
+            id: message 
+        };
+
+        if (flash.success || flash.payment) {
+            toast.success(message, toastOptions);
+        } else if (flash.error) {
+            toast.error(message, toastOptions);
         }
 
-        // 2. If the current flash message is different from the last one we showed
-        if (message !== shownMessage.current) {
-            shownMessage.current = message;
+        lastToastId.current = message;
 
-            if (type === 'success') {
-                toast.success(message, { duration: 3000, position: 'top-right' });
-            } else {
-                toast.error(message, { duration: 3000, position: 'top-right' });
-            }
-        }
-    }, [flash]); // Re-run whenever the flash object changes
+        // Cleanup: Clear the ref after the duration to allow the same message 
+        // to appear again later if triggered by a new action
+        const timer = setTimeout(() => {
+            lastToastId.current = null;
+        }, 3100);
+
+        return () => clearTimeout(timer);
+    }, [flash]);
 
     return null;
 }

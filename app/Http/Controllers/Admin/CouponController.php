@@ -148,12 +148,27 @@ class CouponController extends Controller
         }
 
         // You can add more checks: min_spend, usage limit, etc.
-
+        // {
+        //     "id": 1,
+        //     "code": "KIKILO",
+        //     "type": "percent",
+        //     "value": "10.00",
+        //     "min_spend": "10.00",
+        //     "max_uses": 10,
+        //     "used_count": 0,
+        //     "expires_at": "2030-01-10T00:00:00.000000Z",
+        //     "created_at": "2026-02-04T10:08:01.000000Z",
+        //     "updated_at": "2026-02-04T10:08:01.000000Z"
+        // }
+        // return response()->json($coupon);
         return response()->json([
             'valid' => true,
             'discount' => $coupon->value,
             'type' => $coupon->type,
-            'message' => $coupon->type === 'percentage' ? "{$coupon->value}% off" : "\${$coupon->value} off",
+            'min_spend' => $coupon->min_spend,
+            "max_uses" => $coupon->max_uses,
+            "used_count"=> $coupon->used_count,
+            'message' => $coupon->type === 'percent' ? "{$coupon->value}% off" : "\${$coupon->value} off",
         ]);
     }
 }
