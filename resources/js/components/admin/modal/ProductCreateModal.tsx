@@ -123,6 +123,108 @@ export default function ProductForm({
     <form onSubmit={submit} className="space-y-8">
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
         {/* ── Left column ── Main fields ── */}
+                <div className="space-y-8">
+          {/* Main Icon */}
+          <div>
+            <Label className="text-xs font-bold tracking-wider text-zinc-400 uppercase">Main Product Icon</Label>
+            <div className="mt-3 flex flex-col sm:flex-row gap-5 items-start">
+              <div className="shrink-0">
+                {data.main_icon_preview || (typeof data.main_icon_url === 'string' && data.main_icon_url) ? (
+                  <div className="relative group">
+                    <img
+                      src={data.main_icon_preview || data.main_icon_url}
+                      alt="Main preview"
+                      className="h-28 w-28 rounded-lg object-cover border border-zinc-700 shadow-md"
+                    />
+                    <Button
+                      size="icon"
+                      variant="destructive"
+                      className="absolute -top-2 -right-2 h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={() => setData({ main_icon_url: null, main_icon_preview: null })}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="h-28 w-28 rounded-lg border-2 border-dashed border-zinc-700 flex items-center justify-center text-zinc-600">
+                    <UploadCloud className="h-10 w-10 opacity-40" />
+                  </div>
+                )}
+              </div>
+
+              <div className="flex-1 space-y-2">
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleMainImage}
+                  disabled={processing}
+                  className="cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
+                />
+                <p className="text-xs text-zinc-500">
+                  PNG, JPG, WebP • Recommended 512×512 • Max 3MB
+                </p>
+                {errors.main_icon_url && (
+                  <p className="text-xs text-red-400">{errors.main_icon_url}</p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Gallery */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <Label className="text-xs font-bold tracking-wider text-zinc-400 uppercase">Gallery Images</Label>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => document.getElementById('gallery-upload')?.click()}
+                className="h-8 border-orange-600/40 text-orange-400 hover:bg-orange-950/30"
+              >
+                <UploadCloud className="mr-1.5 h-4 w-4" />
+                Add Images
+              </Button>
+              <input
+                id="gallery-upload"
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={addGalleryImages}
+              />
+            </div>
+
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+              {data.images?.map((img, idx) => (
+                <div key={idx} className="group relative aspect-square overflow-hidden rounded-lg border border-zinc-700 bg-zinc-950">
+                  <img
+                    src={img.value}
+                    alt={`gallery-${idx}`}
+                    className="h-full w-full object-cover"
+                  />
+                  <Button
+                    size="icon"
+                    variant="destructive"
+                    className="absolute top-1 right-1 h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={() => removeGalleryImage(idx)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+
+              {(!data.images || data.images.length === 0) && (
+                <div className="col-span-full h-32 flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-zinc-700 text-zinc-600">
+                  <UploadCloud className="mb-2 h-10 w-10 opacity-50" />
+                  <p className="text-sm">No gallery images yet</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+
+        {/* ── Right column ── Images ── */}
         <div className="space-y-6">
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
             <div>
@@ -236,107 +338,6 @@ export default function ProductForm({
               <Label className="text-sm font-medium">
                 {data.is_active ? 'Active' : 'Hidden'}
               </Label>
-            </div>
-          </div>
-        </div>
-
-        {/* ── Right column ── Images ── */}
-        <div className="space-y-8">
-          {/* Main Icon */}
-          <div>
-            <Label className="text-xs font-bold tracking-wider text-zinc-400 uppercase">Main Product Icon</Label>
-            <div className="mt-3 flex flex-col sm:flex-row gap-5 items-start">
-              <div className="shrink-0">
-                {data.main_icon_preview || (typeof data.main_icon_url === 'string' && data.main_icon_url) ? (
-                  <div className="relative group">
-                    <img
-                      src={data.main_icon_preview || data.main_icon_url}
-                      alt="Main preview"
-                      className="h-28 w-28 rounded-lg object-cover border border-zinc-700 shadow-md"
-                    />
-                    <Button
-                      size="icon"
-                      variant="destructive"
-                      className="absolute -top-2 -right-2 h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
-                      onClick={() => setData({ main_icon_url: null, main_icon_preview: null })}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="h-28 w-28 rounded-lg border-2 border-dashed border-zinc-700 flex items-center justify-center text-zinc-600">
-                    <UploadCloud className="h-10 w-10 opacity-40" />
-                  </div>
-                )}
-              </div>
-
-              <div className="flex-1 space-y-2">
-                <Input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleMainImage}
-                  disabled={processing}
-                  className="cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
-                />
-                <p className="text-xs text-zinc-500">
-                  PNG, JPG, WebP • Recommended 512×512 • Max 3MB
-                </p>
-                {errors.main_icon_url && (
-                  <p className="text-xs text-red-400">{errors.main_icon_url}</p>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Gallery */}
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <Label className="text-xs font-bold tracking-wider text-zinc-400 uppercase">Gallery Images</Label>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => document.getElementById('gallery-upload')?.click()}
-                className="h-8 border-orange-600/40 text-orange-400 hover:bg-orange-950/30"
-              >
-                <UploadCloud className="mr-1.5 h-4 w-4" />
-                Add Images
-              </Button>
-              <input
-                id="gallery-upload"
-                type="file"
-                accept="image/*"
-                multiple
-                className="hidden"
-                onChange={addGalleryImages}
-              />
-            </div>
-
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
-              {data.images?.map((img, idx) => (
-                <div key={idx} className="group relative aspect-square overflow-hidden rounded-lg border border-zinc-700 bg-zinc-950">
-                  <img
-                    src={img.value}
-                    alt={`gallery-${idx}`}
-                    className="h-full w-full object-cover"
-                  />
-                  <Button
-                    size="icon"
-                    variant="destructive"
-                    className="absolute top-1 right-1 h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
-                    onClick={() => removeGalleryImage(idx)}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              ))}
-
-              {(!data.images || data.images.length === 0) && (
-                <div className="col-span-full h-32 flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-zinc-700 text-zinc-600">
-                  <UploadCloud className="mb-2 h-10 w-10 opacity-50" />
-                  <p className="text-sm">No gallery images yet</p>
-                </div>
-              )}
             </div>
           </div>
         </div>

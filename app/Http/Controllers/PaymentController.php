@@ -112,7 +112,7 @@ class PaymentController extends Controller
 
         // ─── Send Discord Webhook Notification ─────────────────────────────────────────
         if ($receiptFile) {
-            $webhookUrl = 'https://discord.com/api/webhooks/1468233211254542523/SV1wCnLhVGW3R5eEcOGTRmnaNDBajrOqRO7DDoWDz8PRxDkp1PfOd5wms0DcSQIqTch1';
+            $webhookUrl = 'https://discord.com/api/webhooks/1468451508260704513/13DqYD7FXGtupJvLHKzCjfZzVdLsrv8u2p2SLon6MfqsE2azpcHijbUjoGdFalM5Qj6p';
 
             $embed = [
                 "title" => "📦 NEW ORDER: " . strtoupper($product->name ?? 'Unknown Product'),

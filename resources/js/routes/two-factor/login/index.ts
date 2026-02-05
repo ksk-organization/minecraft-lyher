@@ -51,3 +51,11 @@ store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
         storeForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
             action: store.url(options),
             method: 'post',
+        })
+    
+    store.form = storeForm
+const login = {
+    store: Object.assign(store, store),
+}
+
+export default login
