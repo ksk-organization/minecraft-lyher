@@ -1,4 +1,4 @@
-// resources/js/Pages/Admin/Products/Index.tsx
+// resources/js/Pages/Admin/Products/ProductForm.tsx
 import React, { useCallback, useEffect } from 'react';
 import { useForm } from '@inertiajs/react';
 import {
@@ -20,30 +20,14 @@ import {
 } from '@/components/ui/select';
 import { route } from 'ziggy-js';
 
-// ────────────────────────────────────────────────
-// Types
-// ────────────────────────────────────────────────
-
-interface Product {
-  id: number;
-  game_mode_id: number;
-  category_id: number;
-  name: string;
-  slug: string;
-  price: number;
-  stock: number;
-  is_active: boolean;
-  short_description: string | null;
-  main_icon_url: string | null;
-  game_mode?: { id: number; title: string };
-  category?: { id: number; name: string };
-  images: { id: number; image_url: string }[];
+// Types (same as before)
+interface ProductImage {
+  id?: number;
+  type: 'url' | 'file';
+  value: string;
+  file?: File | null;
 }
 
-
-// ────────────────────────────────────────────────
-// Reusable Form Component (create + edit)
-// ────────────────────────────────────────────────
 export default function ProductForm({
   form,
   mode, // 'create' | 'edit'
@@ -59,7 +43,7 @@ export default function ProductForm({
 }) {
   const { data, setData, processing, errors, post, put } = form;
 
-  // Main image preview cleanup
+  // Cleanup old blob URLs when component unmounts or preview changes
   useEffect(() => {
     return () => {
       if (data.main_icon_preview && data.main_icon_preview.startsWith('blob:')) {
@@ -73,10 +57,13 @@ export default function ProductForm({
     if (!file) return;
 
     const preview = URL.createObjectURL(file);
-    setData({
+
+    // IMPORTANT: functional update → preserves all other fields!
+    setData((prevData) => ({
+      ...prevData,
       main_icon_url: file,
       main_icon_preview: preview,
-    });
+    }));
   }, [setData]);
 
   const addGalleryImages = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -89,29 +76,38 @@ export default function ProductForm({
       file,
     }));
 
-    setData('images', [...(data.images || []), ...newImages]);
-  }, [data.images, setData]);
+    // Also preserve existing images
+    setData((prev) => ({
+      ...prev,
+      images: [...(prev.images || []), ...newImages],
+    }));
+  }, [setData]);
 
   const removeGalleryImage = useCallback((index: number) => {
-    const newImages = [...(data.images || [])];
-    const removed = newImages.splice(index, 1)[0];
+    setData((prev) => {
+      const newImages = [...(prev.images || [])];
+      const removed = newImages.splice(index, 1)[0];
 
-    // Cleanup blob URL if it was a new file
-    if (removed?.type === 'file' && removed.value.startsWith('blob:')) {
-      URL.revokeObjectURL(removed.value);
-    }
+      if (removed?.type === 'file' && removed.value.startsWith('blob:')) {
+        URL.revokeObjectURL(removed.value);
+      }
 
-    setData('images', newImages);
-  }, [data.images, setData]);
+      return {
+        ...prev,
+        images: newImages,
+      };
+    });
+  }, [setData]);
 
   const submit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
 
     const method = mode === 'create' ? post : put;
-    const routeParams = mode === 'create' ? [] : [data.id];
+    const routeName = mode === 'create' ? 'admin.products.store' : 'admin.products.update';
+    const params = mode === 'create' ? [] : [data.id];
 
-    method(route(`admin.products.${mode === 'create' ? 'store' : 'update'}`, ...routeParams), {
-      forceFormData: true,           // ← very important for file uploads
+    method(route(routeName, ...params), {
+      forceFormData: true,
       preserveScroll: true,
       onSuccess: () => {
         onClose();
@@ -122,109 +118,7 @@ export default function ProductForm({
   return (
     <form onSubmit={submit} className="space-y-8">
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-        {/* ── Left column ── Main fields ── */}
-                <div className="space-y-8">
-          {/* Main Icon */}
-          <div>
-            <Label className="text-xs font-bold tracking-wider text-zinc-400 uppercase">Main Product Icon</Label>
-            <div className="mt-3 flex flex-col sm:flex-row gap-5 items-start">
-              <div className="shrink-0">
-                {data.main_icon_preview || (typeof data.main_icon_url === 'string' && data.main_icon_url) ? (
-                  <div className="relative group">
-                    <img
-                      src={data.main_icon_preview || data.main_icon_url}
-                      alt="Main preview"
-                      className="h-28 w-28 rounded-lg object-cover border border-zinc-700 shadow-md"
-                    />
-                    <Button
-                      size="icon"
-                      variant="destructive"
-                      className="absolute -top-2 -right-2 h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
-                      onClick={() => setData({ main_icon_url: null, main_icon_preview: null })}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="h-28 w-28 rounded-lg border-2 border-dashed border-zinc-700 flex items-center justify-center text-zinc-600">
-                    <UploadCloud className="h-10 w-10 opacity-40" />
-                  </div>
-                )}
-              </div>
-
-              <div className="flex-1 space-y-2">
-                <Input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleMainImage}
-                  disabled={processing}
-                  className="cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
-                />
-                <p className="text-xs text-zinc-500">
-                  PNG, JPG, WebP • Recommended 512×512 • Max 3MB
-                </p>
-                {errors.main_icon_url && (
-                  <p className="text-xs text-red-400">{errors.main_icon_url}</p>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Gallery */}
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <Label className="text-xs font-bold tracking-wider text-zinc-400 uppercase">Gallery Images</Label>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => document.getElementById('gallery-upload')?.click()}
-                className="h-8 border-orange-600/40 text-orange-400 hover:bg-orange-950/30"
-              >
-                <UploadCloud className="mr-1.5 h-4 w-4" />
-                Add Images
-              </Button>
-              <input
-                id="gallery-upload"
-                type="file"
-                accept="image/*"
-                multiple
-                className="hidden"
-                onChange={addGalleryImages}
-              />
-            </div>
-
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
-              {data.images?.map((img, idx) => (
-                <div key={idx} className="group relative aspect-square overflow-hidden rounded-lg border border-zinc-700 bg-zinc-950">
-                  <img
-                    src={img.value}
-                    alt={`gallery-${idx}`}
-                    className="h-full w-full object-cover"
-                  />
-                  <Button
-                    size="icon"
-                    variant="destructive"
-                    className="absolute top-1 right-1 h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
-                    onClick={() => removeGalleryImage(idx)}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              ))}
-
-              {(!data.images || data.images.length === 0) && (
-                <div className="col-span-full h-32 flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-zinc-700 text-zinc-600">
-                  <UploadCloud className="mb-2 h-10 w-10 opacity-50" />
-                  <p className="text-sm">No gallery images yet</p>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-
-        {/* ── Right column ── Images ── */}
+        {/* Left column – Main fields */}
         <div className="space-y-6">
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
             <div>
@@ -250,6 +144,7 @@ export default function ProductForm({
             </div>
           </div>
 
+          {/* Game Mode & Category */}
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
             <div>
               <Label className="text-xs font-bold tracking-wider text-zinc-400 uppercase">Game Mode</Label>
@@ -338,6 +233,111 @@ export default function ProductForm({
               <Label className="text-sm font-medium">
                 {data.is_active ? 'Active' : 'Hidden'}
               </Label>
+            </div>
+          </div>
+        </div>
+
+        {/* Right column – Images */}
+        <div className="space-y-8">
+          {/* Main Icon */}
+          <div>
+            <Label className="text-xs font-bold tracking-wider text-zinc-400 uppercase">Main Product Icon</Label>
+            <div className="mt-3 flex flex-col sm:flex-row gap-5 items-start">
+              <div className="shrink-0">
+                {data.main_icon_preview || (typeof data.main_icon_url === 'string' && data.main_icon_url) ? (
+                  <div className="relative group">
+                    <img
+                      src={data.main_icon_preview || data.main_icon_url}
+                      alt="Main preview"
+                      className="h-28 w-28 rounded-lg object-cover border border-zinc-700 shadow-md"
+                    />
+                    <Button
+                      size="icon"
+                      variant="destructive"
+                      className="absolute -top-2 -right-2 h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={() => setData((prev) => ({
+                        ...prev,
+                        main_icon_url: null,
+                        main_icon_preview: null,
+                      }))}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="h-28 w-28 rounded-lg border-2 border-dashed border-zinc-700 flex items-center justify-center text-zinc-600">
+                    <UploadCloud className="h-10 w-10 opacity-40" />
+                  </div>
+                )}
+              </div>
+
+              <div className="flex-1 space-y-2">
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleMainImage}
+                  disabled={processing}
+                  className="cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
+                />
+                <p className="text-xs text-zinc-500">
+                  PNG, JPG, WebP • Recommended 512×512 • Max 3MB
+                </p>
+                {errors.main_icon_url && (
+                  <p className="text-xs text-red-400">{errors.main_icon_url}</p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Gallery */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <Label className="text-xs font-bold tracking-wider text-zinc-400 uppercase">Gallery Images</Label>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => document.getElementById('gallery-upload')?.click()}
+                className="h-8 border-orange-600/40 text-orange-400 hover:bg-orange-950/30"
+              >
+                <UploadCloud className="mr-1.5 h-4 w-4" />
+                Add Images
+              </Button>
+              <input
+                id="gallery-upload"
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={addGalleryImages}
+              />
+            </div>
+
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+              {data.images?.map((img, idx) => (
+                <div key={idx} className="group relative aspect-square overflow-hidden rounded-lg border border-zinc-700 bg-zinc-950">
+                  <img
+                    src={img.value}
+                    alt={`gallery-${idx}`}
+                    className="h-full w-full object-cover"
+                  />
+                  <Button
+                    size="icon"
+                    variant="destructive"
+                    className="absolute top-1 right-1 h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={() => removeGalleryImage(idx)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+
+              {(!data.images || data.images.length === 0) && (
+                <div className="col-span-full h-32 flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-zinc-700 text-zinc-600">
+                  <UploadCloud className="mb-2 h-10 w-10 opacity-50" />
+                  <p className="text-sm">No gallery images yet</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
