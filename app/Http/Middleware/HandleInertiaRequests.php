@@ -36,30 +36,47 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        $user = $request->user();
 
-        $orders = Order::query()
-            ->where('user_id',  $request->user()->id)
-            ->where('status' , 'pending')
-            ->count();
+        // Only query orders if user is authenticated
+        $pendingOrdersCount = 0;
+        if ($user) {
+            $pendingOrdersCount = Order::query()
+                ->where('user_id', $user->id)
+                ->where('status', 'pending')
+                ->count();
+        }
 
-
-        return [
-            ...parent::share($request),
+        return array_merge(parent::share($request), [
+            // App name (usually static, but good to keep)
             'name' => config('app.name'),
+
+            // Authentication & permissions
             'auth' => [
-                'user' => $request->user(),
+                'user' => $user ? $user->only([
+                    'id',
+                    'name',
+                    'email',
+                    'avatar', // pick only needed fields
+                ]) : null,
                 'can' => [
-                    'access-admin-page' => $request->user()?->can('access-admin-page'),
+                    'access-admin-page' => $user?->can('access-admin-page') ?? false,
                 ],
             ],
+
+            // Flash messages (standard)
             'flash' => [
                 'success' => $request->session()->get('success'),
                 'error'   => $request->session()->get('error'),
-                'payment'   => $request->session()->get('payment'),
+                'payment' => $request->session()->get('payment'),
             ],
-            'orders_count'   => $orders,
 
-            'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
-        ];
+            // Order count for navigation badge
+            'orders_count' => $pendingOrdersCount,
+
+            // Sidebar state (cookie-based persistence)
+            'sidebarOpen' => ! $request->hasCookie('sidebar_state')
+                || $request->cookie('sidebar_state') === 'true',
+        ]);
     }
 }
