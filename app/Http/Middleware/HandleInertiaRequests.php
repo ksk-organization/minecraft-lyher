@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Order;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -35,6 +36,13 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+
+        $orders = Order::query()
+            ->where('user_id',  $request->user()->id)
+            ->where('status' , 'pending')
+            ->count();
+
+
         return [
             ...parent::share($request),
             'name' => config('app.name'),
@@ -49,6 +57,8 @@ class HandleInertiaRequests extends Middleware
                 'error'   => $request->session()->get('error'),
                 'payment'   => $request->session()->get('payment'),
             ],
+            'orders_count'   => $orders,
+
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];
     }

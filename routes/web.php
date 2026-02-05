@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\GameModeController;
 use App\Http\Controllers\Admin\CouponController;
 use App\Http\Controllers\StoreController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\PurchaseController;
 use App\Models\Coupon;
 use App\Models\GameMode;
 
@@ -26,6 +27,7 @@ Route::get('/', function () {
 Route::get('/store', [StoreController::class, 'index']);
 Route::resource('/products', StoreController::class)->names('product');
 Route::resource('/payment', PaymentController::class)->names('payment')->middleware('auth');
+Route::resource('/purchase', PurchaseController::class)->names('purchase')->middleware('auth');
 Route::get('checkout/coupon/check', [CouponController::class, 'check'])->name('checkout.check-coupon');
 Route::get('/payment/success', function () {
     return Inertia::render('payment-success');

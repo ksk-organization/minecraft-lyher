@@ -46,23 +46,6 @@ public function index()
         //     ];
         // });
 
-    // dd($pendingOrders);
-    // "id" => 3
-    // "user_id" => 1
-    // "product_id" => 1
-    // "minecraft_username" => "qajive"
-    // "email" => "jytaqyvy@mailinator.com"
-    // "platform" => "Java"
-    // "subtotal" => "93.00"
-    // "coupon_id" => null
-    // "discount_total" => "0.00"
-    // "total" => "93.00"
-    // "status" => "pending"
-    // "transaction_id" => null
-    // "attachment_url" => "receipts/2026-02/IR0LwWgeZWKGWT8BAf9QQuYPiNsxGqK7ek2eBxQF.png"
-    // "created_at" => "2026-02-04 05:57:09"
-    // "updated_at" => "2026-02-04 05:57:09"
-
     // Recent history – last 20 processed orders
     $history = Order::with(['orderItems.product', 'coupon'])
         ->whereNotIn('status', ['pending'])
