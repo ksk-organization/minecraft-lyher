@@ -513,7 +513,7 @@ update.patch = (args: { game_mode: string | number } | [game_mode: string | numb
     update.form = updateForm
 /**
 * @see \App\Http\Controllers\Admin\GameModeController::destroy
- * @see app/Http/Controllers/Admin/GameModeController.php:93
+ * @see app/Http/Controllers/Admin/GameModeController.php:91
  * @route '/admin/game-modes/{game_mode}'
  */
 export const destroy = (args: { game_mode: number | { id: number } } | [game_mode: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -528,7 +528,7 @@ destroy.definition = {
 
 /**
 * @see \App\Http\Controllers\Admin\GameModeController::destroy
- * @see app/Http/Controllers/Admin/GameModeController.php:93
+ * @see app/Http/Controllers/Admin/GameModeController.php:91
  * @route '/admin/game-modes/{game_mode}'
  */
 destroy.url = (args: { game_mode: number | { id: number } } | [game_mode: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -561,7 +561,7 @@ destroy.url = (args: { game_mode: number | { id: number } } | [game_mode: number
 
 /**
 * @see \App\Http\Controllers\Admin\GameModeController::destroy
- * @see app/Http/Controllers/Admin/GameModeController.php:93
+ * @see app/Http/Controllers/Admin/GameModeController.php:91
  * @route '/admin/game-modes/{game_mode}'
  */
 destroy.delete = (args: { game_mode: number | { id: number } } | [game_mode: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -571,7 +571,7 @@ destroy.delete = (args: { game_mode: number | { id: number } } | [game_mode: num
 
     /**
 * @see \App\Http\Controllers\Admin\GameModeController::destroy
- * @see app/Http/Controllers/Admin/GameModeController.php:93
+ * @see app/Http/Controllers/Admin/GameModeController.php:91
  * @route '/admin/game-modes/{game_mode}'
  */
     const destroyForm = (args: { game_mode: number | { id: number } } | [game_mode: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -586,7 +586,7 @@ destroy.delete = (args: { game_mode: number | { id: number } } | [game_mode: num
 
             /**
 * @see \App\Http\Controllers\Admin\GameModeController::destroy
- * @see app/Http/Controllers/Admin/GameModeController.php:93
+ * @see app/Http/Controllers/Admin/GameModeController.php:91
  * @route '/admin/game-modes/{game_mode}'
  */
         destroyForm.delete = (args: { game_mode: number | { id: number } } | [game_mode: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({

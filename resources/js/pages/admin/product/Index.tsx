@@ -1,5 +1,5 @@
 // resources/js/Pages/Admin/Products/Index.tsx
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { Head, router, useForm } from '@inertiajs/react';
 import {
   PlusCircle,
@@ -32,15 +32,38 @@ import {
 import { route } from 'ziggy-js';
 import AppLayout from '@/layouts/app-layout';
 import ProductForm from '@/components/admin/modal/ProductCreateModal';
+// import ProductForm from '@/Pages/Admin/Products/ProductForm'; // adjust path if needed
 
 // ────────────────────────────────────────────────
 // Types
 // ────────────────────────────────────────────────
+
 interface ProductImage {
-  id?: number;           // from DB (existing)
-  type: 'url' | 'file';
-  value: string;         // preview or existing url
-  file?: File | null;    // only for new uploads
+  id?: number;
+  url: string;           // existing image url (with /storage/ prefix)
+}
+
+interface NewImage {
+  file: File;
+  preview: string;
+}
+
+interface ProductFormData {
+  id?: number;
+  name: string;
+  slug: string;
+  short_description?: string;
+  price?: string | number;
+  stock?: string | number;
+  is_active: boolean;
+  game_mode_id?: string | number;
+  category_id?: string | number;
+
+  main_icon?: File | null;
+  main_icon_url?: string | null;      // existing or preview
+
+  images: (ProductImage | NewImage)[];
+  deleted_image_ids: number[];
 }
 
 interface Product {
@@ -65,9 +88,6 @@ interface Props {
   categories: { id: number; name: string }[];
 }
 
-// ────────────────────────────────────────────────
-// Main Page Component
-// ────────────────────────────────────────────────
 export default function AdminProductsIndex({
   products,
   game_modes,
@@ -77,19 +97,20 @@ export default function AdminProductsIndex({
   const [modalMode, setModalMode] = useState<'create' | 'edit' | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
 
-  const form = useForm({
-    id: null as number | null,
-    game_mode_id: '',
-    category_id: '',
+  const form = useForm<ProductFormData>({
+    id: undefined,
     name: '',
     slug: '',
+    short_description: '',
     price: '',
     stock: '',
-    short_description: '',
     is_active: true,
-    main_icon_url: null as File | string | null,
-    main_icon_preview: null as string | null,
-    images: [] as ProductImage[],
+    game_mode_id: '',
+    category_id: '',
+    main_icon: null,
+    main_icon_url: null,
+    images: [],
+    deleted_image_ids: [],
   });
 
   const filteredProducts = useMemo(() =>
@@ -106,25 +127,29 @@ export default function AdminProductsIndex({
 
   const openEdit = useCallback((product: Product) => {
     form.clearErrors();
+
     form.setData({
       id: product.id,
-      game_mode_id: String(product.game_mode_id),
-      category_id: String(product.category_id),
       name: product.name,
       slug: product.slug,
       short_description: product.short_description ?? '',
       price: String(product.price),
-      stock: String(product.stock),
+      stock: product.stock != null ? String(product.stock) : '',
       is_active: !!product.is_active,
-      main_icon_url: product.main_icon_url ?? null,
-      main_icon_preview: null,
+      game_mode_id: String(product.game_mode_id),
+      category_id: String(product.category_id),
+
+      main_icon: null,
+      main_icon_url: product.main_icon_url ? `/storage/${product.main_icon_url}` : null,
+
       images: product.images.map(img => ({
         id: img.id,
-        type: 'url',
-        value: img.image_url.startsWith('http') ? img.image_url : `/storage/${img.image_url}`,
-        file: null,
+        url: `/storage/${img.image_url}`,
       })),
+
+      deleted_image_ids: [],
     });
+
     setModalMode('edit');
   }, [form]);
 
@@ -215,13 +240,11 @@ export default function AdminProductsIndex({
                       >
                         <TableCell>
                           <div className="flex items-center gap-3">
-                            {/* Main Image */}
                             {product.main_icon_url ? (
                               <img
                                 src={`/storage/${product.main_icon_url}`}
                                 alt={product.name}
                                 className="h-14 w-14 rounded-md object-cover border border-zinc-700"
-                                onError={e => (e.currentTarget.style.display = 'none')}
                               />
                             ) : (
                               <div className="h-14 w-14 rounded-md bg-zinc-800 flex items-center justify-center text-zinc-600">
@@ -229,7 +252,6 @@ export default function AdminProductsIndex({
                               </div>
                             )}
 
-                            {/* Gallery preview (small) */}
                             {product.images?.length > 0 && (
                               <div className="flex -space-x-2">
                                 {product.images.slice(0, 3).map((img, i) => (
@@ -313,7 +335,7 @@ export default function AdminProductsIndex({
               <DialogTitle className="text-3xl font-black text-orange-500">
                 {modalMode === 'create' ? 'Create New Product' : 'Edit Product'}
               </DialogTitle>
-              {modalMode === 'edit' && (
+              {modalMode === 'edit' && form.data.id && (
                 <DialogDescription className="text-zinc-400 mt-1">
                   Product ID: <span className="font-mono text-orange-400">#{form.data.id}</span>
                 </DialogDescription>

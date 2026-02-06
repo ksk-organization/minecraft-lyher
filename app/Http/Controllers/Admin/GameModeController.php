@@ -53,8 +53,6 @@ class GameModeController extends Controller
 
     public function update(Request $request, GameMode $gameMode)
     {
-
-        dd($request->all());
         
         $validated = $request->validate([
             'title'       => 'required|string|max:100|unique:game_modes,title,' . $gameMode->id,

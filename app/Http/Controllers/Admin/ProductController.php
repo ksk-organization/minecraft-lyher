@@ -119,58 +119,145 @@ public function update(Request $request, Product $product)
 {
 
     // dd($request->all());
-    $request->validate([
-        'name' => 'required|string|max:255',
-        'price' => 'required|numeric',
-        'images' => 'nullable|array',
-        'images.*.type' => 'required|in:file,url',
-        'images.*.file' => 'nullable|image|max:2048',
-        'images.*.value' => 'nullable|string',
+    
+    $validated = $request->validate([
+        'game_mode_id'      => 'sometimes|required|exists:game_modes,id',
+        'category_id'       => 'sometimes|required|exists:categories,id',
+        'name'              => 'sometimes|required|string|max:255',
+        'slug'              => 'sometimes|required|string|unique:products,slug,' . $product->id,
+        'price'             => 'sometimes|required|numeric',
+        'stock'             => 'sometimes|nullable|integer',
+        'is_active'         => 'sometimes|boolean',
+        'short_description' => 'sometimes|nullable|string',
+        'long_description'  => 'sometimes|nullable|string',
+
+        // Main icon - allow file or empty string to remove
+        'main_icon'         => 'nullable|image|max:2048',
+
+        // New gallery images
+        'images'            => 'sometimes|array',
+        'images.*'          => 'image|max:2048',
+
+        // IDs of existing images to delete
+        'deleted_image_ids' => 'sometimes|array',
+        'deleted_image_ids.*' => 'integer|exists:product_images,id',
     ]);
 
-    \DB::transaction(function () use ($request, $product) {
-        // 1. Update Core Product Data
-        $product->update($request->only([
-            'game_mode_id', 'category_id', 'name', 'slug', 'price', 'stock', 'is_active', 'main_icon_url', 'short_description'
-        ]));
-
-        // 2. Sync Multimedia Gallery
-        if ($request->has('images')) {
-            $currentImageUrls = [];
-
-            foreach ($request->images as $index => $imgData) {
-                $finalUrl = null;
-
-                if ($imgData['type'] === 'file' && $request->hasFile("images.{$index}.file")) {
-                    // Fast Storage: Store new file
-                    $finalUrl = $request->file("images.{$index}.file")->store('products/gallery', 'public');
-                } else {
-                    // Keep existing URL or use provided URL string
-                    // We strip the "/storage/" prefix if it exists to keep DB paths consistent
-                    $finalUrl = str_replace('/storage/', '', $imgData['value'] ?? '');
-                }
-
-                if ($finalUrl) {
-                    // UpdateOrCreate prevents duplicate rows and keeps sort order
-                    $product->images()->updateOrCreate(
-                        ['image_url' => $finalUrl],
-                        ['image_url' => $finalUrl]
-                    );
-                    $currentImageUrls[] = $finalUrl;
-                }
-            }
-
-            // 3. Performance Cleanup: Remove images that were deleted in the UI
-            // This prevents "Ghost Assets" from cluttering the DB
-            $product->images()->whereNotIn('image_url', $currentImageUrls)->delete();
-        } else {
-            // If no images sent, purge the gallery for this product
-            $product->images()->delete();
+    // ────────────────────────────────────────────────
+    // Update main icon
+    // ────────────────────────────────────────────────
+    if ($request->hasFile('main_icon')) {
+        // Delete old icon if exists
+        if ($product->main_icon_url) {
+            Storage::disk('public')->delete($product->main_icon_url);
         }
-    });
+        $validated['main_icon_url'] = $request->file('main_icon')
+            ->store('products/gallery', 'public');
+    } elseif ($request->filled('main_icon') && $request->input('main_icon') === '') {
+        // User explicitly removed the main icon
+        if ($product->main_icon_url) {
+            Storage::disk('public')->delete($product->main_icon_url);
+        }
+        $validated['main_icon_url'] = null;
+    }
+    // If neither — keep existing main_icon_url
 
-    return redirect()->back()->with('success', 'Asset synchronized successfully.');
+    // ────────────────────────────────────────────────
+    // Update basic fields
+    // ────────────────────────────────────────────────
+    $product->update($validated);
+
+    $product->save();
+
+    // ────────────────────────────────────────────────
+    // Handle gallery image deletions
+    // ────────────────────────────────────────────────
+    if ($request->has('deleted_image_ids') && is_array($request->deleted_image_ids)) {
+        $imagesToDelete = $product->images()
+            ->whereIn('id', $request->deleted_image_ids)
+            ->get();
+
+        foreach ($imagesToDelete as $image) {
+            if ($image->image_url) {
+                Storage::disk('public')->delete($image->image_url);
+            }
+            $image->delete();
+        }
+    }
+
+    // ────────────────────────────────────────────────
+    // Add new gallery images
+    // ────────────────────────────────────────────────
+    if ($request->hasFile('images')) {
+        foreach ($request->file('images') as $newImage) {
+            $path = $newImage->store('products/gallery', 'public');
+            $product->images()->create([
+                'image_url' => $path,
+            ]);
+        }
+    }
+
+    // dd($request->all());
+
+    return redirect()->back()->with('success', 'Product updated successfully.');
 }
+
+// public function update(Request $request, Product $product)
+// {
+
+//     // dd($request->all());
+//     $request->validate([
+//         'name' => 'required|string|max:255',
+//         'price' => 'required|numeric',
+//         'images' => 'nullable|array',
+//         'images.*.type' => 'required|in:file,url',
+//         'images.*.file' => 'nullable|image|max:2048',
+//         'images.*.value' => 'nullable|string',
+//     ]);
+
+//     \DB::transaction(function () use ($request, $product) {
+//         // 1. Update Core Product Data
+//         $product->update($request->only([
+//             'game_mode_id', 'category_id', 'name', 'slug', 'price', 'stock', 'is_active', 'main_icon_url', 'short_description'
+//         ]));
+
+//         // 2. Sync Multimedia Gallery
+//         if ($request->has('images')) {
+//             $currentImageUrls = [];
+
+//             foreach ($request->images as $index => $imgData) {
+//                 $finalUrl = null;
+
+//                 if ($imgData['type'] === 'file' && $request->hasFile("images.{$index}.file")) {
+//                     // Fast Storage: Store new file
+//                     $finalUrl = $request->file("images.{$index}.file")->store('products/gallery', 'public');
+//                 } else {
+//                     // Keep existing URL or use provided URL string
+//                     // We strip the "/storage/" prefix if it exists to keep DB paths consistent
+//                     $finalUrl = str_replace('/storage/', '', $imgData['value'] ?? '');
+//                 }
+
+//                 if ($finalUrl) {
+//                     // UpdateOrCreate prevents duplicate rows and keeps sort order
+//                     $product->images()->updateOrCreate(
+//                         ['image_url' => $finalUrl],
+//                         ['image_url' => $finalUrl]
+//                     );
+//                     $currentImageUrls[] = $finalUrl;
+//                 }
+//             }
+
+//             // 3. Performance Cleanup: Remove images that were deleted in the UI
+//             // This prevents "Ghost Assets" from cluttering the DB
+//             $product->images()->whereNotIn('image_url', $currentImageUrls)->delete();
+//         } else {
+//             // If no images sent, purge the gallery for this product
+//             $product->images()->delete();
+//         }
+//     });
+
+//     return redirect()->back()->with('success', 'Asset synchronized successfully.');
+// }
 
     public function destroy(Product $product)
     {

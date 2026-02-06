@@ -16,7 +16,7 @@ class PaymentController extends Controller
 
     public function store(Request $request)
     {
-        $user = Auth::user(); // nullable for guest checkout
+        // $user = Auth::user(); // nullable for guest checkout
 
         // dd($request->all());
 
@@ -92,9 +92,9 @@ class PaymentController extends Controller
 
         // ─── Create order ───────────────────────────────────────────────────────────────
         $order = Order::create([
-            'user_id'             => $user?->id,
+            'user_id'             => 1,
             'minecraft_username'  => $validated['minecraft_name'],
-            'email'               => $user?->email ?? 'guest@nomroti.net',
+            'email'               => 'guest@nomroti.net',
             'qty'                 => $validated['qty'],
             'platform'            => $validated['platform'],
             'subtotal'            => $subtotal,
