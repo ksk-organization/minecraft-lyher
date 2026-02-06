@@ -6,14 +6,17 @@ interface FlashProps {
     success?: string;
     error?: string;
     payment?: string;
+    errors?: any;
 }
 
 export default function FlashMessage() {
     const { flash } = usePage<{ flash: FlashProps }>().props;
     const lastToastId = useRef<string | null>(null);
 
+    // console.log(flash?.errors)
+
     useEffect(() => {
-        const message = flash?.success || flash?.error || flash?.payment;
+        const message = flash?.success || flash?.error || flash?.payment || flash?.errors;
         if (!message) return;
 
         // Prevent identical toast spam if the page re-renders
