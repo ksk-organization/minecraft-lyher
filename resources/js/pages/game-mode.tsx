@@ -253,7 +253,7 @@ export default function GamemodeEco({ categories }: Props) {
 
             <main className="container mx-auto space-y-20 px-5 py-16 md:space-y-24 md:px-6 md:py-20 lg:px-8">
                 {/* Ranks – currently static, ready to become dynamic */}
-                <section>
+                {/* <section>
                     <SectionHeader
                         title="Exclusive Ranks"
                         icon={<Crown size={28} />}
@@ -302,7 +302,7 @@ export default function GamemodeEco({ categories }: Props) {
                             </motion.div>
                         ))}
                     </div>
-                </section>
+                </section> */}
 
                 {/* Product Categories */}
                 {categories.map((category) => (
