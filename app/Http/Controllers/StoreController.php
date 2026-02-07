@@ -28,6 +28,7 @@ class StoreController extends Controller
                     $query->where('game_mode_id', $gamemode);
                 });
             })
+            ->orderBy('display_order')
             ->get();
 
 
