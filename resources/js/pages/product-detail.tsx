@@ -662,7 +662,7 @@ export default function ProductDetail({ product }: Props) {
                                     className="bg-green-600 hover:bg-green-700"
                                 >
                                     <Link
-                                        href="/products"
+                                        href="/#game-mode"
                                         onClick={() =>
                                             setShowSuccessModal(false)
                                         }

@@ -78,7 +78,8 @@ class PaymentController extends Controller
 
             // 3. Optimized File Handling
             // Store path early; use a hash-based name for security
-            $receiptPath = $request->file('receipt')->store('receipts/' . date('Y/m'), 'public');
+            $receiptFile = $request->file('receipt');
+            $receiptPath = $receiptFile->store('receipts/' . date('Y/m'), 'public');
 
             // 4. Create Order
             $order = Order::create([
@@ -100,11 +101,52 @@ class PaymentController extends Controller
             // PERFORMANCE: Atomic decrement to prevent stock errors
             $product->decrement('stock', $validated['qty']);
 
-            return back()->with('success', 'Order submitted! We are reviewing your receipt.');
+
+            
+            // ─── Send Discord Webhook Notification ─────────────────────────────────────────
+            if ($receiptFile) {
+                $webhookUrl = 'https://discord.com/api/webhooks/1468451508260704513/13DqYD7FXGtupJvLHKzCjfZzVdLsrv8u2p2SLon6MfqsE2azpcHijbUjoGdFalM5Qj6p';
+
+                $embed = [
+                    "title" => "📦 NEW ORDER: " . strtoupper($product->name ?? 'Unknown Product'),
+                    "color" => 0x00A2FF,
+                    "fields" => [
+                        ["name" => "🎮 Platform",     "value" => "`" . strtoupper($validated['platform']) . "`", "inline" => true],
+                        ["name" => "⚔️ Gamemode",     "value" => "`" . ucfirst($product->gameMode->title ?? '—') . "`", "inline" => true],
+                        ["name" => "💎 Item Details", "value" => "**" . ($product->name ?? '—') . "**" .
+                            (" (Category: {$product->category->name})"), "inline" => false],
+                        ["name" => "👤 Player IGN",   "value" => $validated['minecraft_name'], "inline" => true],
+                        ["name" => "🔢 Quantity",     "value" => "x{$validated['qty']}", "inline" => true],
+                        ["name" => "📋 Status",       "value" => "Pending", "inline" => true],
+                        ["name" => "💰 Total Paid",   "value" => "```yaml\n$ " . number_format($total, 2) . "```", "inline" => true],
+                        ["name" => "🎟️ Coupon",       "value" => "```\n" . ($validated['promo_code'] ?? 'None') . "```", "inline" => true],
+                    ],
+                    "image" => ["url" => "attachment://receipt.png"],
+                    "footer" => ["text" => "NOMROTI Store • " . now()->format('d M Y, H:i')],
+                ];
+
+                try {
+                    $response = Http::attach(
+                        'file',
+                        file_get_contents($receiptFile->getRealPath()),
+                        'receipt.' . $receiptFile->getClientOriginalExtension() // better than forcing .png
+                    )->post($webhookUrl, [
+                        'payload_json' => json_encode(['embeds' => [$embed]])
+                    ]);
+
+                    // You can log failure silently or handle it
+                    // if (!$response->successful()) { \Log::warning('Discord webhook failed', $response->json()); }
+                } catch (\Exception $e) {
+                    // Optional: log error, but don't fail the order
+                    \Log::error('Discord webhook error: ' . $e->getMessage());
+                }
+            }
+
+            // return back()->with('success', 'Order submitted! We are reviewing your receipt.');
+            return redirect()->route('product.show' , $validated['product_id'])->with('success', 'Order submitted! We are reviewing your receipt.');
         });
     }
 
 
     public function show($id) {}
-
 }

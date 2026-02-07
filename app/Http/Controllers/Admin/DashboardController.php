@@ -14,7 +14,6 @@ use Inertia\Inertia;
 
 class DashboardController extends Controller
 {
-// app/Http/Controllers/Admin/DashboardController.php
 
 public function index()
 {
