@@ -516,7 +516,7 @@ update.patch = (args: { game_mode: string | number } | [game_mode: string | numb
  * @see app/Http/Controllers/Admin/GameModeController.php:91
  * @route '/admin/game-modes/{game_mode}'
  */
-export const destroy = (args: { game_mode: string | number | { id: string | number } } | [game_mode: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
+export const destroy = (args: { game_mode: number | { id: number } } | [game_mode: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
     url: destroy.url(args, options),
     method: 'delete',
 })
@@ -531,7 +531,7 @@ destroy.definition = {
  * @see app/Http/Controllers/Admin/GameModeController.php:91
  * @route '/admin/game-modes/{game_mode}'
  */
-destroy.url = (args: { game_mode: string | number | { id: string | number } } | [game_mode: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
+destroy.url = (args: { game_mode: number | { id: number } } | [game_mode: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { game_mode: args }
     }
@@ -564,7 +564,7 @@ destroy.url = (args: { game_mode: string | number | { id: string | number } } | 
  * @see app/Http/Controllers/Admin/GameModeController.php:91
  * @route '/admin/game-modes/{game_mode}'
  */
-destroy.delete = (args: { game_mode: string | number | { id: string | number } } | [game_mode: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
+destroy.delete = (args: { game_mode: number | { id: number } } | [game_mode: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
     url: destroy.url(args, options),
     method: 'delete',
 })
@@ -574,7 +574,7 @@ destroy.delete = (args: { game_mode: string | number | { id: string | number } }
  * @see app/Http/Controllers/Admin/GameModeController.php:91
  * @route '/admin/game-modes/{game_mode}'
  */
-    const destroyForm = (args: { game_mode: string | number | { id: string | number } } | [game_mode: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    const destroyForm = (args: { game_mode: number | { id: number } } | [game_mode: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
         action: destroy.url(args, {
                     [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                         _method: 'DELETE',
@@ -589,7 +589,7 @@ destroy.delete = (args: { game_mode: string | number | { id: string | number } }
  * @see app/Http/Controllers/Admin/GameModeController.php:91
  * @route '/admin/game-modes/{game_mode}'
  */
-        destroyForm.delete = (args: { game_mode: string | number | { id: string | number } } | [game_mode: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        destroyForm.delete = (args: { game_mode: number | { id: number } } | [game_mode: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
             action: destroy.url(args, {
                         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                             _method: 'DELETE',

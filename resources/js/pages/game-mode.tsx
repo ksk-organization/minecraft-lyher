@@ -47,6 +47,7 @@ interface Category {
 
 interface Props {
     categories: Category[];
+    gamemodes: any;
 }
 
 // If ranks come from backend later → replace hardcoded array
@@ -172,7 +173,7 @@ function ProductCard({ product }: { product: Product }) {
                             </p>
 
                             {/* Mini gallery preview */}
-                            {product.images.length > 0 && (
+                            {product?.images?.length > 0 && (
                                 <div className="mt-5 flex justify-center -space-x-2 opacity-70 transition-opacity group-hover:opacity-100">
                                     {product.images.slice(0, 4).map((img) => (
                                         <div
@@ -211,9 +212,11 @@ function ProductCard({ product }: { product: Product }) {
 // Main Page
 // ──────────────────────────────────────────────
 
-export default function GamemodeEco({ categories }: Props) {
+export default function GamemodeEco({ categories , gamemodes }: Props) {
     // You can later sort categories by display_order if needed
     // categories.sort((a, b) => a.display_order - b.display_order);
+
+    console.log(categories)
 
     return (
         <Layout>
@@ -237,7 +240,7 @@ export default function GamemodeEco({ categories }: Props) {
                         transition={{ duration: 0.9, ease: 'easeOut' }}
                         className="mb-5 text-5xl font-black tracking-tighter text-white uppercase italic drop-shadow-2xl sm:text-6xl md:text-7xl"
                     >
-                        NOMROTI <span className="text-orange-500">ECO</span>
+                        NOMROTI <span className="text-orange-500">{gamemodes?.title}</span>
                     </motion.h1>
 
                     <motion.p
@@ -246,7 +249,7 @@ export default function GamemodeEco({ categories }: Props) {
                         transition={{ delay: 0.35, duration: 0.9 }}
                         className="mx-auto max-w-3xl text-lg font-medium text-zinc-300 sm:text-xl md:text-2xl"
                     >
-                        Build towns. Trade freely. Dominate the economy.
+                        {gamemodes?.description}
                     </motion.p>
                 </div>
             </header>

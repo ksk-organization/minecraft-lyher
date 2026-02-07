@@ -5,27 +5,66 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Category;
+use App\Models\GameMode;
 use App\Models\Product;
 
 class StoreController extends Controller
 {
+    // public function index(Request $request)
+    // {
+    //     $gamemode = $request->gamemodes;
+
+    //     $categories = Category::query()
+    //         ->when($gamemode, fn ($q) =>
+    //             $q->whereHas('productsByGameMode', fn ($p) => $p)
+    //         )
+    //         ->with([
+    //             'productsByGameMode' => fn ($q) =>
+    //                 $q->where('is_active', true)->with('images')
+    //         ])
+    //         ->orderBy('display_order')
+    //         ->get();
+
+    //     return Inertia::render('game-mode', [
+    //         'categories' => $categories
+    //     ]);
+    // }
+
+
     public function index(Request $request)
     {
-        $categories = Category::with('products.images')
-            ->when($request->gamemodes, function ($query) use ($request) {
-                $query->whereHas('products', function ($q) use ($request) {
-                    $q->where('game_mode_id', $request->gamemodes);
+        $gamemode = $request->gamemode;
+
+
+
+        $categories = Category::with([
+            'products' => function ($query) use ($gamemode) {
+                if ($gamemode) {
+                    $query->where('game_mode_id', $gamemode);
+                }
+            }
+        ])
+            ->when($gamemode, function ($q) use ($gamemode) {
+                $q->whereHas('products', function ($query) use ($gamemode) {
+                    $query->where('game_mode_id', $gamemode);
                 });
             })
             ->get();
 
+
+        $gamemodes = GameMode::findOrFail($gamemode);
+
+
         return Inertia::render('game-mode', [
             'categories' => $categories,
+            'gamemodes' => $gamemodes,
             'filters' => [
-                'gamemodes' => $request->gamemodes
+                'gamemodes' => $gamemode
             ]
         ]);
     }
+
+
 
 
     public function show($id)
