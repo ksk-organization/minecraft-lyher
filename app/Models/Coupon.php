@@ -14,6 +14,7 @@ class Coupon extends Model
         'min_spend',
         'max_uses',
         'used_count',
+        'is_active',
         'expires_at'
     ];
 

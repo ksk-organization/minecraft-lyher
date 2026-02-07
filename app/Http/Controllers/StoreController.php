@@ -10,27 +10,6 @@ use App\Models\Product;
 
 class StoreController extends Controller
 {
-    // public function index(Request $request)
-    // {
-    //     $gamemode = $request->gamemodes;
-
-    //     $categories = Category::query()
-    //         ->when($gamemode, fn ($q) =>
-    //             $q->whereHas('productsByGameMode', fn ($p) => $p)
-    //         )
-    //         ->with([
-    //             'productsByGameMode' => fn ($q) =>
-    //                 $q->where('is_active', true)->with('images')
-    //         ])
-    //         ->orderBy('display_order')
-    //         ->get();
-
-    //     return Inertia::render('game-mode', [
-    //         'categories' => $categories
-    //     ]);
-    // }
-
-
     public function index(Request $request)
     {
         $gamemode = $request->gamemode;

@@ -212,11 +212,11 @@ function ProductCard({ product }: { product: Product }) {
 // Main Page
 // ──────────────────────────────────────────────
 
-export default function GamemodeEco({ categories , gamemodes }: Props) {
+export default function GamemodeEco({ categories, gamemodes }: Props) {
     // You can later sort categories by display_order if needed
     // categories.sort((a, b) => a.display_order - b.display_order);
 
-    console.log(categories)
+    console.log(categories);
 
     return (
         <Layout>
@@ -240,7 +240,31 @@ export default function GamemodeEco({ categories , gamemodes }: Props) {
                         transition={{ duration: 0.9, ease: 'easeOut' }}
                         className="mb-5 text-5xl font-black tracking-tighter text-white uppercase italic drop-shadow-2xl sm:text-6xl md:text-7xl"
                     >
-                        NOMROTI <span className="text-orange-500">{gamemodes?.title}</span>
+                        {(() => {
+                            const title = gamemodes?.title || '';
+                            const keyword = 'NOMROTI';
+
+                            // PERFORMANCE: Create a regex that splits while keeping the separator in the array
+                            // The parentheses in the regex (keyword) are crucial for keeping the delimiter
+                            const parts = title.split(
+                                new RegExp(`(${keyword})`, 'gi'),
+                            );
+
+                            return parts.map((part, index) =>
+                                part.toUpperCase() === keyword ? (
+                                    <span key={index} className="text-white">
+                                        {part}
+                                    </span>
+                                ) : (
+                                    <span
+                                        key={index}
+                                        className="text-orange-500"
+                                    >
+                                        {part}
+                                    </span>
+                                ),
+                            );
+                        })()}
                     </motion.h1>
 
                     <motion.p

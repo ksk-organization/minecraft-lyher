@@ -13,45 +13,13 @@ use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
-// public function index()
-// {
-//     // Use fast pagination and specific selects to reduce DB I/O and Network Latency
-//     $products = Product::query()
-//         ->select(['id', 'game_mode_id', 'category_id', 'name', 'price', 'stock', 'is_active', 'main_icon_url', 'created_at'])
-//         ->with([
-//             'gameMode:id,title',
-//             'category:id,name'
-//         ])
-//         ->latest()
-//         ->paginate(10) // Prevents memory crashes; Inertia handles this seamlessly
-//         ->withQueryString();
-
-//     return Inertia::render('admin/product/Index', [
-//         'products' => $products,
-//         // Cached or lightweight selects for filters/dropdowns
-//         'game_modes' => GameMode::select('id', 'title')->toBase()->get(),
-//         'categories' => Category::select('id', 'name')->toBase()->get(),
-//     ]);
-// }
-
-public function index()
+    public function index()
     {
-
-        // dd(Product::query()
-        //         ->select(['id', 'game_mode_id', 'category_id', 'name', 'slug', 'price', 'stock', 'is_active', 'main_icon_url'])
-        //         ->with([
-        //             'gameMode:id,title',
-        //             'category:id,name',
-        //             'images'
-        //         ])
-        //         ->latest()
-        //         ->paginate(10)
-        //         ->withQueryString());
 
         return Inertia::render('admin/product/Index', [
             // Performance: Select only necessary columns and eager load with constraints
             'products' => Product::query()
-                ->select(['id', 'game_mode_id', 'short_description','category_id', 'name', 'slug', 'price', 'stock', 'is_active', 'main_icon_url'])
+                ->select(['id', 'game_mode_id', 'short_description', 'category_id', 'name', 'slug', 'price', 'stock', 'is_active', 'main_icon_url'])
                 ->with([
                     'gameMode:id,title',
                     'category:id,name',
@@ -67,183 +35,127 @@ public function index()
         ]);
     }
 
-public function store(Request $request)
-{
-    // 1. Validation: Secure & Performant
-    $validated = $request->validate([
-        'game_mode_id'      => 'required|exists:game_modes,id',
-        'category_id'       => 'required|exists:categories,id',
-        'name'              => 'required|string|max:255',
-        'slug'              => 'required|string|unique:products,slug',
-        'price'             => 'required|numeric|min:0',
-        'stock'             => 'nullable|integer|min:0',
-        'is_active'         => 'boolean',
-        'short_description' => 'nullable|string',
-        'long_description'  => 'nullable|string',
-        'main_icon_url'     => 'nullable|image|mimes:webp,png,jpg,jpeg|max:3072', // Up to 3MB
-        'images'            => 'nullable|array',
-        'images.*.file'     => 'nullable|image|mimes:webp,png,jpg,jpeg|max:3072',
-    ]);
+    public function store(Request $request)
+    {
+        // 1. Validation: Secure & Performant
+        $validated = $request->validate([
+            'game_mode_id'      => 'required|exists:game_modes,id',
+            'category_id'       => 'required|exists:categories,id',
+            'name'              => 'required|string|max:255',
+            'slug'              => 'required|string|unique:products,slug',
+            'price'             => 'required|numeric|min:0',
+            'stock'             => 'nullable|integer|min:0',
+            'is_active'         => 'boolean',
+            'short_description' => 'nullable|string',
+            'long_description'  => 'nullable|string',
+            'main_icon_url'     => 'nullable|image|mimes:webp,png,jpg,jpeg|max:3072', // Up to 3MB
+            'images'            => 'nullable|array',
+            'images.*.file'     => 'nullable|image|mimes:webp,png,jpg,jpeg|max:3072',
+        ]);
 
-    // 2. Wrap in Transaction for Database Integrity
-    return DB::transaction(function () use ($request, $validated) {
-        
-        // Handle Main Icon Upload
-        if ($request->hasFile('main_icon_url')) {
-            $validated['main_icon_url'] = $request->file('main_icon_url')
-                ->store('products/icons', 'public');
-        }
+        // 2. Wrap in Transaction for Database Integrity
+        return DB::transaction(function () use ($request, $validated) {
 
-        // Create the Product
-        $product = Product::create($validated);
+            // Handle Main Icon Upload
+            if ($request->hasFile('main_icon_url')) {
+                $validated['main_icon_url'] = $request->file('main_icon_url')
+                    ->store('products/icons', 'public');
+            }
 
-        // 3. Handle Gallery Images (Optimized for Frontend 'images' array)
-        if ($request->has('images')) {
-            foreach ($request->input('images') as $index => $imageData) {
-                
-                // Check if this specific index contains a file upload
-                if ($request->hasFile("images.{$index}.file")) {
-                    $path = $request->file("images.{$index}.file")
-                        ->store('products/gallery', 'public');
-                    
-                    $product->images()->create([
-                        'image_url' => $path // Ensure this matches your DB column
-                    ]);
+            // Create the Product
+            $product = Product::create($validated);
+
+            // 3. Handle Gallery Images (Optimized for Frontend 'images' array)
+            if ($request->has('images')) {
+                foreach ($request->input('images') as $index => $imageData) {
+
+                    // Check if this specific index contains a file upload
+                    if ($request->hasFile("images.{$index}.file")) {
+                        $path = $request->file("images.{$index}.file")
+                            ->store('products/gallery', 'public');
+
+                        $product->images()->create([
+                            'image_url' => $path // Ensure this matches your DB column
+                        ]);
+                    }
                 }
             }
-        }
 
-        return redirect()->back()->with('success', 'Product created successfully.');
-    });
-}
+            return redirect()->back()->with('success', 'Product created successfully.');
+        });
+    }
 
-public function update(Request $request, Product $product)
-{
-    // dd($request->all());
-    // 1. Validation (Strict mimes & sizes for speed/security)
-    $validated = $request->validate([
-        'game_mode_id'      => 'required|exists:game_modes,id',
-        'category_id'       => 'required|exists:categories,id',
-        'name'              => 'required|string|max:255',
-        'slug'              => 'required|string|unique:products,slug,' . $product->id,
-        'price'             => 'required|numeric|min:0',
-        'stock'             => 'nullable|integer|min:0',
-        'is_active'         => 'boolean',
-        'short_description' => 'nullable|string',
-        'main_icon_url'     => 'nullable',
-        'images'            => 'nullable|array',
-        'images.*.id'       => 'nullable|integer|exists:product_images,id', // Check if existing image belongs to DB
-        'images.*.file'     => 'nullable|image|mimes:webp,png,jpg,jpeg|max:3072',
-    ]);
+    public function update(Request $request, Product $product)
+    {
+        // dd($request->all());
+        // 1. Validation (Strict mimes & sizes for speed/security)
+        $validated = $request->validate([
+            'game_mode_id'      => 'required|exists:game_modes,id',
+            'category_id'       => 'required|exists:categories,id',
+            'name'              => 'required|string|max:255',
+            'slug'              => 'required|string|unique:products,slug,' . $product->id,
+            'price'             => 'required|numeric|min:0',
+            'stock'             => 'nullable|integer|min:0',
+            'is_active'         => 'boolean',
+            'short_description' => 'nullable|string',
+            'main_icon_url'     => 'nullable',
+            'images'            => 'nullable|array',
+            'images.*.id'       => 'nullable|integer|exists:product_images,id', // Check if existing image belongs to DB
+            'images.*.file'     => 'nullable|image|mimes:webp,png,jpg,jpeg|max:3072',
+        ]);
 
-    return DB::transaction(function () use ($request, $product, $validated) {
-        
-        // 2. Handle Main Icon (Atomic Swap)
-        if ($request->hasFile('main_icon_url')) {
-            // Delete old file if it exists to keep storage clean
-            if ($product->main_icon_url) {
-                Storage::disk('public')->delete($product->main_icon_url);
+        return DB::transaction(function () use ($request, $product, $validated) {
+
+            // 2. Handle Main Icon (Atomic Swap)
+            if ($request->hasFile('main_icon_url')) {
+                // Delete old file if it exists to keep storage clean
+                if ($product->main_icon_url) {
+                    Storage::disk('public')->delete($product->main_icon_url);
+                }
+                $validated['main_icon_url'] = $request->file('main_icon_url')
+                    ->store('products/icons', 'public');
+            } else {
+                // If main_icon_url is not a file, it's either the existing string or null.
+                // We remove it from $validated so we don't overwrite the existing path with null.
+                unset($validated['main_icon_url']);
             }
-            $validated['main_icon_url'] = $request->file('main_icon_url')
-                ->store('products/icons', 'public');
-        } else {
-            // If main_icon_url is not a file, it's either the existing string or null.
-            // We remove it from $validated so we don't overwrite the existing path with null.
-            unset($validated['main_icon_url']);
-        }
 
-        $product->update($validated);
+            $product->update($validated);
 
-        // 3. Handle Gallery Syncing
-        $currentImageIds = [];
+            // 3. Handle Gallery Syncing
+            $currentImageIds = [];
 
-        if ($request->has('images')) {
-            foreach ($request->input('images') as $index => $imgData) {
-                
-                // Case A: New File Upload
-                if ($request->hasFile("images.{$index}.file")) {
-                    $path = $request->file("images.{$index}.file")
-                        ->store('products/gallery', 'public');
-                    
-                    $newImg = $product->images()->create(['image_url' => $path]);
-                    $currentImageIds[] = $newImg->id;
-                } 
-                // Case B: Existing Image (Keep it)
-                elseif (isset($imgData['id'])) {
-                    $currentImageIds[] = $imgData['id'];
+            if ($request->has('images')) {
+                foreach ($request->input('images') as $index => $imgData) {
+
+                    // Case A: New File Upload
+                    if ($request->hasFile("images.{$index}.file")) {
+                        $path = $request->file("images.{$index}.file")
+                            ->store('products/gallery', 'public');
+
+                        $newImg = $product->images()->create(['image_url' => $path]);
+                        $currentImageIds[] = $newImg->id;
+                    }
+                    // Case B: Existing Image (Keep it)
+                    elseif (isset($imgData['id'])) {
+                        $currentImageIds[] = $imgData['id'];
+                    }
                 }
             }
-        }
 
-        // 4. Cleanup: Delete images from Disk and DB that are no longer in the array
-        $product->images()
-            ->whereNotIn('id', $currentImageIds)
-            ->get()
-            ->each(function ($img) {
-                Storage::disk('public')->delete($img->image_url);
-                $img->delete();
-            });
+            // 4. Cleanup: Delete images from Disk and DB that are no longer in the array
+            $product->images()
+                ->whereNotIn('id', $currentImageIds)
+                ->get()
+                ->each(function ($img) {
+                    Storage::disk('public')->delete($img->image_url);
+                    $img->delete();
+                });
 
-        return redirect()->back()->with('success', 'Product updated successfully.');
-    });
-}
+            return redirect()->back()->with('success', 'Product updated successfully.');
+        });
+    }
 
-// public function update(Request $request, Product $product)
-// {
-
-//     // dd($request->all());
-//     $request->validate([
-//         'name' => 'required|string|max:255',
-//         'price' => 'required|numeric',
-//         'images' => 'nullable|array',
-//         'images.*.type' => 'required|in:file,url',
-//         'images.*.file' => 'nullable|image|max:2048',
-//         'images.*.value' => 'nullable|string',
-//     ]);
-
-//     \DB::transaction(function () use ($request, $product) {
-//         // 1. Update Core Product Data
-//         $product->update($request->only([
-//             'game_mode_id', 'category_id', 'name', 'slug', 'price', 'stock', 'is_active', 'main_icon_url', 'short_description'
-//         ]));
-
-//         // 2. Sync Multimedia Gallery
-//         if ($request->has('images')) {
-//             $currentImageUrls = [];
-
-//             foreach ($request->images as $index => $imgData) {
-//                 $finalUrl = null;
-
-//                 if ($imgData['type'] === 'file' && $request->hasFile("images.{$index}.file")) {
-//                     // Fast Storage: Store new file
-//                     $finalUrl = $request->file("images.{$index}.file")->store('products/gallery', 'public');
-//                 } else {
-//                     // Keep existing URL or use provided URL string
-//                     // We strip the "/storage/" prefix if it exists to keep DB paths consistent
-//                     $finalUrl = str_replace('/storage/', '', $imgData['value'] ?? '');
-//                 }
-
-//                 if ($finalUrl) {
-//                     // UpdateOrCreate prevents duplicate rows and keeps sort order
-//                     $product->images()->updateOrCreate(
-//                         ['image_url' => $finalUrl],
-//                         ['image_url' => $finalUrl]
-//                     );
-//                     $currentImageUrls[] = $finalUrl;
-//                 }
-//             }
-
-//             // 3. Performance Cleanup: Remove images that were deleted in the UI
-//             // This prevents "Ghost Assets" from cluttering the DB
-//             $product->images()->whereNotIn('image_url', $currentImageUrls)->delete();
-//         } else {
-//             // If no images sent, purge the gallery for this product
-//             $product->images()->delete();
-//         }
-//     });
-
-//     return redirect()->back()->with('success', 'Asset synchronized successfully.');
-// }
 
     public function destroy(Product $product)
     {

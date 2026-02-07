@@ -69,6 +69,7 @@ return new class extends Migration
             $table->decimal('min_spend', 10, 2)->default(0);
             $table->integer('max_uses')->nullable();
             $table->integer('used_count')->default(0);
+            $table->boolean('is_active')->default(0);
 
             $table->timestamp('expires_at')->nullable();
             $table->timestamps();

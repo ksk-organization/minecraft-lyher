@@ -118,7 +118,7 @@ export default function PurchaseHistory({ orders, user }: Props) {
               When you make your first purchase, it will appear here.
             </p>
             <Button asChild size="lg" className="bg-primary hover:bg-primary/90">
-              <Link href="/products">Browse Products</Link>
+              <Link href="/#game-mode">Browse Products</Link>
             </Button>
           </div>
         ) : (

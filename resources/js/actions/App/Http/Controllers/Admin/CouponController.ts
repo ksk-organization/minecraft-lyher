@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../../../../wayfinder'
 /**
 * @see \App\Http\Controllers\Admin\CouponController::check
- * @see app/Http/Controllers/Admin/CouponController.php:130
+ * @see app/Http/Controllers/Admin/CouponController.php:99
  * @route '/checkout/coupon/check'
  */
 export const check = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -16,7 +16,7 @@ check.definition = {
 
 /**
 * @see \App\Http\Controllers\Admin\CouponController::check
- * @see app/Http/Controllers/Admin/CouponController.php:130
+ * @see app/Http/Controllers/Admin/CouponController.php:99
  * @route '/checkout/coupon/check'
  */
 check.url = (options?: RouteQueryOptions) => {
@@ -25,7 +25,7 @@ check.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\Admin\CouponController::check
- * @see app/Http/Controllers/Admin/CouponController.php:130
+ * @see app/Http/Controllers/Admin/CouponController.php:99
  * @route '/checkout/coupon/check'
  */
 check.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -34,7 +34,7 @@ check.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 })
 /**
 * @see \App\Http\Controllers\Admin\CouponController::check
- * @see app/Http/Controllers/Admin/CouponController.php:130
+ * @see app/Http/Controllers/Admin/CouponController.php:99
  * @route '/checkout/coupon/check'
  */
 check.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -44,7 +44,7 @@ check.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
     /**
 * @see \App\Http\Controllers\Admin\CouponController::check
- * @see app/Http/Controllers/Admin/CouponController.php:130
+ * @see app/Http/Controllers/Admin/CouponController.php:99
  * @route '/checkout/coupon/check'
  */
     const checkForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -54,7 +54,7 @@ check.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
             /**
 * @see \App\Http\Controllers\Admin\CouponController::check
- * @see app/Http/Controllers/Admin/CouponController.php:130
+ * @see app/Http/Controllers/Admin/CouponController.php:99
  * @route '/checkout/coupon/check'
  */
         checkForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -63,7 +63,7 @@ check.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
         })
             /**
 * @see \App\Http\Controllers\Admin\CouponController::check
- * @see app/Http/Controllers/Admin/CouponController.php:130
+ * @see app/Http/Controllers/Admin/CouponController.php:99
  * @route '/checkout/coupon/check'
  */
         checkForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({

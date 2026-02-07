@@ -65,7 +65,7 @@ public function index()
             ];
         });
 
-    return Inertia::render('dashboard', [
+    return Inertia::render('admin/dashboard', [
         'stats' => [
             'pending'   => $pendingCount,
             'revenue'   => number_format($totalRevenue, 2, '.', ','),

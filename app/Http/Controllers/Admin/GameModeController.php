@@ -59,7 +59,7 @@ class GameModeController extends Controller
             'slug'        => 'required|string|max:120|unique:game_modes,slug,' . $gameMode->id,
             'description' => 'nullable|string|max:1000',
             'server_ip'   => 'required|string|max:100',
-            'image_url'   => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            // 'image_url'   => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'is_active'   => 'boolean',
         ]);
 
