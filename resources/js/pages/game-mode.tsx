@@ -89,7 +89,7 @@ function SectionHeader({
                 {icon}
             </div>
             <div className="flex items-baseline gap-4">
-                <h2 className="text-4xl font-black tracking-tighter text-white uppercase italic md:text-5xl">
+                <h2 className="text-2xl xs:text-3xl sm:text-4xl font-black tracking-tighter text-white uppercase italic md:text-5xl">
                     {title}
                 </h2>
                 {count !== undefined && (

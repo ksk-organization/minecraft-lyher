@@ -35,6 +35,10 @@ interface ProductImage {
     sort_order: number;
 }
 
+interface Category {
+    name: string;
+}
+
 interface Product {
     id: number;
     name: string;
@@ -45,6 +49,7 @@ interface Product {
     short_description: string | null;
     long_description: string | null;
     images: ProductImage[];
+    category: Category;
 }
 
 interface Props {
@@ -257,12 +262,17 @@ export default function ProductDetail({ product }: Props) {
         });
     };
 
+    const hasBaseCategory = product.category.name
+        .toLowerCase()
+        .includes('base');
+
     return (
         <Layout>
             <Head title={`NOMROTI | ${product.name}`} />
 
-            <main className="container mx-auto mt-8 max-w-7xl px-5 py-10 md:px-6 md:py-16">
-                <div className="grid gap-10 lg:grid-cols-2 lg:gap-16">
+            <main className="container mx-auto mt-8 max-w-7xl px-4 py-8 sm:px-5 sm:py-10 md:px-6 md:py-16">
+                <div className="grid gap-8 md:grid-cols-2 md:gap-12 lg:gap-16">
+                    {/* Image Gallery */}
                     <div>
                         <ImageGallery
                             mainImage={activeImg}
@@ -271,26 +281,27 @@ export default function ProductDetail({ product }: Props) {
                             onThumbClick={setActiveImg}
                         />
                         {product.short_description && (
-                            <p className="text-md leading-relaxed text-zinc-300">
+                            <p className="mt-4 text-base leading-relaxed text-zinc-300">
                                 {product.short_description}
                             </p>
                         )}
                     </div>
 
-                    <div className="space-y-4">
-                        <header className="space-y-2">
-                            <h1 className="text-3xl font-black tracking-tight text-white uppercase italic md:text-4xl">
+                    {/* Content */}
+                    <div className="space-y-5">
+                        <header className="space-y-3">
+                            <h1 className="text-2xl font-black tracking-tight text-white uppercase italic md:text-3xl lg:text-4xl">
                                 {product.name}
                             </h1>
 
-                            <div className="flex flex-wrap items-baseline gap-4">
-                                <span className="font-mono text-3xl font-bold text-primary md:text-4xl">
+                            <div className="flex flex-wrap items-baseline gap-3 sm:gap-4">
+                                <span className="font-mono text-2xl font-bold text-primary md:text-3xl lg:text-4xl">
                                     ${formatPrice(finalPrice)}
                                 </span>
 
                                 {discountAmount > 0 && (
                                     <>
-                                        <span className="text-xl text-muted-foreground line-through opacity-70 md:text-2xl">
+                                        <span className="text-lg text-muted-foreground line-through opacity-70 md:text-xl">
                                             ${formatPrice(subtotal)}
                                         </span>
                                         <Badge className="border-green-500/40 bg-green-600/30 text-green-400">
@@ -304,7 +315,6 @@ export default function ProductDetail({ product }: Props) {
                                 <Badge
                                     variant="outline"
                                     className={cn(
-                                        'ml-2',
                                         product.stock > 0
                                             ? 'border-green-600/40 bg-green-950/30 text-green-400'
                                             : 'border-red-600/40 bg-red-950/30 text-red-400',
@@ -317,298 +327,329 @@ export default function ProductDetail({ product }: Props) {
                             </div>
 
                             {minSpendWarning && (
-                                <p className="mt-1 text-sm font-medium text-amber-400">
+                                <p className="text-sm font-medium text-amber-400">
                                     {minSpendWarning}
                                 </p>
                             )}
-
-                            {/* {product.short_description && (
-                <p className="text-md leading-relaxed text-zinc-300">
-                  {product.short_description}
-                </p>
-              )} */}
                         </header>
 
-                        {/* Form Card */}
-                        <Card className="overflow-hidden border-white/5 bg-[#0f0f0f] shadow-[0_32px_64px_-15px_rgba(0,0,0,0.6)]">
-                            <div className="h-1 w-full bg-gradient-to-r from-primary/50 via-primary to-transparent" />
-                            <CardHeader className="px-8 pt-8">
-                                <CardTitle className="text-sm font-black tracking-[0.3em] text-white/90 uppercase">
-                                    Secure Checkout
-                                </CardTitle>
-                            </CardHeader>
-
-                            <CardContent className="space-y-6 p-8">
-                                <form
-                                    onSubmit={handleSubmit}
-                                    className="space-y-5"
+                        {/* Conditional Rendering: Form Card or Telegram Button */}
+                        {hasBaseCategory ? (
+                            <Button
+                                asChild
+                                className="group relative h-16 w-full overflow-hidden rounded-xl bg-primary transition-all hover:ring-2 hover:ring-primary/20 active:scale-[0.98]"
+                            >
+                                <a
+                                    href="https://t.me/nomrotismp"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
                                 >
-                                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                                        {/* Quantity Selector */}
-                                        <div className="space-y-3">
-                                            <Label
-                                                htmlFor="qty"
-                                                className="text-[10px] font-black tracking-widest text-muted-foreground uppercase"
-                                            >
-                                                Quantity
-                                            </Label>
-                                            <div className="flex h-12 items-center rounded-xl border border-white/10 bg-black/40 p-1 transition-colors focus-within:border-primary/50">
-                                                <Button
-                                                    type="button"
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    className="h-full w-12 rounded-lg hover:bg-white/5"
-                                                    onClick={decreaseQty}
-                                                    disabled={
-                                                        quantity <= 1 ||
-                                                        form.processing
-                                                    }
-                                                >
-                                                    <Minus size={14} />
-                                                </Button>
+                                    <div className="relative z-10 flex items-center justify-center gap-3">
+                                        <ShoppingCart className="h-5 w-5 transition-transform group-hover:-translate-x-1" />
+                                        <span className="text-lg font-black tracking-widest uppercase italic">
+                                            Purchase via Telegram
+                                        </span>
+                                    </div>
+                                    <div className="absolute inset-0 translate-x-[-100%] bg-gradient-to-r from-transparent via-white/10 to-transparent transition-transform duration-500 group-hover:translate-x-[100%]" />
+                                </a>
+                            </Button>
+                        ) : (
+                            <Card className="overflow-hidden border-white/5 bg-[#0f0f0f] shadow-[0_32px_64px_-15px_rgba(0,0,0,0.6)]">
+                                <div className="h-1 w-full bg-gradient-to-r from-primary/50 via-primary to-transparent" />
+                                <CardHeader className="px-6 pt-6 md:px-8 md:pt-8">
+                                    <CardTitle className="text-sm font-black tracking-[0.3em] text-white/90 uppercase">
+                                        Secure Checkout
+                                    </CardTitle>
+                                </CardHeader>
 
-                                                <input
-                                                    id="qty"
-                                                    type="number"
-                                                    min="1"
-                                                    max={product.stock}
-                                                    value={quantity}
-                                                    onChange={(e) => {
-                                                        const val = Number(
-                                                            e.target.value,
-                                                        );
-                                                        if (
-                                                            !isNaN(val) &&
-                                                            val >= 1 &&
-                                                            val <= product.stock
-                                                        ) {
-                                                            setQuantity(val);
+                                <CardContent className="space-y-6 p-6 md:p-8">
+                                    <form
+                                        onSubmit={handleSubmit}
+                                        className="space-y-5"
+                                    >
+                                        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                                            {/* Quantity Selector */}
+                                            <div className="space-y-3">
+                                                <Label
+                                                    htmlFor="qty"
+                                                    className="text-[10px] font-black tracking-widest text-muted-foreground uppercase"
+                                                >
+                                                    Quantity
+                                                </Label>
+                                                <div className="flex h-12 items-center rounded-xl border border-white/10 bg-black/40 p-1 transition-colors focus-within:border-primary/50">
+                                                    <Button
+                                                        type="button"
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="h-full w-12 rounded-lg hover:bg-white/5"
+                                                        onClick={decreaseQty}
+                                                        disabled={
+                                                            quantity <= 1 ||
+                                                            form.processing
                                                         }
-                                                    }}
-                                                    className="h-full w-full [appearance:textfield] bg-transparent text-center text-sm font-bold outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                                                    disabled={
-                                                        form.processing ||
-                                                        product.stock <= 0
-                                                    }
-                                                />
+                                                    >
+                                                        <Minus size={14} />
+                                                    </Button>
 
-                                                <Button
-                                                    type="button"
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    className="h-full w-12 rounded-lg hover:bg-white/5"
-                                                    onClick={increaseQty}
-                                                    disabled={
-                                                        quantity >=
-                                                            product.stock ||
-                                                        form.processing
-                                                    }
-                                                >
-                                                    <Plus size={14} />
-                                                </Button>
-                                            </div>
-                                            {form.errors.qty && (
-                                                <p className="text-xs font-medium text-red-400">
-                                                    {form.errors.qty}
-                                                </p>
-                                            )}
-                                        </div>
+                                                    <input
+                                                        id="qty"
+                                                        type="number"
+                                                        min="1"
+                                                        max={product.stock}
+                                                        value={quantity}
+                                                        onChange={(e) => {
+                                                            const val = Number(
+                                                                e.target.value,
+                                                            );
+                                                            if (
+                                                                !isNaN(val) &&
+                                                                val >= 1 &&
+                                                                val <=
+                                                                    product.stock
+                                                            ) {
+                                                                setQuantity(
+                                                                    val,
+                                                                );
+                                                            }
+                                                        }}
+                                                        className="h-full w-full [appearance:textfield] bg-transparent text-center text-sm font-bold outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                                                        disabled={
+                                                            form.processing ||
+                                                            product.stock <= 0
+                                                        }
+                                                    />
 
-                                        {/* Minecraft Username */}
-                                        <div className="space-y-3">
-                                            <Label
-                                                htmlFor="minecraft_name"
-                                                className="text-[10px] font-black tracking-widest text-muted-foreground uppercase"
-                                            >
-                                                Minecraft Username
-                                            </Label>
-                                            <div className="group relative">
-                                                <Input
-                                                    id="minecraft_name"
-                                                    value={
-                                                        form.data.minecraft_name
-                                                    }
-                                                    onChange={(e) =>
-                                                        form.setData(
-                                                            'minecraft_name',
-                                                            e.target.value.trim(),
-                                                        )
-                                                    }
-                                                    placeholder="Enter IGN"
-                                                    className="h-12 rounded-xl border-white/10 bg-black/40 px-4 transition-all focus:ring-1 focus:ring-primary/40"
-                                                    disabled={form.processing}
-                                                />
-                                                <div className="absolute top-1/2 right-4 -translate-y-1/2">
-                                                    {form.data.minecraft_name
-                                                        .length > 2 &&
-                                                        !form.errors
-                                                            .minecraft_name && (
-                                                            <CheckCircle2 className="h-4 w-4 animate-in text-green-500 zoom-in" />
-                                                        )}
+                                                    <Button
+                                                        type="button"
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="h-full w-12 rounded-lg hover:bg-white/5"
+                                                        onClick={increaseQty}
+                                                        disabled={
+                                                            quantity >=
+                                                                product.stock ||
+                                                            form.processing
+                                                        }
+                                                    >
+                                                        <Plus size={14} />
+                                                    </Button>
                                                 </div>
-                                            </div>
-                                            {form.errors.minecraft_name && (
-                                                <p className="text-xs font-medium text-red-400">
-                                                    {form.errors.minecraft_name}
-                                                </p>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    {/* Platform */}
-                                    <div className="space-y-3">
-                                        <Label className="text-[10px] font-black tracking-widest text-muted-foreground uppercase">
-                                            Platform
-                                        </Label>
-                                        <PlatformSelector
-                                            value={form.data.platform}
-                                            onChange={(value) =>
-                                                form.setData('platform', value)
-                                            }
-                                            disabled={form.processing}
-                                        />
-                                    </div>
-
-                                    {/* Promo Code */}
-                                    <div className="space-y-3">
-                                        <Label className="text-[10px] font-black tracking-widest text-muted-foreground uppercase">
-                                            Promo Code
-                                        </Label>
-                                        <div className="flex gap-2">
-                                            <div className="relative flex-1">
-                                                <Input
-                                                    value={form.data.promo_code}
-                                                    onChange={(e) =>
-                                                        form.setData(
-                                                            'promo_code',
-                                                            e.target.value.toUpperCase(),
-                                                        )
-                                                    }
-                                                    placeholder="HAVE A COUPON?"
-                                                    className={cn(
-                                                        'h-12 rounded-xl border-white/10 bg-black/40 pr-10 transition-all',
-                                                        couponStatus?.valid &&
-                                                            'border-green-500/40 bg-green-500/5',
-                                                        couponStatus?.valid ===
-                                                            false &&
-                                                            form.data
-                                                                .promo_code &&
-                                                            'border-red-500/40',
-                                                    )}
-                                                    disabled={
-                                                        form.processing ||
-                                                        checkingCoupon
-                                                    }
-                                                />
-                                                <div className="absolute top-1/2 right-3 -translate-y-1/2">
-                                                    {checkingCoupon ? (
-                                                        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                                                    ) : couponStatus?.valid ? (
-                                                        <CheckCircle2 className="h-4 w-4 text-green-500" />
-                                                    ) : couponStatus?.valid ===
-                                                          false &&
-                                                      form.data.promo_code ? (
-                                                        <AlertCircle className="h-4 w-4 text-red-500" />
-                                                    ) : null}
-                                                </div>
-                                            </div>
-                                            <Button
-                                                type="button"
-                                                variant="secondary"
-                                                onClick={() =>
-                                                    form.setData(
-                                                        'promo_code',
-                                                        form.data.promo_code
-                                                            .trim()
-                                                            .toUpperCase(),
-                                                    )
-                                                }
-                                                disabled={
-                                                    form.processing ||
-                                                    checkingCoupon ||
-                                                    !form.data.promo_code.trim()
-                                                }
-                                                className="h-12 rounded-xl px-6 font-bold tracking-tighter uppercase"
-                                            >
-                                                Apply
-                                            </Button>
-                                        </div>
-
-                                        {couponStatus && (
-                                            <p
-                                                className={cn(
-                                                    'px-1 text-[11px] font-bold',
-                                                    couponStatus.valid
-                                                        ? 'text-green-400'
-                                                        : 'text-red-400',
+                                                {form.errors.qty && (
+                                                    <p className="text-xs font-medium text-red-400">
+                                                        {form.errors.qty}
+                                                    </p>
                                                 )}
-                                            >
-                                                {couponStatus.message}
-                                            </p>
-                                        )}
-                                    </div>
+                                            </div>
 
-                                    {/* Payment Information Area */}
-                                    <div className="space-y-6 rounded-2xl border border-white/5 bg-white/[0.02] p-6">
-                                        <PaymentSection
-                                            finalPrice={finalPrice}
-                                            platform={form.data.platform}
-                                        />
+                                            {/* Minecraft Username */}
+                                            <div className="space-y-3">
+                                                <Label
+                                                    htmlFor="minecraft_name"
+                                                    className="text-[10px] font-black tracking-widest text-muted-foreground uppercase"
+                                                >
+                                                    Minecraft Username
+                                                </Label>
+                                                <div className="group relative">
+                                                    <Input
+                                                        id="minecraft_name"
+                                                        value={
+                                                            form.data
+                                                                .minecraft_name
+                                                        }
+                                                        onChange={(e) =>
+                                                            form.setData(
+                                                                'minecraft_name',
+                                                                e.target.value.trim(),
+                                                            )
+                                                        }
+                                                        placeholder="Enter IGN"
+                                                        className="h-12 rounded-xl border-white/10 bg-black/40 px-4 transition-all focus:ring-1 focus:ring-primary/40"
+                                                        disabled={
+                                                            form.processing
+                                                        }
+                                                    />
+                                                    <div className="absolute top-1/2 right-4 -translate-y-1/2">
+                                                        {form.data
+                                                            .minecraft_name
+                                                            .length > 2 &&
+                                                            !form.errors
+                                                                .minecraft_name && (
+                                                                <CheckCircle2 className="h-4 w-4 text-green-500" />
+                                                            )}
+                                                    </div>
+                                                </div>
+                                                {form.errors.minecraft_name && (
+                                                    <p className="text-xs font-medium text-red-400">
+                                                        {
+                                                            form.errors
+                                                                .minecraft_name
+                                                        }
+                                                    </p>
+                                                )}
+                                            </div>
+                                        </div>
 
-                                        <div className="pt-2">
-                                            <ReceiptUpload
-                                                file={form.data.receipt}
-                                                onFileChange={(file) =>
+                                        {/* Platform */}
+                                        <div className="space-y-3">
+                                            <Label className="text-[10px] font-black tracking-widest text-muted-foreground uppercase">
+                                                Platform
+                                            </Label>
+                                            <PlatformSelector
+                                                value={form.data.platform}
+                                                onChange={(value) =>
                                                     form.setData(
-                                                        'receipt',
-                                                        file,
+                                                        'platform',
+                                                        value,
                                                     )
                                                 }
                                                 disabled={form.processing}
                                             />
-                                            {form.errors.receipt && (
-                                                <p className="mt-2 text-xs font-medium text-red-400">
-                                                    {form.errors.receipt}
+                                        </div>
+
+                                        {/* Promo Code */}
+                                        <div className="space-y-3">
+                                            <Label className="text-[10px] font-black tracking-widest text-muted-foreground uppercase">
+                                                Promo Code
+                                            </Label>
+                                            <div className="flex flex-col gap-3 sm:flex-row sm:gap-2">
+                                                <div className="relative flex-1">
+                                                    <Input
+                                                        value={
+                                                            form.data.promo_code
+                                                        }
+                                                        onChange={(e) =>
+                                                            form.setData(
+                                                                'promo_code',
+                                                                e.target.value.toUpperCase(),
+                                                            )
+                                                        }
+                                                        placeholder="HAVE A COUPON?"
+                                                        className={cn(
+                                                            'h-12 rounded-xl border-white/10 bg-black/40 pr-10 transition-all',
+                                                            couponStatus?.valid &&
+                                                                'border-green-500/40 bg-green-500/5',
+                                                            couponStatus?.valid ===
+                                                                false &&
+                                                                form.data
+                                                                    .promo_code &&
+                                                                'border-red-500/40',
+                                                        )}
+                                                        disabled={
+                                                            form.processing ||
+                                                            checkingCoupon
+                                                        }
+                                                    />
+                                                    <div className="absolute top-1/2 right-3 -translate-y-1/2">
+                                                        {checkingCoupon ? (
+                                                            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                                                        ) : couponStatus?.valid ? (
+                                                            <CheckCircle2 className="h-4 w-4 text-green-500" />
+                                                        ) : couponStatus?.valid ===
+                                                              false &&
+                                                          form.data
+                                                              .promo_code ? (
+                                                            <AlertCircle className="h-4 w-4 text-red-500" />
+                                                        ) : null}
+                                                    </div>
+                                                </div>
+                                                <Button
+                                                    type="button"
+                                                    variant="secondary"
+                                                    onClick={() =>
+                                                        form.setData(
+                                                            'promo_code',
+                                                            form.data.promo_code
+                                                                .trim()
+                                                                .toUpperCase(),
+                                                        )
+                                                    }
+                                                    disabled={
+                                                        form.processing ||
+                                                        checkingCoupon ||
+                                                        !form.data.promo_code.trim()
+                                                    }
+                                                    className="h-12 w-full rounded-xl px-8 font-bold tracking-tighter uppercase sm:w-auto sm:px-6"
+                                                >
+                                                    Apply
+                                                </Button>
+                                            </div>
+
+                                            {couponStatus && (
+                                                <p
+                                                    className={cn(
+                                                        'px-1 text-[11px] font-bold',
+                                                        couponStatus.valid
+                                                            ? 'text-green-400'
+                                                            : 'text-red-400',
+                                                    )}
+                                                >
+                                                    {couponStatus.message}
                                                 </p>
                                             )}
                                         </div>
-                                    </div>
 
-                                    {/* Global Error Handle */}
-                                    {form.errors.general && (
-                                        <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-3">
-                                            <p className="text-center text-xs font-bold tracking-tight text-red-400 uppercase">
-                                                {form.errors.general}
-                                            </p>
-                                        </div>
-                                    )}
+                                        {/* Payment Information Area */}
+                                        <div className="space-y-6 rounded-2xl border border-white/5 bg-white/[0.02] p-6">
+                                            <PaymentSection
+                                                finalPrice={finalPrice}
+                                                platform={form.data.platform}
+                                            />
 
-                                    {/* Final Action */}
-                                    <Button
-                                        type="submit"
-                                        disabled={
-                                            form.processing ||
-                                            product.stock <= 0
-                                        }
-                                        className="group relative h-16 w-full overflow-hidden rounded-xl bg-primary transition-all hover:ring-2 hover:ring-primary/20 active:scale-[0.98]"
-                                    >
-                                        <div className="relative z-10 flex items-center justify-center gap-3">
-                                            {form.processing ? (
-                                                <Loader2 className="h-5 w-5 animate-spin" />
-                                            ) : (
-                                                <>
-                                                    <ShoppingCart className="h-5 w-5 transition-transform group-hover:-translate-x-1" />
-                                                    <span className="text-lg font-black tracking-widest uppercase italic">
-                                                        Confirm & Pay
-                                                    </span>
-                                                </>
-                                            )}
+                                            <div className="pt-2">
+                                                <ReceiptUpload
+                                                    file={form.data.receipt}
+                                                    onFileChange={(file) =>
+                                                        form.setData(
+                                                            'receipt',
+                                                            file,
+                                                        )
+                                                    }
+                                                    disabled={form.processing}
+                                                />
+                                                {form.errors.receipt && (
+                                                    <p className="mt-2 text-xs font-medium text-red-400">
+                                                        {form.errors.receipt}
+                                                    </p>
+                                                )}
+                                            </div>
                                         </div>
-                                        <div className="absolute inset-0 translate-x-[-100%] bg-gradient-to-r from-transparent via-white/10 to-transparent transition-transform duration-500 group-hover:translate-x-[100%]" />
-                                    </Button>
-                                </form>
-                            </CardContent>
-                        </Card>
+
+                                        {/* Global Error Handle */}
+                                        {form.errors.general && (
+                                            <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-3">
+                                                <p className="text-center text-xs font-bold tracking-tight text-red-400 uppercase">
+                                                    {form.errors.general}
+                                                </p>
+                                            </div>
+                                        )}
+
+                                        {/* Final Action */}
+                                        <Button
+                                            type="submit"
+                                            disabled={
+                                                form.processing ||
+                                                product.stock <= 0
+                                            }
+                                            className="group relative h-16 w-full overflow-hidden rounded-xl bg-primary transition-all hover:ring-2 hover:ring-primary/20 active:scale-[0.98]"
+                                        >
+                                            <div className="relative z-10 flex items-center justify-center gap-3">
+                                                {form.processing ? (
+                                                    <Loader2 className="h-5 w-5 animate-spin" />
+                                                ) : (
+                                                    <>
+                                                        <ShoppingCart className="h-5 w-5 transition-transform group-hover:-translate-x-1" />
+                                                        <span className="text-lg font-black tracking-widest uppercase italic">
+                                                            Confirm & Pay
+                                                        </span>
+                                                    </>
+                                                )}
+                                            </div>
+                                            <div className="absolute inset-0 translate-x-[-100%] bg-gradient-to-r from-transparent via-white/10 to-transparent transition-transform duration-500 group-hover:translate-x-[100%]" />
+                                        </Button>
+                                    </form>
+                                </CardContent>
+                            </Card>
+                        )}
 
                         {product.long_description && (
                             <Card className="border-white/5 bg-[#1a1a1a] shadow-xl">
@@ -629,7 +670,7 @@ export default function ProductDetail({ product }: Props) {
             {/* Success Modal */}
             {showSuccessModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
-                    <div className="relative w-full max-w-md rounded-2xl border border-green-500/30 bg-gradient-to-b from-[#1a2a1a] to-[#121f12] p-8 shadow-2xl">
+                    <div className="relative w-full max-w-sm rounded-2xl border border-green-500/30 bg-gradient-to-b from-[#1a2a1a] to-[#121f12] p-8 shadow-2xl sm:max-w-md">
                         <button
                             onClick={() => setShowSuccessModal(false)}
                             className="absolute top-5 right-5 text-zinc-400 hover:text-white"

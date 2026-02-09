@@ -28,7 +28,7 @@ export default function Navigation() {
 
   return (
     <nav className="fixed top-6 z-50 flex w-full justify-center px-4">
-      <div className="flex items-center gap-6 rounded-full border border-border/40 bg-card/90 px-5 py-2 shadow-2xl backdrop-blur-lg">
+      <div className="flex items-center gap-3 sm:gap-6 rounded-full border border-border/40 bg-card/90 px-5 py-2 shadow-2xl backdrop-blur-lg">
         {/* Logo */}
         <Link
           href="/"
@@ -69,7 +69,7 @@ export default function Navigation() {
         </div>
 
         {/* Social Icons */}
-        <div className="flex items-center gap-4 border-l border-border/40 pl-4">
+        <div className="hidden xs:flex items-center gap-4 border-l border-border/40 pl-4">
           <a
             href="https://dsc.gg/nomrotismp"
             target="_blank"
@@ -91,7 +91,7 @@ export default function Navigation() {
         </div>
 
         {/* CTA Button */}
-        <Button className="h-9 rounded-full bg-primary px-6 font-bold text-primary-foreground transition-all hover:opacity-90 active:scale-95">
+        <Button className="h-7 sm:h-9 rounded-full bg-primary px-4 sm:px-6 font-bold text-primary-foreground transition-all hover:opacity-90 active:scale-95">
           PLAY NOW
         </Button>
       </div>

@@ -212,7 +212,7 @@ store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     store.form = storeForm
 /**
 * @see \App\Http\Controllers\StoreController::show
- * @see app/Http/Controllers/StoreController.php:49
+ * @see app/Http/Controllers/StoreController.php:50
  * @route '/products/{product}'
  */
 export const show = (args: { product: string | number } | [product: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -227,7 +227,7 @@ show.definition = {
 
 /**
 * @see \App\Http\Controllers\StoreController::show
- * @see app/Http/Controllers/StoreController.php:49
+ * @see app/Http/Controllers/StoreController.php:50
  * @route '/products/{product}'
  */
 show.url = (args: { product: string | number } | [product: string | number ] | string | number, options?: RouteQueryOptions) => {
@@ -255,7 +255,7 @@ show.url = (args: { product: string | number } | [product: string | number ] | s
 
 /**
 * @see \App\Http\Controllers\StoreController::show
- * @see app/Http/Controllers/StoreController.php:49
+ * @see app/Http/Controllers/StoreController.php:50
  * @route '/products/{product}'
  */
 show.get = (args: { product: string | number } | [product: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -264,7 +264,7 @@ show.get = (args: { product: string | number } | [product: string | number ] | s
 })
 /**
 * @see \App\Http\Controllers\StoreController::show
- * @see app/Http/Controllers/StoreController.php:49
+ * @see app/Http/Controllers/StoreController.php:50
  * @route '/products/{product}'
  */
 show.head = (args: { product: string | number } | [product: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -274,7 +274,7 @@ show.head = (args: { product: string | number } | [product: string | number ] | 
 
     /**
 * @see \App\Http\Controllers\StoreController::show
- * @see app/Http/Controllers/StoreController.php:49
+ * @see app/Http/Controllers/StoreController.php:50
  * @route '/products/{product}'
  */
     const showForm = (args: { product: string | number } | [product: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -284,7 +284,7 @@ show.head = (args: { product: string | number } | [product: string | number ] | 
 
             /**
 * @see \App\Http\Controllers\StoreController::show
- * @see app/Http/Controllers/StoreController.php:49
+ * @see app/Http/Controllers/StoreController.php:50
  * @route '/products/{product}'
  */
         showForm.get = (args: { product: string | number } | [product: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -293,7 +293,7 @@ show.head = (args: { product: string | number } | [product: string | number ] | 
         })
             /**
 * @see \App\Http\Controllers\StoreController::show
- * @see app/Http/Controllers/StoreController.php:49
+ * @see app/Http/Controllers/StoreController.php:50
  * @route '/products/{product}'
  */
         showForm.head = (args: { product: string | number } | [product: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({

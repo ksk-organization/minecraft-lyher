@@ -122,7 +122,7 @@ export default function Welcome({ gamemodes }: WelcomeProps) {
                             transition={{ duration: 0.9, ease: 'easeOut' }}
                             className="space-y-8 text-center lg:text-left"
                         >
-                            <h1 className="text-6xl leading-[0.9] font-black tracking-tighter uppercase italic md:text-8xl">
+                            <h1 className="text-5xl sm:text-6xl leading-[0.9] font-black tracking-tighter uppercase italic md:text-8xl">
                                 NOMROTI
                                 <br />
                                 <span className="text-primary drop-shadow-[0_0_20px_rgba(255,102,0,0.4)]">
@@ -146,22 +146,24 @@ export default function Welcome({ gamemodes }: WelcomeProps) {
                                             <button
                                                 onClick={copyServerIp}
                                                 className={cn(
-                                                    'group flex cursor-pointer items-center gap-5 rounded-2xl border p-4 px-7 shadow-2xl backdrop-blur-xl transition-all active:scale-98',
+                                                    'group flex cursor-pointer flex-col items-center gap-5 rounded-2xl border p-4 px-7 shadow-2xl backdrop-blur-xl transition-all active:scale-98 sm:flex-row',
                                                     hasCopied
                                                         ? 'border-green-500/60 bg-green-950/30'
                                                         : 'border-white/10 bg-black/65 hover:border-primary/60',
                                                 )}
                                             >
-                                                <div className="relative flex h-3.5 w-3.5 shrink-0">
-                                                    <span className="absolute h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
-                                                    <span className="relative h-3.5 w-3.5 rounded-full bg-green-500 shadow-[0_0_14px_#22c55e]" />
+                                                <div className="flex items-center gap-5">
+                                                    <div className="relative flex h-3.5 w-3.5 shrink-0">
+                                                        <span className="absolute h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
+                                                        <span className="relative h-3.5 w-3.5 rounded-full bg-green-500 shadow-[0_0_14px_#22c55e]" />
+                                                    </div>
+
+                                                    <span className="font-mono text-2xl font-bold tracking-tight text-white">
+                                                        nomroti.net
+                                                    </span>
                                                 </div>
 
-                                                <span className="font-mono text-2xl font-bold tracking-tight text-white">
-                                                    nomroti.net
-                                                </span>
-
-                                                <div className="flex items-center gap-3 border-l border-white/15 pl-5">
+                                                <div className="flex items-center gap-3 sm:pl-5 sm:border-l border-white/15 ">
                                                     <Users
                                                         className="text-primary"
                                                         size={22}

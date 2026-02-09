@@ -45,6 +45,9 @@
 
         --color-destructive: var(--destructive);
     --color-destructive-foreground: var(--destructive-foreground);
+
+        /* This adds the xs: prefix at 480px */
+  --breakpoint-xs: 30rem;
 }
 
 :root {

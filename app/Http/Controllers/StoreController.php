@@ -50,7 +50,9 @@ class StoreController extends Controller
     public function show($id)
     {
 
-        $product = Product::with('images')->findOrFail($id);
+        $product = Product::with('images' , 'category')->findOrFail($id);
+
+        
         return Inertia::render('product-detail', compact('product'));
     }
 }
