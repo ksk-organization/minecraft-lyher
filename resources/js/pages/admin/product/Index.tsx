@@ -1,5 +1,6 @@
 // resources/js/Pages/Admin/Products/Index.tsx
-import React, { useState, useCallback, useMemo } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Head, router, useForm } from '@inertiajs/react';
 import {
   PlusCircle,
@@ -11,6 +12,8 @@ import {
   AlertCircle,
   ImageIcon,
 } from 'lucide-react';
+import { debounce } from 'lodash';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -29,42 +32,22 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination';
+
 import { route } from 'ziggy-js';
 import AppLayout from '@/layouts/app-layout';
 import ProductForm from '@/components/admin/modal/ProductCreateModal';
-// import ProductForm from '@/Pages/Admin/Products/ProductForm'; // adjust path if needed
 
 // ────────────────────────────────────────────────
 // Types
 // ────────────────────────────────────────────────
-
-interface ProductImage {
-  id?: number;
-  url: string;           // existing image url (with /storage/ prefix)
-}
-
-interface NewImage {
-  file: File;
-  preview: string;
-}
-
-interface ProductFormData {
-  id?: number;
-  name: string;
-  slug: string;
-  short_description?: string;
-  price?: string | number;
-  stock?: string | number;
-  is_active: boolean;
-  game_mode_id?: string | number;
-  category_id?: string | number;
-
-  main_icon?: File | null;
-  main_icon_url?: string | null;      // existing or preview
-
-  images: (ProductImage | NewImage)[];
-  deleted_image_ids: number[];
-}
 
 interface Product {
   id: number;
@@ -82,18 +65,50 @@ interface Product {
   images: { id: number; image_url: string }[];
 }
 
+interface ProductFormData {
+  id?: number;
+  name: string;
+  slug: string;
+  short_description?: string;
+  price?: string | number;
+  stock?: string | number;
+  is_active: boolean;
+  game_mode_id?: string | number;
+  category_id?: string | number;
+  main_icon?: File | null;
+  main_icon_url?: string | null;
+  images: any[];
+  deleted_image_ids: number[];
+}
+
 interface Props {
-  products: { data: Product[]; total: number };
+  products: {
+    data: Product[];
+    total: number;
+    from: number;
+    to: number;
+    prev_page_url: string | null;
+    next_page_url: string | null;
+    links: {
+      url: string | null;
+      label: string;
+      active: boolean;
+    }[];
+  };
+  filters: {
+    search?: string;
+  };
   game_modes: { id: number; title: string }[];
   categories: { id: number; name: string }[];
 }
 
 export default function AdminProductsIndex({
   products,
+  filters,
   game_modes,
   categories,
 }: Props) {
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(filters.search ?? '');
   const [modalMode, setModalMode] = useState<'create' | 'edit' | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
 
@@ -113,56 +128,70 @@ export default function AdminProductsIndex({
     deleted_image_ids: [],
   });
 
-  const filteredProducts = useMemo(() =>
-    products.data.filter(p =>
-      p.name.toLowerCase().includes(search.toLowerCase()) ||
-      p.slug.toLowerCase().includes(search.toLowerCase())
-    ),
-  [products.data, search]);
+  // ────────────────────────────────────────────────
+  // Server-side Search (Debounced)
+  // ────────────────────────────────────────────────
+  useEffect(() => {
+    const handler = debounce(() => {
+      router.get(
+        route('admin.products.index'),
+        { search },
+        {
+          preserveState: true,
+          replace: true,
+        }
+      );
+    }, 400);
 
-  const openCreate = useCallback(() => {
+    handler();
+    return () => handler.cancel();
+  }, [search]);
+
+  const openCreate = () => {
     form.reset();
     setModalMode('create');
-  }, [form]);
+  };
 
-  const openEdit = useCallback((product: Product) => {
+  const openEdit = (product: Product) => {
     form.clearErrors();
-
     form.setData({
       id: product.id,
       name: product.name,
       slug: product.slug,
       short_description: product.short_description ?? '',
       price: String(product.price),
-      stock: product.stock != null ? String(product.stock) : '',
+      stock: String(product.stock),
       is_active: !!product.is_active,
       game_mode_id: String(product.game_mode_id),
       category_id: String(product.category_id),
-
       main_icon: null,
-      main_icon_url: product.main_icon_url ? `/storage/${product.main_icon_url}` : null,
-
+      main_icon_url: product.main_icon_url
+        ? `/storage/${product.main_icon_url}`
+        : null,
       images: product.images.map(img => ({
         id: img.id,
         url: `/storage/${img.image_url}`,
       })),
-
       deleted_image_ids: [],
     });
 
     setModalMode('edit');
-  }, [form]);
+  };
 
-  const handleDelete = useCallback((id: number) => {
+  const handleDelete = (id: number) => {
     router.delete(route('admin.products.destroy', id), {
       preserveScroll: true,
       onSuccess: () => setDeleteConfirm(null),
     });
-  }, []);
+  };
 
-  const refresh = useCallback(() => {
-    router.reload({ only: ['products'] });
-  }, []);
+  const goToPage = (url: string | null) => {
+    if (!url) return;
+    router.visit(url, {
+      preserveScroll: true,
+      preserveState: true,
+    });
+  };
 
   return (
     <AppLayout>
@@ -170,199 +199,159 @@ export default function AdminProductsIndex({
 
       <div className="space-y-8 p-6 lg:p-8">
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="flex flex-col md:flex-row justify-between gap-6">
           <div>
-            <h1 className="text-3xl lg:text-4xl font-black tracking-tight text-white">
-              Products
-            </h1>
-            <p className="mt-2 text-zinc-400">
-              Manage all store items • <strong>{products.total}</strong> total
+            <h1 className="text-3xl font-black text-white">Products</h1>
+            <p className="text-zinc-400 mt-1">
+              Total: <strong>{products.total}</strong>
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-4">
-            <div className="relative w-64 lg:w-80">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+          <div className="flex items-center gap-4">
+            <div className="relative w-72">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
               <Input
                 placeholder="Search name or slug..."
-                className="pl-10 border-zinc-700 bg-zinc-900 focus:border-orange-500"
+                className="pl-10 bg-zinc-900 border-zinc-700"
                 value={search}
                 onChange={e => setSearch(e.target.value)}
               />
             </div>
 
-            <Button
-              onClick={openCreate}
-              className="gap-2 bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-500 hover:to-orange-400 shadow-lg shadow-orange-900/30"
-            >
+            <Button variant="outline" size="icon" onClick={() => router.reload()}>
+              <RefreshCw size={18} />
+            </Button>
+            <Button onClick={openCreate} className="gap-2 bg-orange-600">
               <PlusCircle size={18} />
               New Product
             </Button>
 
-            <Button variant="outline" size="icon" onClick={refresh} title="Refresh">
-              <RefreshCw size={18} />
-            </Button>
           </div>
         </div>
 
         {/* Table */}
-        <Card className="border-zinc-800/50 bg-gradient-to-b from-zinc-950 to-black overflow-hidden">
-          <CardHeader className="border-b border-zinc-800">
-            <CardTitle className="text-xl">All Products ({filteredProducts.length})</CardTitle>
+        <Card className="bg-black border-zinc-800">
+          <CardHeader>
+            <CardTitle>Products</CardTitle>
           </CardHeader>
 
           <CardContent className="p-0">
-            {filteredProducts.length === 0 ? (
-              <div className="py-24 text-center text-zinc-500">
-                <p className="text-lg font-medium">
-                  {search ? 'No matching products' : 'No products created yet'}
-                </p>
-                {!search && <p className="mt-3">Click "New Product" to add your first item.</p>}
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader className="bg-zinc-900/60">
-                    <TableRow className="border-zinc-800 hover:bg-transparent">
-                      <TableHead className="w-24 text-xs font-bold text-orange-400 uppercase">Preview</TableHead>
-                      <TableHead className="text-xs font-bold text-zinc-300 uppercase">Product</TableHead>
-                      <TableHead className="text-xs font-bold text-zinc-300 uppercase hidden md:table-cell">Description</TableHead>
-                      <TableHead className="text-xs font-bold text-zinc-300 uppercase">Price / Stock</TableHead>
-                      <TableHead className="text-right text-xs font-bold text-zinc-300 uppercase pr-6">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Preview</TableHead>
+                  <TableHead>Product</TableHead>
+                  <TableHead className="hidden md:table-cell">Description</TableHead>
+                  <TableHead>Price / Stock</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
 
-                  <TableBody>
-                    {filteredProducts.map(product => (
-                      <TableRow
-                        key={product.id}
-                        className="group border-zinc-800 hover:bg-orange-950/10 transition-colors"
+              <TableBody>
+                {products.data.map(product => (
+                  <TableRow key={product.id}>
+                    <TableCell>
+                      {product.main_icon_url ? (
+                        <img
+                          src={`/storage/${product.main_icon_url}`}
+                          className="h-14 w-14 rounded object-cover"
+                        />
+                      ) : (
+                        <div className="h-14 w-14 bg-zinc-800 flex items-center justify-center">
+                          <ImageIcon />
+                        </div>
+                      )}
+                    </TableCell>
+
+                    <TableCell>
+                      <div className="font-semibold text-white">
+                        {product.name}
+                      </div>
+                      <div className="text-xs text-zinc-500">
+                        {product.game_mode?.title} • {product.category?.name}
+                      </div>
+                    </TableCell>
+
+                    <TableCell className="hidden md:table-cell text-zinc-400">
+                      {product.short_description ?? '—'}
+                    </TableCell>
+
+                    <TableCell>
+                      <div className="text-orange-400 font-mono">
+                        ${Number(product.price).toFixed(2)}
+                      </div>
+                      <div className="text-xs text-zinc-500">
+                        {product.stock} in stock
+                      </div>
+                    </TableCell>
+
+                    <TableCell className="text-right">
+                      <Button size="icon" variant="ghost" onClick={() => openEdit(product)}>
+                        <Pencil size={16} />
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => setDeleteConfirm(product.id)}
                       >
-                        <TableCell>
-                          <div className="flex items-center gap-3">
-                            {product.main_icon_url ? (
-                              <img
-                                src={`/storage/${product.main_icon_url}`}
-                                alt={product.name}
-                                className="h-14 w-14 rounded-md object-cover border border-zinc-700"
-                              />
-                            ) : (
-                              <div className="h-14 w-14 rounded-md bg-zinc-800 flex items-center justify-center text-zinc-600">
-                                <ImageIcon size={20} />
-                              </div>
-                            )}
+                        <Trash2 size={16} className="text-red-500" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
 
-                            {product.images?.length > 0 && (
-                              <div className="flex -space-x-2">
-                                {product.images.slice(0, 3).map((img, i) => (
-                                  <img
-                                    key={i}
-                                    src={`/storage/${img.image_url}`}
-                                    alt="gallery"
-                                    className="h-10 w-10 rounded-md object-cover border-2 border-black shadow-sm"
-                                  />
-                                ))}
-                                {product.images.length > 3 && (
-                                  <div className="h-10 w-10 rounded-md bg-zinc-800 border-2 border-black flex items-center justify-center text-[10px] font-bold text-zinc-400">
-                                    +{product.images.length - 3}
-                                  </div>
-                                )}
-                              </div>
-                            )}
-                          </div>
-                        </TableCell>
+            {/* Pagination */}
+            {products.links.length > 1 && (
+              <div className="py-6 flex flex-col items-center gap-2">
+                <Pagination>
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious
+                        onClick={() => goToPage(products.prev_page_url)}
+                        className={!products.prev_page_url ? 'opacity-50 pointer-events-none' : ''}
+                      />
+                    </PaginationItem>
 
-                        <TableCell>
-                          <div className="font-medium text-white group-hover:text-orange-400 transition-colors">
-                            {product.name}
-                          </div>
-                          <div className="mt-0.5 text-xs text-zinc-500 font-mono">
-                            {product.game_mode?.title || '—'} • {product.category?.name || 'Uncategorized'}
-                          </div>
-                        </TableCell>
+                    {products.links
+                      .filter(l => /^\d+$/.test(l.label))
+                      .map(link => (
+                        <PaginationItem key={link.label}>
+                          <PaginationLink
+                            isActive={link.active}
+                            onClick={() => goToPage(link.url)}
+                          >
+                            {link.label}
+                          </PaginationLink>
+                        </PaginationItem>
+                      ))}
 
-                        <TableCell className="hidden md:table-cell">
-                          <div className="text-sm text-zinc-400 line-clamp-2 max-w-xs">
-                            {product.short_description || '—'}
-                          </div>
-                        </TableCell>
+                    <PaginationItem>
+                      <PaginationNext
+                        onClick={() => goToPage(products.next_page_url)}
+                        className={!products.next_page_url ? 'opacity-50 pointer-events-none' : ''}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
 
-                        <TableCell>
-                          <div className="font-mono font-bold text-orange-400">
-                            ${Number(product.price).toFixed(2)}
-                          </div>
-                          <div className="mt-0.5 text-xs text-zinc-500">
-                            {product.stock} in stock
-                          </div>
-                        </TableCell>
-
-                        <TableCell className="text-right pr-4">
-                          <div className="flex items-center justify-end gap-1">
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                              <Eye size={16} className="text-zinc-400" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8"
-                              onClick={() => openEdit(product)}
-                            >
-                              <Pencil size={16} className="text-blue-400" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8"
-                              onClick={() => setDeleteConfirm(product.id)}
-                            >
-                              <Trash2 size={16} className="text-red-500" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                <p className="text-sm text-zinc-500">
+                  Showing {products.from}–{products.to} of {products.total}
+                </p>
               </div>
             )}
           </CardContent>
         </Card>
 
-        {/* Create / Edit Modal */}
-        <Dialog open={!!modalMode} onOpenChange={() => setModalMode(null)}>
-          <DialogContent className="sm:max-w-6xl max-h-[95vh] overflow-hidden bg-gradient-to-br from-zinc-950 via-black to-zinc-950 border-zinc-700/40 shadow-2xl rounded-2xl p-0">
-            <DialogHeader className="px-8 py-6 border-b border-zinc-800 bg-black/40 backdrop-blur-sm">
-              <DialogTitle className="text-3xl font-black text-orange-500">
-                {modalMode === 'create' ? 'Create New Product' : 'Edit Product'}
-              </DialogTitle>
-              {modalMode === 'edit' && form.data.id && (
-                <DialogDescription className="text-zinc-400 mt-1">
-                  Product ID: <span className="font-mono text-orange-400">#{form.data.id}</span>
-                </DialogDescription>
-              )}
-            </DialogHeader>
-
-            <div className="p-8 md:p-10 lg:p-12 overflow-y-auto">
-              <ProductForm
-                form={form}
-                mode={modalMode!}
-                onClose={() => setModalMode(null)}
-                game_modes={game_modes}
-                categories={categories}
-              />
-            </div>
-          </DialogContent>
-        </Dialog>
-
         {/* Delete Confirmation */}
         <Dialog open={deleteConfirm !== null} onOpenChange={() => setDeleteConfirm(null)}>
-          <DialogContent className="sm:max-w-md border-red-900/40 bg-zinc-950">
-            <div className="py-6 text-center">
-              <AlertCircle className="mx-auto mb-5 h-14 w-14 text-red-500" />
-              <h3 className="mb-3 text-2xl font-bold text-white">Delete Product?</h3>
-              <p className="mb-8 text-zinc-300">
-                This action cannot be undone.<br />
-                All associated data will be permanently removed.
+          <DialogContent className="sm:max-w-md bg-zinc-950">
+            <div className="text-center py-6">
+              <AlertCircle className="mx-auto h-14 w-14 text-red-500 mb-4" />
+              <h3 className="text-xl font-bold text-white">Delete Product?</h3>
+              <p className="text-zinc-400 mt-2 mb-6">
+                This action cannot be undone.
               </p>
               <div className="flex justify-center gap-4">
                 <Button variant="outline" onClick={() => setDeleteConfirm(null)}>
@@ -372,7 +361,7 @@ export default function AdminProductsIndex({
                   variant="destructive"
                   onClick={() => deleteConfirm && handleDelete(deleteConfirm)}
                 >
-                  Delete Forever
+                  Delete
                 </Button>
               </div>
             </div>

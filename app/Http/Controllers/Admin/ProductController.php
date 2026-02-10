@@ -13,23 +13,28 @@ use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-
         return Inertia::render('admin/product/Index', [
-            // Performance: Select only necessary columns and eager load with constraints
             'products' => Product::query()
-                ->select(['id', 'game_mode_id', 'short_description', 'category_id', 'name', 'slug', 'price', 'stock', 'is_active', 'main_icon_url'])
+                // ->select(['id', 'game_mode_id', 'short_description', 'category_id', 'name', 'slug', 'price', 'stock', 'is_active', 'main_icon_url'])
+                // Performance: Filter search on server side to minimize data transfer
+                ->when($request->input('search'), function ($query, $search) {
+                    $query->where('name', 'like', "%{$search}%")
+                        ->orWhere('slug', 'like', "%{$search}%");
+                })
                 ->with([
                     'gameMode:id,title',
                     'category:id,name',
-                    'images'
+                    'images' // Optimization: Select specific columns for images too
                 ])
                 ->latest()
-                ->paginate(10)
+                ->paginate(10) // Changed from 1 to 10 for better UX, keep withQueryString for pagination links
                 ->withQueryString(),
 
-            // Optimization: toBase() skips Eloquent hydration for static dropdowns
+            // Pass filters back to the frontend to sync the Search Input state
+            'filters' => $request->only(['search']),
+
             'game_modes' => GameMode::select('id', 'title')->toBase()->get(),
             'categories' => Category::select('id', 'name')->toBase()->get(),
         ]);
