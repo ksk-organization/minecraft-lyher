@@ -230,7 +230,7 @@ export default function GamemodeEco({ categories, gamemodes }: Props) {
                 <div
                     className="absolute inset-0 bg-cover bg-center bg-no-repeat"
                     style={{
-                        backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.75), rgba(0,0,0,0.92)), url('https://images.unsplash.com/photo-1587573089737-43b8f0f39e3e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80')`,
+                        backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0.75), rgba(0,0,0,0.92)), url('${gamemodes?.image_background}')`,
                     }}
                 />
                 <div className="relative z-10 container px-6 text-center">

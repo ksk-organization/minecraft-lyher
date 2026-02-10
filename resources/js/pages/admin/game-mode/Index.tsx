@@ -45,6 +45,7 @@ interface GameMode {
   description?: string | null;
   server_ip: string;
   image_url?: string | null;
+  image_background?: string | null;
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -53,7 +54,6 @@ interface GameMode {
 interface Props {
   game_modes: GameMode[];
 }
-
 
 // ────────────────────────────────────────────────
 // Main Component
@@ -71,6 +71,7 @@ export default function AdminGameModesIndex({ game_modes }: Props) {
     description: '',
     server_ip: 'nomroti.net',
     image_url: null as File | string | null,
+    image_background: null as File | string | null,
     is_active: true,
   });
 
@@ -97,25 +98,39 @@ export default function AdminGameModesIndex({ game_modes }: Props) {
       description: gm.description ?? '',
       server_ip: gm.server_ip,
       image_url: gm.image_url ?? null,
+      image_background: gm.image_background ?? null,
       is_active: gm.is_active,
     });
     setModalMode('edit');
   }, [form]);
 
-  const handleSubmit = useCallback(() => {
-    const routeName = isCreate ? 'admin.game-modes.store' : 'admin.game-modes.update';
-    const method = isCreate ? 'post' : 'put';
-    const params = isCreate ? [] : [form.data.id];
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault();
 
-    (form as any)[method](route(routeName, ...params), {
+    const routeName = isCreate
+      ? 'admin.game-modes.store'
+      : 'admin.game-modes.update';
+
+    const url = isCreate
+      ? route(routeName)
+      : route(routeName, form.data.id);
+
+    router.post(url, {
+      ...form.data,
+      _method: isCreate ? undefined : 'put',
+    }, {
+      forceFormData: true,
       preserveScroll: true,
       onSuccess: () => {
         form.reset();
         setModalMode(null);
         router.reload({ only: ['game_modes'] });
       },
+      onError: (errors) => {
+        console.error('Form submission errors:', errors);
+      },
     });
-  }, [form, isCreate, isEdit]);
+  };
 
   const confirmDelete = useCallback((id: number) => setDeleteId(id), []);
   const executeDelete = useCallback(() => {
@@ -167,7 +182,7 @@ export default function AdminGameModesIndex({ game_modes }: Props) {
           </div>
         </div>
 
-        {/* Table */}
+        {/* Table – now showing both images */}
         <Card className="border-white/5 bg-[#1f1f1f] overflow-hidden">
           <CardHeader className="border-b border-white/5">
             <CardTitle className="flex items-center justify-between">
@@ -188,7 +203,8 @@ export default function AdminGameModesIndex({ game_modes }: Props) {
                 <Table>
                   <TableHeader>
                     <TableRow className="hover:bg-transparent border-b border-white/5">
-                      <TableHead>Image</TableHead>
+                      <TableHead>Preview</TableHead>
+                      <TableHead>Background</TableHead>
                       <TableHead>Title</TableHead>
                       <TableHead>Slug</TableHead>
                       <TableHead>Server IP</TableHead>
@@ -213,6 +229,22 @@ export default function AdminGameModesIndex({ game_modes }: Props) {
                             </div>
                           )}
                         </TableCell>
+
+                        <TableCell>
+                          {mode.image_background ? (
+                            <img
+                              src={mode.image_background}
+                              alt={`${mode.title} background`}
+                              className="h-12 w-20 object-cover rounded border border-border shadow-sm opacity-80"
+                              onError={(e) => (e.currentTarget.style.display = 'none')}
+                            />
+                          ) : (
+                            <div className="h-12 w-20 rounded bg-muted/50 flex items-center justify-center text-xs text-muted-foreground">
+                              No bg
+                            </div>
+                          )}
+                        </TableCell>
+
                         <TableCell className="font-medium">{mode.title}</TableCell>
                         <TableCell className="font-mono text-muted-foreground">{mode.slug}</TableCell>
                         <TableCell className="font-mono">{mode.server_ip}</TableCell>
@@ -276,6 +308,7 @@ export default function AdminGameModesIndex({ game_modes }: Props) {
               setData={form.setData}
               errors={form.errors}
               processing={form.processing}
+              onSubmit={submit}
             />
 
             <DialogFooter className="gap-3">
@@ -287,9 +320,10 @@ export default function AdminGameModesIndex({ game_modes }: Props) {
                 Cancel
               </Button>
               <Button
-                onClick={handleSubmit}
+                onClick={submit}
                 disabled={form.processing}
                 className="min-w-[160px]"
+                type="submit"
               >
                 {form.processing ? (
                   <>
@@ -332,23 +366,38 @@ export default function AdminGameModesIndex({ game_modes }: Props) {
           </DialogContent>
         </Dialog>
 
-        {/* View Details Dialog */}
+        {/* View Details Dialog – now includes background image */}
         <Dialog open={!!viewMode} onOpenChange={() => setViewMode(null)}>
           <DialogContent className="sm:max-w-lg">
             <DialogHeader>
               <DialogTitle>{viewMode?.title}</DialogTitle>
             </DialogHeader>
             <div className="space-y-6 py-5">
-              {viewMode?.image_url && (
-                <div className="flex justify-center">
-                  <img
-                    src={viewMode.image_url}
-                    alt={viewMode.title}
-                    className="max-h-64 object-contain rounded-lg border border-border shadow-md"
-                    onError={(e) => (e.currentTarget.style.display = 'none')}
-                  />
-                </div>
-              )}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                {viewMode?.image_url && (
+                  <div>
+                    <h4 className="font-semibold text-sm mb-2 text-muted-foreground">Preview Image</h4>
+                    <img
+                      src={viewMode.image_url}
+                      alt={viewMode.title}
+                      className="w-full h-40 object-cover rounded-lg border border-border shadow-md"
+                      onError={(e) => (e.currentTarget.style.display = 'none')}
+                    />
+                  </div>
+                )}
+
+                {viewMode?.image_background && (
+                  <div>
+                    <h4 className="font-semibold text-sm mb-2 text-muted-foreground">Background Image</h4>
+                    <img
+                      src={viewMode.image_background}
+                      alt={`${viewMode.title} background`}
+                      className="w-full h-40 object-cover rounded-lg border border-border shadow-md opacity-90"
+                      onError={(e) => (e.currentTarget.style.display = 'none')}
+                    />
+                  </div>
+                )}
+              </div>
 
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                 <div>
@@ -383,7 +432,6 @@ export default function AdminGameModesIndex({ game_modes }: Props) {
           </DialogContent>
         </Dialog>
       </div>
-      
     </AppLayout>
   );
 }

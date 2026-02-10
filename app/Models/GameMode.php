@@ -12,6 +12,7 @@ protected $fillable = [
         'description',
         'server_ip',
         'image_url',
+        'image_background',
         'is_active'
     ];
 
@@ -19,4 +20,4 @@ protected $fillable = [
     {
         return $this->hasMany(Product::class);
     }
-    }
+}

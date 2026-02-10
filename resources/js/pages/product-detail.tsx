@@ -281,9 +281,11 @@ export default function ProductDetail({ product }: Props) {
                             onThumbClick={setActiveImg}
                         />
                         {product.short_description && (
-                            <p className="mt-4 text-base leading-relaxed text-zinc-300">
-                                {product.short_description}
-                            </p>
+                        <div
+                            className="mt-4 text-base leading-relaxed text-zinc-300 whitespace-pre-line"
+                        >
+                            {product.short_description}
+                        </div>
                         )}
                     </div>
 

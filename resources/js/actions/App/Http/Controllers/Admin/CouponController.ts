@@ -487,7 +487,7 @@ edit.head = (args: { coupon: string | number } | [coupon: string | number ] | st
  * @see app/Http/Controllers/Admin/CouponController.php:73
  * @route '/admin/coupons/{coupon}'
  */
-export const update = (args: { coupon: string | number | { id: string | number } } | [coupon: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
+export const update = (args: { coupon: number | { id: number } } | [coupon: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
     url: update.url(args, options),
     method: 'put',
 })
@@ -502,7 +502,7 @@ update.definition = {
  * @see app/Http/Controllers/Admin/CouponController.php:73
  * @route '/admin/coupons/{coupon}'
  */
-update.url = (args: { coupon: string | number | { id: string | number } } | [coupon: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
+update.url = (args: { coupon: number | { id: number } } | [coupon: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { coupon: args }
     }
@@ -535,7 +535,7 @@ update.url = (args: { coupon: string | number | { id: string | number } } | [cou
  * @see app/Http/Controllers/Admin/CouponController.php:73
  * @route '/admin/coupons/{coupon}'
  */
-update.put = (args: { coupon: string | number | { id: string | number } } | [coupon: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
+update.put = (args: { coupon: number | { id: number } } | [coupon: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
     url: update.url(args, options),
     method: 'put',
 })
@@ -544,7 +544,7 @@ update.put = (args: { coupon: string | number | { id: string | number } } | [cou
  * @see app/Http/Controllers/Admin/CouponController.php:73
  * @route '/admin/coupons/{coupon}'
  */
-update.patch = (args: { coupon: string | number | { id: string | number } } | [coupon: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
+update.patch = (args: { coupon: number | { id: number } } | [coupon: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
     url: update.url(args, options),
     method: 'patch',
 })
@@ -554,7 +554,7 @@ update.patch = (args: { coupon: string | number | { id: string | number } } | [c
  * @see app/Http/Controllers/Admin/CouponController.php:73
  * @route '/admin/coupons/{coupon}'
  */
-    const updateForm = (args: { coupon: string | number | { id: string | number } } | [coupon: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    const updateForm = (args: { coupon: number | { id: number } } | [coupon: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
         action: update.url(args, {
                     [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                         _method: 'PUT',
@@ -569,7 +569,7 @@ update.patch = (args: { coupon: string | number | { id: string | number } } | [c
  * @see app/Http/Controllers/Admin/CouponController.php:73
  * @route '/admin/coupons/{coupon}'
  */
-        updateForm.put = (args: { coupon: string | number | { id: string | number } } | [coupon: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        updateForm.put = (args: { coupon: number | { id: number } } | [coupon: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
             action: update.url(args, {
                         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                             _method: 'PUT',
@@ -583,7 +583,7 @@ update.patch = (args: { coupon: string | number | { id: string | number } } | [c
  * @see app/Http/Controllers/Admin/CouponController.php:73
  * @route '/admin/coupons/{coupon}'
  */
-        updateForm.patch = (args: { coupon: string | number | { id: string | number } } | [coupon: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        updateForm.patch = (args: { coupon: number | { id: number } } | [coupon: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
             action: update.url(args, {
                         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                             _method: 'PATCH',

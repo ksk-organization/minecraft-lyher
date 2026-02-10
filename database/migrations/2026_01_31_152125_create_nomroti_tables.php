@@ -18,6 +18,7 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->string('server_ip')->default('nomroti.net');
             $table->string('image_url')->nullable();
+            $table->text('image_background')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
