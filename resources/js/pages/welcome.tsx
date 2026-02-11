@@ -56,7 +56,7 @@ function HeroBackground() {
                 style={{
                     backgroundImage: `
             linear-gradient(to bottom, rgba(26,26,26,0.88), rgba(26,26,26,0.95)),
-            url('https://m.gettywallpapers.com/wp-content/uploads/2023/10/Minecraft-Laptop-Wallpaper-scaled.jpg')
+            url('/assets/img/bg.jpg')
           `,
                     backgroundBlendMode: 'multiply',
                     willChange: 'transform',
@@ -207,9 +207,9 @@ export default function Welcome({ gamemodes }: WelcomeProps) {
                             className="pointer-events-none hidden justify-center select-none lg:flex"
                         >
                             <img
-                                src="/assets/img/hero.png"
+                                src="/assets/logo/logo.webp"
                                 alt="Nomroti Network Logo / Hero Art"
-                                className="max-w-[50%] drop-shadow-[0_30px_90px_rgba(0,0,0,0.75)]"
+                                className="max-w-[60%] drop-shadow-[0_30px_90px_rgba(0,0,0,0.75)]"
                                 loading="eager"
                                 width={720}
                                 height={720}

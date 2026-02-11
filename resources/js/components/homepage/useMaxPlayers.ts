@@ -7,7 +7,7 @@ export const useMaxPlayers = () => {
         const fetchData = async () => {
             const res = await fetch('https://api.mcsrvstat.us/3/nomroti.net');
             const json = await res.json();
-            setMaxPlayers(json?.players?.max ?? 0);
+            setMaxPlayers(json?.players?.online ?? 0);
         };
 
         fetchData();
