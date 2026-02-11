@@ -1,5 +1,6 @@
 {
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
   "_FlashMessage-DyvCRTBB.js": {
     "file": "assets/FlashMessage-DyvCRTBB.js",
     "name": "FlashMessage",
@@ -54,11 +55,40 @@
   "_app-logo-icon-DjIZ5qaI.js": {
     "file": "assets/app-logo-icon-DjIZ5qaI.js",
 >>>>>>> Stashed changes
+=======
+  "_FlashMessage-WIDcqtWL.js": {
+    "file": "assets/FlashMessage-WIDcqtWL.js",
+    "name": "FlashMessage",
+    "imports": [
+      "_button-D0ki8ICI.js",
+      "resources/js/app.tsx"
+    ]
+  },
+  "_app-layout-zGfFuM9r.js": {
+    "file": "assets/app-layout-zGfFuM9r.js",
+    "name": "app-layout",
+    "imports": [
+      "resources/js/app.tsx",
+      "_FlashMessage-WIDcqtWL.js",
+      "_index-Ca60cHDS.js",
+      "_button-D0ki8ICI.js",
+      "_index-DTD_Oj08.js",
+      "_tooltip-CIYpetJM.js",
+      "_x-B0-Fr4KI.js",
+      "_index-D0VPW7r4.js",
+      "_app-logo-icon-DjIZ5qaI.js",
+      "_package-mtjmZ03V.js"
+    ]
+  },
+  "_app-logo-icon-DjIZ5qaI.js": {
+    "file": "assets/app-logo-icon-DjIZ5qaI.js",
+>>>>>>> Stashed changes
     "name": "app-logo-icon",
     "imports": [
       "resources/js/app.tsx"
     ]
   },
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
   "_auth-layout-FlAaQhq9.js": {
     "file": "assets/auth-layout-FlAaQhq9.js",
@@ -100,11 +130,33 @@
   "_button-D0ki8ICI.js": {
     "file": "assets/button-D0ki8ICI.js",
 >>>>>>> Stashed changes
+=======
+  "_auth-layout-EQWaVo-K.js": {
+    "file": "assets/auth-layout-EQWaVo-K.js",
+    "name": "auth-layout",
+    "imports": [
+      "resources/js/app.tsx",
+      "_app-logo-icon-DjIZ5qaI.js"
+    ]
+  },
+  "_badge-Dm5T0M5L.js": {
+    "file": "assets/badge-Dm5T0M5L.js",
+    "name": "badge",
+    "imports": [
+      "resources/js/app.tsx",
+      "_index-Ca60cHDS.js",
+      "_button-D0ki8ICI.js"
+    ]
+  },
+  "_button-D0ki8ICI.js": {
+    "file": "assets/button-D0ki8ICI.js",
+>>>>>>> Stashed changes
     "name": "button",
     "imports": [
       "resources/js/app.tsx"
     ]
   },
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
   "_card-KM4dqlXU.js": {
     "file": "assets/card-KM4dqlXU.js",
@@ -278,11 +330,94 @@
     "file": "assets/index-BfCAraLO.js",
     "name": "index",
     "imports": [
+=======
+  "_card-e3-rAPhB.js": {
+    "file": "assets/card-e3-rAPhB.js",
+    "name": "card",
+    "imports": [
+      "resources/js/app.tsx",
+      "_button-D0ki8ICI.js"
+    ]
+  },
+  "_check-8UskThHN.js": {
+    "file": "assets/check-8UskThHN.js",
+    "name": "check",
+    "imports": [
+      "_button-D0ki8ICI.js"
+    ]
+  },
+  "_circle-alert-CiOtOD28.js": {
+    "file": "assets/circle-alert-CiOtOD28.js",
+    "name": "circle-alert",
+    "imports": [
+      "_button-D0ki8ICI.js"
+    ]
+  },
+  "_circle-check-BaF9971J.js": {
+    "file": "assets/circle-check-BaF9971J.js",
+    "name": "circle-check",
+    "imports": [
+      "_button-D0ki8ICI.js"
+    ]
+  },
+  "_circle-plus-B3gXl-wk.js": {
+    "file": "assets/circle-plus-B3gXl-wk.js",
+    "name": "circle-plus",
+    "imports": [
+      "_button-D0ki8ICI.js"
+    ]
+  },
+  "_copy-JAb8H4A0.js": {
+    "file": "assets/copy-JAb8H4A0.js",
+    "name": "copy",
+    "imports": [
+      "_button-D0ki8ICI.js"
+    ]
+  },
+  "_dialog-BdkKblgY.js": {
+    "file": "assets/dialog-BdkKblgY.js",
+    "name": "dialog",
+    "imports": [
+      "resources/js/app.tsx",
+      "_app-layout-zGfFuM9r.js",
+      "_button-D0ki8ICI.js",
+      "_x-B0-Fr4KI.js"
+    ]
+  },
+  "_eye-uzRaeiaz.js": {
+    "file": "assets/eye-uzRaeiaz.js",
+    "name": "eye",
+    "imports": [
+      "_button-D0ki8ICI.js"
+    ]
+  },
+  "_index-6ffbJyHu.js": {
+    "file": "assets/index-6ffbJyHu.js",
+    "name": "index",
+    "imports": [
+      "_app-logo-icon-DjIZ5qaI.js"
+    ]
+  },
+  "_index-BVm_BpcR.js": {
+    "file": "assets/index-BVm_BpcR.js",
+    "name": "index",
+    "imports": [
+      "_app-logo-icon-DjIZ5qaI.js"
+    ]
+  },
+  "_index-BfCAraLO.js": {
+    "file": "assets/index-BfCAraLO.js",
+    "name": "index",
+    "imports": [
+>>>>>>> Stashed changes
       "_app-logo-icon-DjIZ5qaI.js"
     ]
   },
   "_index-BgWMG0eq.js": {
     "file": "assets/index-BgWMG0eq.js",
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
     "name": "index",
     "imports": [
@@ -293,6 +428,7 @@
     "file": "assets/index-BsxvijQw.js",
     "name": "index"
   },
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
   "_index-CDU5orc-.js": {
     "file": "assets/index-CDU5orc-.js",
@@ -678,11 +814,210 @@
   "_transition-BMNfVqUm.js": {
     "file": "assets/transition-BMNfVqUm.js",
 >>>>>>> Stashed changes
+=======
+  "_index-CKv1V8Lf.js": {
+    "file": "assets/index-CKv1V8Lf.js",
+    "name": "index",
+    "imports": [
+      "_app-logo-icon-DjIZ5qaI.js",
+      "_index-BfCAraLO.js"
+    ]
+  },
+  "_index-Ca60cHDS.js": {
+    "file": "assets/index-Ca60cHDS.js",
+    "name": "index",
+    "imports": [
+      "resources/js/app.tsx",
+      "_button-D0ki8ICI.js"
+    ]
+  },
+  "_index-D0VPW7r4.js": {
+    "file": "assets/index-D0VPW7r4.js",
+    "name": "index",
+    "imports": [
+      "resources/js/app.tsx",
+      "_index-Ca60cHDS.js"
+    ]
+  },
+  "_index-DTD_Oj08.js": {
+    "file": "assets/index-DTD_Oj08.js",
+    "name": "index",
+    "imports": [
+      "resources/js/app.tsx",
+      "_button-D0ki8ICI.js"
+    ]
+  },
+  "_input-CLIFYelm.js": {
+    "file": "assets/input-CLIFYelm.js",
+    "name": "input",
+    "imports": [
+      "resources/js/app.tsx",
+      "_button-D0ki8ICI.js"
+    ]
+  },
+  "_input-error-HrW3zZrD.js": {
+    "file": "assets/input-error-HrW3zZrD.js",
+    "name": "input-error",
+    "imports": [
+      "resources/js/app.tsx",
+      "_button-D0ki8ICI.js"
+    ]
+  },
+  "_label-BtyX5p96.js": {
+    "file": "assets/label-BtyX5p96.js",
+    "name": "label",
+    "imports": [
+      "resources/js/app.tsx",
+      "_index-D0VPW7r4.js",
+      "_button-D0ki8ICI.js"
+    ]
+  },
+  "_layout-BBRiJSfK.js": {
+    "file": "assets/layout-BBRiJSfK.js",
+    "name": "layout",
+    "imports": [
+      "resources/js/app.tsx",
+      "_button-D0ki8ICI.js",
+      "_FlashMessage-WIDcqtWL.js"
+    ]
+  },
+  "_layout-CCiArdsq.js": {
+    "file": "assets/layout-CCiArdsq.js",
+    "name": "layout",
+    "imports": [
+      "resources/js/app.tsx",
+      "_button-D0ki8ICI.js",
+      "_separator-B9tdEJMn.js",
+      "_app-logo-icon-DjIZ5qaI.js",
+      "_app-layout-zGfFuM9r.js",
+      "_index-BVm_BpcR.js"
+    ]
+  },
+  "_loader-circle-C8uCnOAS.js": {
+    "file": "assets/loader-circle-C8uCnOAS.js",
+    "name": "loader-circle",
+    "imports": [
+      "_button-D0ki8ICI.js"
+    ]
+  },
+  "_minus-BAiAEYIz.js": {
+    "file": "assets/minus-BAiAEYIz.js",
+    "name": "minus",
+    "imports": [
+      "_button-D0ki8ICI.js"
+    ]
+  },
+  "_monitor-r9OAmRtC.js": {
+    "file": "assets/monitor-r9OAmRtC.js",
+    "name": "monitor",
+    "imports": [
+      "_button-D0ki8ICI.js"
+    ]
+  },
+  "_package-mtjmZ03V.js": {
+    "file": "assets/package-mtjmZ03V.js",
+    "name": "package",
+    "imports": [
+      "_button-D0ki8ICI.js"
+    ]
+  },
+  "_plus-kpMxvMxn.js": {
+    "file": "assets/plus-kpMxvMxn.js",
+    "name": "plus",
+    "imports": [
+      "_button-D0ki8ICI.js"
+    ]
+  },
+  "_refresh-cw-BYXlIrUG.js": {
+    "file": "assets/refresh-cw-BYXlIrUG.js",
+    "name": "refresh-cw",
+    "imports": [
+      "_button-D0ki8ICI.js"
+    ]
+  },
+  "_select-DwchHXoh.js": {
+    "file": "assets/select-DwchHXoh.js",
+    "name": "select",
+    "imports": [
+      "resources/js/app.tsx",
+      "_index-DTD_Oj08.js",
+      "_app-layout-zGfFuM9r.js",
+      "_button-D0ki8ICI.js",
+      "_tooltip-CIYpetJM.js",
+      "_index-BgWMG0eq.js",
+      "_check-8UskThHN.js"
+    ]
+  },
+  "_separator-B9tdEJMn.js": {
+    "file": "assets/separator-B9tdEJMn.js",
+    "name": "separator",
+    "imports": [
+      "resources/js/app.tsx",
+      "_index-D0VPW7r4.js",
+      "_button-D0ki8ICI.js"
+    ]
+  },
+  "_spinner-Dqdsprh3.js": {
+    "file": "assets/spinner-Dqdsprh3.js",
+    "name": "spinner",
+    "imports": [
+      "resources/js/app.tsx",
+      "_button-D0ki8ICI.js",
+      "_loader-circle-C8uCnOAS.js"
+    ]
+  },
+  "_switch-B92Yh5O-.js": {
+    "file": "assets/switch-B92Yh5O-.js",
+    "name": "switch",
+    "imports": [
+      "resources/js/app.tsx",
+      "_index-DTD_Oj08.js",
+      "_button-D0ki8ICI.js",
+      "_index-BgWMG0eq.js"
+    ]
+  },
+  "_table-DwudFYqy.js": {
+    "file": "assets/table-DwudFYqy.js",
+    "name": "table",
+    "imports": [
+      "_button-D0ki8ICI.js",
+      "resources/js/app.tsx"
+    ]
+  },
+  "_text-link-CQha43JX.js": {
+    "file": "assets/text-link-CQha43JX.js",
+    "name": "text-link",
+    "imports": [
+      "resources/js/app.tsx",
+      "_button-D0ki8ICI.js"
+    ]
+  },
+  "_textarea-CKDnwVIT.js": {
+    "file": "assets/textarea-CKDnwVIT.js",
+    "name": "textarea",
+    "imports": [
+      "resources/js/app.tsx",
+      "_button-D0ki8ICI.js"
+    ]
+  },
+  "_tooltip-CIYpetJM.js": {
+    "file": "assets/tooltip-CIYpetJM.js",
+    "name": "tooltip",
+    "imports": [
+      "resources/js/app.tsx",
+      "_index-DTD_Oj08.js",
+      "_button-D0ki8ICI.js"
+    ]
+  },
+  "_transition-BMNfVqUm.js": {
+    "file": "assets/transition-BMNfVqUm.js",
+>>>>>>> Stashed changes
     "name": "transition",
     "imports": [
       "resources/js/app.tsx"
     ]
   },
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
   "_trash-2-BR4YVOOQ.js": {
     "file": "assets/trash-2-BR4YVOOQ.js",
@@ -738,6 +1073,34 @@
   "resources/css/app.css": {
     "file": "assets/app-DhSlcnaw.css",
 >>>>>>> Stashed changes
+=======
+  "_trash-2-eQvjzcMs.js": {
+    "file": "assets/trash-2-eQvjzcMs.js",
+    "name": "trash-2",
+    "imports": [
+      "_button-D0ki8ICI.js"
+    ]
+  },
+  "_use-two-factor-auth-CDH-rhm-.js": {
+    "file": "assets/use-two-factor-auth-CDH-rhm-.js",
+    "name": "use-two-factor-auth",
+    "imports": [
+      "resources/js/app.tsx",
+      "_button-D0ki8ICI.js",
+      "_minus-BAiAEYIz.js",
+      "_index-BVm_BpcR.js"
+    ]
+  },
+  "_x-B0-Fr4KI.js": {
+    "file": "assets/x-B0-Fr4KI.js",
+    "name": "x",
+    "imports": [
+      "_button-D0ki8ICI.js"
+    ]
+  },
+  "resources/css/app.css": {
+    "file": "assets/app-DhSlcnaw.css",
+>>>>>>> Stashed changes
     "src": "resources/css/app.css",
     "isEntry": true,
     "name": "app",
@@ -747,7 +1110,11 @@
   },
   "resources/js/app.tsx": {
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     "file": "assets/app-CKP5Ygwi.js",
+=======
+    "file": "assets/app-BTkljCgl.js",
+>>>>>>> Stashed changes
 =======
     "file": "assets/app-BTkljCgl.js",
 >>>>>>> Stashed changes
@@ -779,6 +1146,7 @@
     ],
     "css": [
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
       "assets/app-CE5rUijO.css"
     ]
   },
@@ -791,11 +1159,19 @@
   "resources/js/pages/admin/category/Index.tsx": {
     "file": "assets/Index-rymIFWWo.js",
 >>>>>>> Stashed changes
+=======
+      "assets/app-DhSlcnaw.css"
+    ]
+  },
+  "resources/js/pages/admin/category/Index.tsx": {
+    "file": "assets/Index-rymIFWWo.js",
+>>>>>>> Stashed changes
     "name": "Index",
     "src": "resources/js/pages/admin/category/Index.tsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.tsx",
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
       "_button-BmK6C9aC.js",
       "_input-BZ1g4DOs.js",
@@ -857,11 +1233,43 @@
   "resources/js/pages/admin/coupon/Index.tsx": {
     "file": "assets/Index-DAxDZAAH.js",
 >>>>>>> Stashed changes
+=======
+      "_button-D0ki8ICI.js",
+      "_input-CLIFYelm.js",
+      "_table-DwudFYqy.js",
+      "_card-e3-rAPhB.js",
+      "_dialog-BdkKblgY.js",
+      "_index-BsxvijQw.js",
+      "_app-layout-zGfFuM9r.js",
+      "_label-BtyX5p96.js",
+      "_eye-uzRaeiaz.js",
+      "_trash-2-eQvjzcMs.js",
+      "_loader-circle-C8uCnOAS.js",
+      "_circle-plus-B3gXl-wk.js",
+      "_refresh-cw-BYXlIrUG.js",
+      "_circle-alert-CiOtOD28.js",
+      "_x-B0-Fr4KI.js",
+      "_FlashMessage-WIDcqtWL.js",
+      "_index-Ca60cHDS.js",
+      "_index-DTD_Oj08.js",
+      "_tooltip-CIYpetJM.js",
+      "_index-D0VPW7r4.js",
+      "_app-logo-icon-DjIZ5qaI.js",
+      "_package-mtjmZ03V.js"
+    ],
+    "css": [
+      "assets/app-DhSlcnaw.css"
+    ]
+  },
+  "resources/js/pages/admin/coupon/Index.tsx": {
+    "file": "assets/Index-DAxDZAAH.js",
+>>>>>>> Stashed changes
     "name": "Index",
     "src": "resources/js/pages/admin/coupon/Index.tsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.tsx",
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
       "_FlashMessage-DyvCRTBB.js",
       "_button-BmK6C9aC.js",
@@ -927,11 +1335,45 @@
   "resources/js/pages/admin/dashboard.tsx": {
     "file": "assets/dashboard-fi93Y2RZ.js",
 >>>>>>> Stashed changes
+=======
+      "_FlashMessage-WIDcqtWL.js",
+      "_button-D0ki8ICI.js",
+      "_card-e3-rAPhB.js",
+      "_table-DwudFYqy.js",
+      "_badge-Dm5T0M5L.js",
+      "_input-CLIFYelm.js",
+      "_label-BtyX5p96.js",
+      "_dialog-BdkKblgY.js",
+      "_select-DwchHXoh.js",
+      "_switch-B92Yh5O-.js",
+      "_app-layout-zGfFuM9r.js",
+      "_index-BsxvijQw.js",
+      "_copy-JAb8H4A0.js",
+      "_trash-2-eQvjzcMs.js",
+      "_plus-kpMxvMxn.js",
+      "_index-Ca60cHDS.js",
+      "_index-D0VPW7r4.js",
+      "_x-B0-Fr4KI.js",
+      "_index-DTD_Oj08.js",
+      "_tooltip-CIYpetJM.js",
+      "_index-BgWMG0eq.js",
+      "_check-8UskThHN.js",
+      "_app-logo-icon-DjIZ5qaI.js",
+      "_package-mtjmZ03V.js"
+    ],
+    "css": [
+      "assets/app-DhSlcnaw.css"
+    ]
+  },
+  "resources/js/pages/admin/dashboard.tsx": {
+    "file": "assets/dashboard-fi93Y2RZ.js",
+>>>>>>> Stashed changes
     "name": "dashboard",
     "src": "resources/js/pages/admin/dashboard.tsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.tsx",
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
       "_card-KM4dqlXU.js",
       "_button-BmK6C9aC.js",
@@ -989,11 +1431,41 @@
   "resources/js/pages/admin/game-mode/Index.tsx": {
     "file": "assets/Index-BNvkd0gg.js",
 >>>>>>> Stashed changes
+=======
+      "_card-e3-rAPhB.js",
+      "_button-D0ki8ICI.js",
+      "_input-CLIFYelm.js",
+      "_badge-Dm5T0M5L.js",
+      "_table-DwudFYqy.js",
+      "_app-layout-zGfFuM9r.js",
+      "_dialog-BdkKblgY.js",
+      "_index-BsxvijQw.js",
+      "_eye-uzRaeiaz.js",
+      "_check-8UskThHN.js",
+      "_x-B0-Fr4KI.js",
+      "_circle-alert-CiOtOD28.js",
+      "_refresh-cw-BYXlIrUG.js",
+      "_index-Ca60cHDS.js",
+      "_FlashMessage-WIDcqtWL.js",
+      "_index-DTD_Oj08.js",
+      "_tooltip-CIYpetJM.js",
+      "_index-D0VPW7r4.js",
+      "_app-logo-icon-DjIZ5qaI.js",
+      "_package-mtjmZ03V.js"
+    ],
+    "css": [
+      "assets/app-DhSlcnaw.css"
+    ]
+  },
+  "resources/js/pages/admin/game-mode/Index.tsx": {
+    "file": "assets/Index-BNvkd0gg.js",
+>>>>>>> Stashed changes
     "name": "Index",
     "src": "resources/js/pages/admin/game-mode/Index.tsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.tsx",
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
       "_button-BmK6C9aC.js",
       "_input-BZ1g4DOs.js",
@@ -1063,11 +1535,47 @@
   "resources/js/pages/admin/product/Index.tsx": {
     "file": "assets/Index-CQkzhGWu.js",
 >>>>>>> Stashed changes
+=======
+      "_button-D0ki8ICI.js",
+      "_input-CLIFYelm.js",
+      "_table-DwudFYqy.js",
+      "_card-e3-rAPhB.js",
+      "_dialog-BdkKblgY.js",
+      "_badge-Dm5T0M5L.js",
+      "_index-BsxvijQw.js",
+      "_app-layout-zGfFuM9r.js",
+      "_switch-B92Yh5O-.js",
+      "_label-BtyX5p96.js",
+      "_textarea-CKDnwVIT.js",
+      "_eye-uzRaeiaz.js",
+      "_trash-2-eQvjzcMs.js",
+      "_loader-circle-C8uCnOAS.js",
+      "_circle-plus-B3gXl-wk.js",
+      "_refresh-cw-BYXlIrUG.js",
+      "_circle-alert-CiOtOD28.js",
+      "_x-B0-Fr4KI.js",
+      "_index-Ca60cHDS.js",
+      "_FlashMessage-WIDcqtWL.js",
+      "_index-DTD_Oj08.js",
+      "_tooltip-CIYpetJM.js",
+      "_index-D0VPW7r4.js",
+      "_app-logo-icon-DjIZ5qaI.js",
+      "_package-mtjmZ03V.js",
+      "_index-BgWMG0eq.js"
+    ],
+    "css": [
+      "assets/app-DhSlcnaw.css"
+    ]
+  },
+  "resources/js/pages/admin/product/Index.tsx": {
+    "file": "assets/Index-CQkzhGWu.js",
+>>>>>>> Stashed changes
     "name": "Index",
     "src": "resources/js/pages/admin/product/Index.tsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.tsx",
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
       "_button-BmK6C9aC.js",
       "_input-BZ1g4DOs.js",
@@ -1137,11 +1645,47 @@
   "resources/js/pages/auth/confirm-password.tsx": {
     "file": "assets/confirm-password-wvg4rH7e.js",
 >>>>>>> Stashed changes
+=======
+      "_button-D0ki8ICI.js",
+      "_input-CLIFYelm.js",
+      "_table-DwudFYqy.js",
+      "_card-e3-rAPhB.js",
+      "_dialog-BdkKblgY.js",
+      "_app-layout-zGfFuM9r.js",
+      "_index-BsxvijQw.js",
+      "_switch-B92Yh5O-.js",
+      "_label-BtyX5p96.js",
+      "_textarea-CKDnwVIT.js",
+      "_select-DwchHXoh.js",
+      "_x-B0-Fr4KI.js",
+      "_loader-circle-C8uCnOAS.js",
+      "_refresh-cw-BYXlIrUG.js",
+      "_circle-plus-B3gXl-wk.js",
+      "_trash-2-eQvjzcMs.js",
+      "_circle-alert-CiOtOD28.js",
+      "_FlashMessage-WIDcqtWL.js",
+      "_index-Ca60cHDS.js",
+      "_index-DTD_Oj08.js",
+      "_tooltip-CIYpetJM.js",
+      "_index-D0VPW7r4.js",
+      "_app-logo-icon-DjIZ5qaI.js",
+      "_package-mtjmZ03V.js",
+      "_index-BgWMG0eq.js",
+      "_check-8UskThHN.js"
+    ],
+    "css": [
+      "assets/app-DhSlcnaw.css"
+    ]
+  },
+  "resources/js/pages/auth/confirm-password.tsx": {
+    "file": "assets/confirm-password-wvg4rH7e.js",
+>>>>>>> Stashed changes
     "name": "confirm-password",
     "src": "resources/js/pages/auth/confirm-password.tsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.tsx",
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
       "_input-error-DM8JYTkX.js",
       "_button-BmK6C9aC.js",
@@ -1181,11 +1725,32 @@
   "resources/js/pages/auth/forgot-password.tsx": {
     "file": "assets/forgot-password-BHP71ASz.js",
 >>>>>>> Stashed changes
+=======
+      "_input-error-HrW3zZrD.js",
+      "_button-D0ki8ICI.js",
+      "_input-CLIFYelm.js",
+      "_label-BtyX5p96.js",
+      "_spinner-Dqdsprh3.js",
+      "_auth-layout-EQWaVo-K.js",
+      "_index-BfCAraLO.js",
+      "_index-D0VPW7r4.js",
+      "_index-Ca60cHDS.js",
+      "_loader-circle-C8uCnOAS.js",
+      "_app-logo-icon-DjIZ5qaI.js"
+    ],
+    "css": [
+      "assets/app-DhSlcnaw.css"
+    ]
+  },
+  "resources/js/pages/auth/forgot-password.tsx": {
+    "file": "assets/forgot-password-BHP71ASz.js",
+>>>>>>> Stashed changes
     "name": "forgot-password",
     "src": "resources/js/pages/auth/forgot-password.tsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.tsx",
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
       "_input-error-DM8JYTkX.js",
       "_text-link-DQbAAU9P.js",
@@ -1227,11 +1792,33 @@
   "resources/js/pages/auth/login.tsx": {
     "file": "assets/login-C6xdu2gs.js",
 >>>>>>> Stashed changes
+=======
+      "_input-error-HrW3zZrD.js",
+      "_text-link-CQha43JX.js",
+      "_button-D0ki8ICI.js",
+      "_input-CLIFYelm.js",
+      "_label-BtyX5p96.js",
+      "_auth-layout-EQWaVo-K.js",
+      "_app-logo-icon-DjIZ5qaI.js",
+      "_index-CKv1V8Lf.js",
+      "_loader-circle-C8uCnOAS.js",
+      "_index-D0VPW7r4.js",
+      "_index-Ca60cHDS.js",
+      "_index-BfCAraLO.js"
+    ],
+    "css": [
+      "assets/app-DhSlcnaw.css"
+    ]
+  },
+  "resources/js/pages/auth/login.tsx": {
+    "file": "assets/login-C6xdu2gs.js",
+>>>>>>> Stashed changes
     "name": "login",
     "src": "resources/js/pages/auth/login.tsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.tsx",
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
       "_input-error-DM8JYTkX.js",
       "_text-link-DQbAAU9P.js",
@@ -1281,11 +1868,37 @@
   "resources/js/pages/auth/register.tsx": {
     "file": "assets/register-fUxdhadF.js",
 >>>>>>> Stashed changes
+=======
+      "_input-error-HrW3zZrD.js",
+      "_text-link-CQha43JX.js",
+      "_button-D0ki8ICI.js",
+      "_index-DTD_Oj08.js",
+      "_index-BgWMG0eq.js",
+      "_check-8UskThHN.js",
+      "_input-CLIFYelm.js",
+      "_label-BtyX5p96.js",
+      "_spinner-Dqdsprh3.js",
+      "_auth-layout-EQWaVo-K.js",
+      "_app-logo-icon-DjIZ5qaI.js",
+      "_index-CKv1V8Lf.js",
+      "_index-D0VPW7r4.js",
+      "_index-Ca60cHDS.js",
+      "_loader-circle-C8uCnOAS.js",
+      "_index-BfCAraLO.js"
+    ],
+    "css": [
+      "assets/app-DhSlcnaw.css"
+    ]
+  },
+  "resources/js/pages/auth/register.tsx": {
+    "file": "assets/register-fUxdhadF.js",
+>>>>>>> Stashed changes
     "name": "register",
     "src": "resources/js/pages/auth/register.tsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.tsx",
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
       "_input-error-DM8JYTkX.js",
       "_text-link-DQbAAU9P.js",
@@ -1325,11 +1938,32 @@
   "resources/js/pages/auth/reset-password.tsx": {
     "file": "assets/reset-password-BXI5yWeB.js",
 >>>>>>> Stashed changes
+=======
+      "_input-error-HrW3zZrD.js",
+      "_text-link-CQha43JX.js",
+      "_button-D0ki8ICI.js",
+      "_input-CLIFYelm.js",
+      "_label-BtyX5p96.js",
+      "_spinner-Dqdsprh3.js",
+      "_auth-layout-EQWaVo-K.js",
+      "_app-logo-icon-DjIZ5qaI.js",
+      "_index-D0VPW7r4.js",
+      "_index-Ca60cHDS.js",
+      "_loader-circle-C8uCnOAS.js"
+    ],
+    "css": [
+      "assets/app-DhSlcnaw.css"
+    ]
+  },
+  "resources/js/pages/auth/reset-password.tsx": {
+    "file": "assets/reset-password-BXI5yWeB.js",
+>>>>>>> Stashed changes
     "name": "reset-password",
     "src": "resources/js/pages/auth/reset-password.tsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.tsx",
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
       "_input-error-DM8JYTkX.js",
       "_button-BmK6C9aC.js",
@@ -1371,11 +2005,33 @@
   "resources/js/pages/auth/two-factor-challenge.tsx": {
     "file": "assets/two-factor-challenge-BGMERiNw.js",
 >>>>>>> Stashed changes
+=======
+      "_input-error-HrW3zZrD.js",
+      "_button-D0ki8ICI.js",
+      "_input-CLIFYelm.js",
+      "_label-BtyX5p96.js",
+      "_spinner-Dqdsprh3.js",
+      "_auth-layout-EQWaVo-K.js",
+      "_index-CKv1V8Lf.js",
+      "_index-D0VPW7r4.js",
+      "_index-Ca60cHDS.js",
+      "_loader-circle-C8uCnOAS.js",
+      "_app-logo-icon-DjIZ5qaI.js",
+      "_index-BfCAraLO.js"
+    ],
+    "css": [
+      "assets/app-DhSlcnaw.css"
+    ]
+  },
+  "resources/js/pages/auth/two-factor-challenge.tsx": {
+    "file": "assets/two-factor-challenge-BGMERiNw.js",
+>>>>>>> Stashed changes
     "name": "two-factor-challenge",
     "src": "resources/js/pages/auth/two-factor-challenge.tsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.tsx",
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
       "_use-two-factor-auth-Bfxd03Wo.js",
       "_input-error-DM8JYTkX.js",
@@ -1409,11 +2065,29 @@
   "resources/js/pages/auth/verify-email.tsx": {
     "file": "assets/verify-email-DQAlp-sE.js",
 >>>>>>> Stashed changes
+=======
+      "_use-two-factor-auth-CDH-rhm-.js",
+      "_input-error-HrW3zZrD.js",
+      "_button-D0ki8ICI.js",
+      "_input-CLIFYelm.js",
+      "_auth-layout-EQWaVo-K.js",
+      "_index-BVm_BpcR.js",
+      "_minus-BAiAEYIz.js",
+      "_app-logo-icon-DjIZ5qaI.js"
+    ],
+    "css": [
+      "assets/app-DhSlcnaw.css"
+    ]
+  },
+  "resources/js/pages/auth/verify-email.tsx": {
+    "file": "assets/verify-email-DQAlp-sE.js",
+>>>>>>> Stashed changes
     "name": "verify-email",
     "src": "resources/js/pages/auth/verify-email.tsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.tsx",
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
       "_text-link-DQbAAU9P.js",
       "_button-BmK6C9aC.js",
@@ -1445,11 +2119,28 @@
   "resources/js/pages/game-mode.tsx": {
     "file": "assets/game-mode-B54Y2bqr.js",
 >>>>>>> Stashed changes
+=======
+      "_text-link-CQha43JX.js",
+      "_button-D0ki8ICI.js",
+      "_spinner-Dqdsprh3.js",
+      "_auth-layout-EQWaVo-K.js",
+      "_app-logo-icon-DjIZ5qaI.js",
+      "_index-6ffbJyHu.js",
+      "_loader-circle-C8uCnOAS.js"
+    ],
+    "css": [
+      "assets/app-DhSlcnaw.css"
+    ]
+  },
+  "resources/js/pages/game-mode.tsx": {
+    "file": "assets/game-mode-B54Y2bqr.js",
+>>>>>>> Stashed changes
     "name": "game-mode",
     "src": "resources/js/pages/game-mode.tsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.tsx",
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
       "_layout-BCgvjyHd.js",
       "_badge-Dz61usWC.js",
@@ -1485,11 +2176,30 @@
   "resources/js/pages/payment-success.tsx": {
     "file": "assets/payment-success-HfRtquVW.js",
 >>>>>>> Stashed changes
+=======
+      "_layout-BBRiJSfK.js",
+      "_badge-Dm5T0M5L.js",
+      "_tooltip-CIYpetJM.js",
+      "_button-D0ki8ICI.js",
+      "_index-BsxvijQw.js",
+      "_package-mtjmZ03V.js",
+      "_FlashMessage-WIDcqtWL.js",
+      "_index-Ca60cHDS.js",
+      "_index-DTD_Oj08.js"
+    ],
+    "css": [
+      "assets/app-DhSlcnaw.css"
+    ]
+  },
+  "resources/js/pages/payment-success.tsx": {
+    "file": "assets/payment-success-HfRtquVW.js",
+>>>>>>> Stashed changes
     "name": "payment-success",
     "src": "resources/js/pages/payment-success.tsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.tsx",
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
       "_layout-BCgvjyHd.js",
       "_button-BmK6C9aC.js",
@@ -1517,11 +2227,26 @@
   "resources/js/pages/product-detail.tsx": {
     "file": "assets/product-detail-BHJHwAQA.js",
 >>>>>>> Stashed changes
+=======
+      "_layout-BBRiJSfK.js",
+      "_button-D0ki8ICI.js",
+      "_card-e3-rAPhB.js",
+      "_circle-check-BaF9971J.js",
+      "_FlashMessage-WIDcqtWL.js"
+    ],
+    "css": [
+      "assets/app-DhSlcnaw.css"
+    ]
+  },
+  "resources/js/pages/product-detail.tsx": {
+    "file": "assets/product-detail-BHJHwAQA.js",
+>>>>>>> Stashed changes
     "name": "product-detail",
     "src": "resources/js/pages/product-detail.tsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.tsx",
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
       "_button-BmK6C9aC.js",
       "_input-BZ1g4DOs.js",
@@ -1577,11 +2302,40 @@
   "resources/js/pages/purchase.tsx": {
     "file": "assets/purchase-NL3QtK34.js",
 >>>>>>> Stashed changes
+=======
+      "_button-D0ki8ICI.js",
+      "_input-CLIFYelm.js",
+      "_card-e3-rAPhB.js",
+      "_label-BtyX5p96.js",
+      "_badge-Dm5T0M5L.js",
+      "_layout-BBRiJSfK.js",
+      "_circle-check-BaF9971J.js",
+      "_tooltip-CIYpetJM.js",
+      "_monitor-r9OAmRtC.js",
+      "_index-BsxvijQw.js",
+      "_minus-BAiAEYIz.js",
+      "_plus-kpMxvMxn.js",
+      "_loader-circle-C8uCnOAS.js",
+      "_circle-alert-CiOtOD28.js",
+      "_x-B0-Fr4KI.js",
+      "_index-D0VPW7r4.js",
+      "_index-Ca60cHDS.js",
+      "_FlashMessage-WIDcqtWL.js",
+      "_index-DTD_Oj08.js"
+    ],
+    "css": [
+      "assets/app-DhSlcnaw.css"
+    ]
+  },
+  "resources/js/pages/purchase.tsx": {
+    "file": "assets/purchase-NL3QtK34.js",
+>>>>>>> Stashed changes
     "name": "purchase",
     "src": "resources/js/pages/purchase.tsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.tsx",
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
       "_layout-BCgvjyHd.js",
       "_badge-Dz61usWC.js",
@@ -1617,11 +2371,30 @@
   "resources/js/pages/settings/appearance.tsx": {
     "file": "assets/appearance-D9G-gQYd.js",
 >>>>>>> Stashed changes
+=======
+      "_layout-BBRiJSfK.js",
+      "_badge-Dm5T0M5L.js",
+      "_button-D0ki8ICI.js",
+      "_card-e3-rAPhB.js",
+      "_separator-B9tdEJMn.js",
+      "_package-mtjmZ03V.js",
+      "_FlashMessage-WIDcqtWL.js",
+      "_index-Ca60cHDS.js",
+      "_index-D0VPW7r4.js"
+    ],
+    "css": [
+      "assets/app-DhSlcnaw.css"
+    ]
+  },
+  "resources/js/pages/settings/appearance.tsx": {
+    "file": "assets/appearance-D9G-gQYd.js",
+>>>>>>> Stashed changes
     "name": "appearance",
     "src": "resources/js/pages/settings/appearance.tsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.tsx",
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
       "_button-BmK6C9aC.js",
       "_monitor-BwlJcTdZ.js",
@@ -1667,11 +2440,35 @@
   "resources/js/pages/settings/password.tsx": {
     "file": "assets/password-Dfj6dpC0.js",
 >>>>>>> Stashed changes
+=======
+      "_button-D0ki8ICI.js",
+      "_monitor-r9OAmRtC.js",
+      "_layout-CCiArdsq.js",
+      "_app-layout-zGfFuM9r.js",
+      "_separator-B9tdEJMn.js",
+      "_index-D0VPW7r4.js",
+      "_index-Ca60cHDS.js",
+      "_app-logo-icon-DjIZ5qaI.js",
+      "_index-BVm_BpcR.js",
+      "_FlashMessage-WIDcqtWL.js",
+      "_index-DTD_Oj08.js",
+      "_tooltip-CIYpetJM.js",
+      "_x-B0-Fr4KI.js",
+      "_package-mtjmZ03V.js"
+    ],
+    "css": [
+      "assets/app-DhSlcnaw.css"
+    ]
+  },
+  "resources/js/pages/settings/password.tsx": {
+    "file": "assets/password-Dfj6dpC0.js",
+>>>>>>> Stashed changes
     "name": "password",
     "src": "resources/js/pages/settings/password.tsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.tsx",
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
       "_app-logo-icon-C9txJkP3.js",
       "_layout-DnWZh6j9.js",
@@ -1723,11 +2520,38 @@
   "resources/js/pages/settings/profile.tsx": {
     "file": "assets/profile-DT01DW3p.js",
 >>>>>>> Stashed changes
+=======
+      "_app-logo-icon-DjIZ5qaI.js",
+      "_layout-CCiArdsq.js",
+      "_input-error-HrW3zZrD.js",
+      "_button-D0ki8ICI.js",
+      "_input-CLIFYelm.js",
+      "_label-BtyX5p96.js",
+      "_app-layout-zGfFuM9r.js",
+      "_transition-BMNfVqUm.js",
+      "_separator-B9tdEJMn.js",
+      "_index-D0VPW7r4.js",
+      "_index-Ca60cHDS.js",
+      "_index-BVm_BpcR.js",
+      "_FlashMessage-WIDcqtWL.js",
+      "_index-DTD_Oj08.js",
+      "_tooltip-CIYpetJM.js",
+      "_x-B0-Fr4KI.js",
+      "_package-mtjmZ03V.js"
+    ],
+    "css": [
+      "assets/app-DhSlcnaw.css"
+    ]
+  },
+  "resources/js/pages/settings/profile.tsx": {
+    "file": "assets/profile-DT01DW3p.js",
+>>>>>>> Stashed changes
     "name": "profile",
     "src": "resources/js/pages/settings/profile.tsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.tsx",
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
       "_app-logo-icon-C9txJkP3.js",
       "_layout-DnWZh6j9.js",
@@ -1783,11 +2607,40 @@
   "resources/js/pages/settings/two-factor.tsx": {
     "file": "assets/two-factor-m9QjMa30.js",
 >>>>>>> Stashed changes
+=======
+      "_app-logo-icon-DjIZ5qaI.js",
+      "_layout-CCiArdsq.js",
+      "_input-error-HrW3zZrD.js",
+      "_button-D0ki8ICI.js",
+      "_dialog-BdkKblgY.js",
+      "_input-CLIFYelm.js",
+      "_label-BtyX5p96.js",
+      "_app-layout-zGfFuM9r.js",
+      "_index-6ffbJyHu.js",
+      "_transition-BMNfVqUm.js",
+      "_separator-B9tdEJMn.js",
+      "_index-D0VPW7r4.js",
+      "_index-Ca60cHDS.js",
+      "_index-BVm_BpcR.js",
+      "_x-B0-Fr4KI.js",
+      "_FlashMessage-WIDcqtWL.js",
+      "_index-DTD_Oj08.js",
+      "_tooltip-CIYpetJM.js",
+      "_package-mtjmZ03V.js"
+    ],
+    "css": [
+      "assets/app-DhSlcnaw.css"
+    ]
+  },
+  "resources/js/pages/settings/two-factor.tsx": {
+    "file": "assets/two-factor-m9QjMa30.js",
+>>>>>>> Stashed changes
     "name": "two-factor",
     "src": "resources/js/pages/settings/two-factor.tsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.tsx",
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
       "_layout-DnWZh6j9.js",
       "_button-BmK6C9aC.js",
@@ -1857,11 +2710,47 @@
   "resources/js/pages/welcome.tsx": {
     "file": "assets/welcome-CtA1I0hO.js",
 >>>>>>> Stashed changes
+=======
+      "_layout-CCiArdsq.js",
+      "_button-D0ki8ICI.js",
+      "_card-e3-rAPhB.js",
+      "_index-BVm_BpcR.js",
+      "_circle-alert-CiOtOD28.js",
+      "_eye-uzRaeiaz.js",
+      "_refresh-cw-BYXlIrUG.js",
+      "_use-two-factor-auth-CDH-rhm-.js",
+      "_input-error-HrW3zZrD.js",
+      "_dialog-BdkKblgY.js",
+      "_spinner-Dqdsprh3.js",
+      "_check-8UskThHN.js",
+      "_copy-JAb8H4A0.js",
+      "_badge-Dm5T0M5L.js",
+      "_app-layout-zGfFuM9r.js",
+      "_separator-B9tdEJMn.js",
+      "_index-D0VPW7r4.js",
+      "_index-Ca60cHDS.js",
+      "_app-logo-icon-DjIZ5qaI.js",
+      "_minus-BAiAEYIz.js",
+      "_x-B0-Fr4KI.js",
+      "_loader-circle-C8uCnOAS.js",
+      "_FlashMessage-WIDcqtWL.js",
+      "_index-DTD_Oj08.js",
+      "_tooltip-CIYpetJM.js",
+      "_package-mtjmZ03V.js"
+    ],
+    "css": [
+      "assets/app-DhSlcnaw.css"
+    ]
+  },
+  "resources/js/pages/welcome.tsx": {
+    "file": "assets/welcome-CtA1I0hO.js",
+>>>>>>> Stashed changes
     "name": "welcome",
     "src": "resources/js/pages/welcome.tsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.tsx",
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
       "_tooltip-UZ39_NfS.js",
       "_layout-BCgvjyHd.js",
@@ -1873,6 +2762,18 @@
     ],
     "css": [
       "assets/app-CE5rUijO.css"
+=======
+      "_tooltip-CIYpetJM.js",
+      "_layout-BBRiJSfK.js",
+      "_card-e3-rAPhB.js",
+      "_button-D0ki8ICI.js",
+      "_index-BsxvijQw.js",
+      "_index-DTD_Oj08.js",
+      "_FlashMessage-WIDcqtWL.js"
+    ],
+    "css": [
+      "assets/app-DhSlcnaw.css"
+>>>>>>> Stashed changes
 =======
       "_tooltip-CIYpetJM.js",
       "_layout-BBRiJSfK.js",
